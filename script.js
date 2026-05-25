@@ -344,8 +344,7 @@ function renderVehicles(vehicles, category) {
         const descripcionHtml = vehicle.descripcion
             ? `<p class="vehicle-description">${vehicle.descripcion}</p>`
             : '';
-        const safeMarca = String(vehicle.marca).replace(/'/g, "\\'");
-        const safeModelo = String(vehicle.modelo).replace(/'/g, "\\'");
+        const safeName = String(displayName).replace(/'/g, "\\'");
 
         vehicleCard.innerHTML = `
             <div class="vehicle-image-wrapper">
@@ -373,7 +372,7 @@ function renderVehicles(vehicles, category) {
                 <div class="vehicle-price">${priceFormatted}</div>
                 <button 
                     class="btn-consultar" 
-                    onclick="consultarWhatsApp('${safeMarca}', '${safeModelo}', ${vehicle.año})"
+                    onclick="consultarWhatsApp('${safeName}', ${vehicle.año})"
                 >
                     Consultar por WhatsApp
                 </button>
@@ -387,8 +386,8 @@ function renderVehicles(vehicles, category) {
 /**
  * Abre WhatsApp con mensaje predefinido para un vehículo
  */
-function consultarWhatsApp(marca, modelo, año) {
-    const mensaje = `Hola! Me interesa el ${marca} ${modelo} ${año} que vi en su sitio web. ¿Podrían darme más información?`;
+function consultarWhatsApp(vehicleName, año) {
+    const mensaje = `Hola! Me interesa el ${vehicleName} (${año}) que vi en su sitio web. ¿Podrían darme más información?`;
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 }
