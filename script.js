@@ -197,12 +197,12 @@ const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
 const PAGE_IMAGE_SELECTORS = {
     logo: '.logo-image',
     hero_visual: '.hero-image',
-    service_1: 'img[src*="service_1"]',
-    service_2: 'img[src*="service_2"]',
-    service_3: 'img[src*="service_3"]',
-    service_4: 'img[src*="service_4"]',
-    service_5: 'img[src*="service_5"]',
-    service_6: 'img[src*="service_6"]'
+    service_1: 'img[data-src*="service_1"]',
+    service_2: 'img[data-src*="service_2"]',
+    service_3: 'img[data-src*="service_3"]',
+    service_4: 'img[data-src*="service_4"]',
+    service_5: 'img[data-src*="service_5"]',
+    service_6: 'img[data-src*="service_6"]'
 };
 
 async function getMergedVehicleInventory() {
