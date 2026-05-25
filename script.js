@@ -218,6 +218,9 @@ async function getMergedVehicleInventory() {
                 nombre: o.nombre,
                 descripcion: o.descripcion,
                 precio: o.precio !== undefined ? o.precio : vehicle.precio,
+                año: o.anio !== undefined ? o.anio : vehicle.año,
+                km: o.km !== undefined ? o.km : vehicle.km,
+                color: o.color !== undefined ? o.color : vehicle.color,
                 image: o.image || vehicle.image
             };
         });

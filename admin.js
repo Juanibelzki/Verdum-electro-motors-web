@@ -21,22 +21,22 @@ const SITE_IMAGE_SLOTS = [
 ];
 
 const DEFAULT_VEHICLES = [
-    { id: 1, category: 'Autos 0KM', marca: 'Volkswagen', modelo: 'Virtus', precio: 2850000 },
-    { id: 2, category: 'Autos 0KM', marca: 'Nissan', modelo: 'Versa', precio: 2450000 },
-    { id: 3, category: 'Autos 0KM', marca: 'Chevrolet', modelo: 'Onix', precio: 2100000 },
-    { id: 4, category: 'Autos 0KM', marca: 'Toyota', modelo: 'Corolla', precio: 3150000 },
-    { id: 5, category: 'Autos Usados', marca: 'Volkswagen', modelo: 'Gol', precio: 1450000 },
-    { id: 6, category: 'Autos Usados', marca: 'Ford', modelo: 'EcoSport', precio: 1850000 },
-    { id: 7, category: 'Autos Usados', marca: 'Peugeot', modelo: '208', precio: 1250000 },
-    { id: 8, category: 'Autos Usados', marca: 'Honda', modelo: 'Civic', precio: 1650000 },
-    { id: 9, category: 'Autos Usados', marca: 'Renault', modelo: 'Kwid', precio: 950000 },
-    { id: 10, category: 'Motos Eléctricas', marca: 'Energica', modelo: 'EVA', precio: 450000 },
-    { id: 11, category: 'Motos Eléctricas', marca: 'Super Soco', modelo: 'TC Max', precio: 280000 },
-    { id: 12, category: 'Motos Eléctricas', marca: 'Volta', modelo: 'V1', precio: 350000 },
-    { id: 13, category: 'Patinetas Eléctricas', marca: 'Xiaomi', modelo: 'Mi 3 Pro', precio: 95000 },
-    { id: 14, category: 'Patinetas Eléctricas', marca: 'Ninebot', modelo: 'Max G30', precio: 125000 },
-    { id: 15, category: 'Patinetas Eléctricas', marca: 'Segway', modelo: 'Ninebot Pro', precio: 140000 },
-    { id: 16, category: 'Patinetas Eléctricas', marca: 'Hiboy', modelo: 'S2 Pro', precio: 110000 }
+    { id: 1, category: 'Autos 0KM', marca: 'Volkswagen', modelo: 'Virtus', precio: 2850000, anio: 2024, km: '0 KM', color: 'Blanco' },
+    { id: 2, category: 'Autos 0KM', marca: 'Nissan', modelo: 'Versa', precio: 2450000, anio: 2024, km: '0 KM', color: 'Plata' },
+    { id: 3, category: 'Autos 0KM', marca: 'Chevrolet', modelo: 'Onix', precio: 2100000, anio: 2024, km: '0 KM', color: 'Negro' },
+    { id: 4, category: 'Autos 0KM', marca: 'Toyota', modelo: 'Corolla', precio: 3150000, anio: 2024, km: '0 KM', color: 'Gris' },
+    { id: 5, category: 'Autos Usados', marca: 'Volkswagen', modelo: 'Gol', precio: 1450000, anio: 2019, km: '85000', color: 'Rojo' },
+    { id: 6, category: 'Autos Usados', marca: 'Ford', modelo: 'EcoSport', precio: 1850000, anio: 2020, km: '72500', color: 'Blanco' },
+    { id: 7, category: 'Autos Usados', marca: 'Peugeot', modelo: '208', precio: 1250000, anio: 2018, km: '95000', color: 'Azul' },
+    { id: 8, category: 'Autos Usados', marca: 'Honda', modelo: 'Civic', precio: 1650000, anio: 2019, km: '68000', color: 'Plateado' },
+    { id: 9, category: 'Autos Usados', marca: 'Renault', modelo: 'Kwid', precio: 950000, anio: 2020, km: '45000', color: 'Negro' },
+    { id: 10, category: 'Motos Eléctricas', marca: 'Energica', modelo: 'EVA', precio: 450000, anio: 2024, km: '0 KM', color: 'Negro' },
+    { id: 11, category: 'Motos Eléctricas', marca: 'Super Soco', modelo: 'TC Max', precio: 280000, anio: 2024, km: '0 KM', color: 'Rojo' },
+    { id: 12, category: 'Motos Eléctricas', marca: 'Volta', modelo: 'V1', precio: 350000, anio: 2023, km: '5000', color: 'Blanco' },
+    { id: 13, category: 'Patinetas Eléctricas', marca: 'Xiaomi', modelo: 'Mi 3 Pro', precio: 95000, anio: 2024, km: '0 KM', color: 'Negro' },
+    { id: 14, category: 'Patinetas Eléctricas', marca: 'Ninebot', modelo: 'Max G30', precio: 125000, anio: 2024, km: '0 KM', color: 'Gris' },
+    { id: 15, category: 'Patinetas Eléctricas', marca: 'Segway', modelo: 'Ninebot Pro', precio: 140000, anio: 2023, km: '2000', color: 'Blanco' },
+    { id: 16, category: 'Patinetas Eléctricas', marca: 'Hiboy', modelo: 'S2 Pro', precio: 110000, anio: 2024, km: '0 KM', color: 'Negro' }
 ];
 
 const SECTION_MAP = {
@@ -654,6 +654,9 @@ async function renderVehiclesEditor() {
         const o = overrides[v.id] || {};
         const nombre = o.nombre !== undefined ? o.nombre : getVehicleDefaultName(v);
         const precio = o.precio !== undefined ? o.precio : v.precio;
+        const anio = o.anio !== undefined ? o.anio : (v.anio || 2024);
+        const km = o.km !== undefined ? o.km : (v.km || '0 KM');
+        const color = o.color !== undefined ? o.color : (v.color || '—');
         const descripcion = o.descripcion || '';
         const imgSrc = o.image || '';
 
@@ -675,6 +678,12 @@ async function renderVehiclesEditor() {
                         <input type="text" class="vehicle-nombre" data-id="${v.id}" value="${escapeHtml(nombre)}">
                         <label>Precio (ARS)</label>
                         <input type="number" class="vehicle-precio" data-id="${v.id}" value="${precio}" min="0">
+                        <label>Año</label>
+                        <input type="number" class="vehicle-anio" data-id="${v.id}" value="${anio}" min="1990" max="2030">
+                        <label>KM</label>
+                        <input type="text" class="vehicle-km" data-id="${v.id}" value="${escapeHtml(km)}">
+                        <label>Color</label>
+                        <input type="text" class="vehicle-color" data-id="${v.id}" value="${escapeHtml(color)}">
                         <label>Descripción</label>
                         <textarea class="vehicle-descripcion" data-id="${v.id}" rows="2">${escapeHtml(descripcion)}</textarea>
                         <button type="button" class="btn-update vehicle-save-btn" data-id="${v.id}">✓ Guardar vehículo</button>
@@ -706,6 +715,12 @@ async function renderVehiclesEditor() {
                         <input type="text" class="vehicle-nombre" data-id="${cv.id}" value="${escapeHtml(cv.marca + ' ' + cv.modelo)}">
                         <label>Precio (ARS)</label>
                         <input type="number" class="vehicle-precio" data-id="${cv.id}" value="${cv.precio}" min="0">
+                        <label>Año</label>
+                        <input type="number" class="vehicle-anio" data-id="${cv.id}" value="${cv.anio || 2024}" min="1990" max="2030">
+                        <label>KM</label>
+                        <input type="text" class="vehicle-km" data-id="${cv.id}" value="${escapeHtml(cv.km || '0 KM')}">
+                        <label>Color</label>
+                        <input type="text" class="vehicle-color" data-id="${cv.id}" value="${escapeHtml(cv.color || '—')}">
                         <label>Descripción</label>
                         <textarea class="vehicle-descripcion" data-id="${cv.id}" rows="2">${escapeHtml(cv.descripcion || '')}</textarea>
                         <button type="button" class="btn-update vehicle-save-btn" data-id="${cv.id}">✓ Guardar</button>
@@ -725,6 +740,9 @@ async function saveVehicle(id) {
 
     const nombre = card.querySelector('.vehicle-nombre').value.trim();
     const precio = parseInt(card.querySelector('.vehicle-precio').value, 10);
+    const anio = parseInt(card.querySelector('.vehicle-anio').value, 10);
+    const km = card.querySelector('.vehicle-km').value.trim();
+    const color = card.querySelector('.vehicle-color').value.trim();
     const descripcion = card.querySelector('.vehicle-descripcion').value.trim();
 
     if (!nombre || isNaN(precio)) {
@@ -746,6 +764,9 @@ async function saveVehicle(id) {
                 marca: parts[0] || v.marca,
                 modelo: parts.slice(1).join(' ') || v.modelo,
                 precio: precio,
+                anio: anio,
+                km: km,
+                color: color,
                 descripcion: descripcion
             };
         });
@@ -755,6 +776,9 @@ async function saveVehicle(id) {
         if (!overrides[id]) overrides[id] = {};
         overrides[id].nombre = nombre;
         overrides[id].precio = precio;
+        overrides[id].anio = anio;
+        overrides[id].km = km;
+        overrides[id].color = color;
         overrides[id].descripcion = descripcion;
         await setVehicleOverrides(overrides);
     }
