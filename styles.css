@@ -7,21 +7,21 @@
 ============================================ */
 :root {
     /* Colores de fondo */
-    --bg-primary:    #0A1931;
-    --bg-secondary:  #1A3D63;
-    --bg-tertiary:   #4A7FA7;
+    --bg-primary:    #17181D;
+    --bg-secondary:  #292C35;
+    --bg-tertiary:   #E09145;
     
-    /* Colores primarios - Azul */
-    --primary-400:   #B3CFE5;
-    --primary-500:   #4A7FA7;
-    --primary-600:   #1A3D63;
-    --primary-700:   #0A1931;
+    /* Colores primarios - Naranja/Accent */
+    --primary-400:   #F0B87F;
+    --primary-500:   #E09145;
+    --primary-600:   #292C35;
+    --primary-700:   #17181D;
     
     /* Colores de texto */
     --text-primary:   #F6FAFD;
     --text-secondary: #D1DFE8;
-    --text-tertiary:  #7FA9C3;
-    --text-quaternary:#4A7FA7;
+    --text-tertiary:  #8B8F99;
+    --text-quaternary:#E09145;
     
     /* Transiciones y efectos */
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -74,12 +74,12 @@ h1, h2, h3, h4, h5, h6 {
 
 @keyframes pulse-glow {
     0%, 100% { 
-        box-shadow: 0 0 0 1px rgba(74,127,167,0.5), 
-                    0 4px 24px rgba(74,127,167,0.4); 
+        box-shadow: 0 0 0 1px rgba(224,145,69,0.5), 
+                    0 4px 24px rgba(224,145,69,0.4); 
     }
     50% { 
-        box-shadow: 0 0 0 2px rgba(74,127,167,0.8), 
-                    0 8px 40px rgba(74,127,167,0.6); 
+        box-shadow: 0 0 0 2px rgba(224,145,69,0.8), 
+                    0 8px 40px rgba(224,145,69,0.6); 
     }
 }
 
@@ -162,9 +162,9 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Glassmorphism Card */
 .glass-card {
-    background: linear-gradient(135deg, rgba(74,127,167,0.08) 0%, rgba(74,127,167,0.04) 50%, rgba(74,127,167,0.08) 100%);
+    background: linear-gradient(135deg, rgba(224,145,69,0.08) 0%, rgba(224,145,69,0.04) 50%, rgba(224,145,69,0.08) 100%);
     backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(74,127,167,0.15);
+    border: 1px solid rgba(224,145,69,0.15);
     border-radius: 24px;
     padding: 32px;
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3), inset 0 1px 0 0 rgba(255,255,255,0.05);
@@ -172,14 +172,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-card:hover {
-    border-color: rgba(74,127,167,0.35);
-    box-shadow: 0 25px 50px -12px rgba(74,127,167,0.35), inset 0 1px 0 0 rgba(255,255,255,0.05);
+    border-color: rgba(224,145,69,0.35);
+    box-shadow: 0 25px 50px -12px rgba(224,145,69,0.35), inset 0 1px 0 0 rgba(255,255,255,0.05);
     transform: translateY(-4px);
 }
 
 /* Botones */
 .btn-primary {
-    background: linear-gradient(135deg, #1A3D63 0%, #4A7FA7 30%, #B3CFE5 60%, #4A7FA7 100%);
+    background: linear-gradient(135deg, #292C35 0%, #E09145 30%, #F0B87F 60%, #E09145 100%);
     background-size: 200% 200%;
     animation: gradient-shift 4s ease infinite;
     color: #F6FAFD;
@@ -189,13 +189,13 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 12px;
     border: none;
     cursor: pointer;
-    box-shadow: 0 0 0 1px rgba(74,127,167,0.5), 0 4px 24px rgba(74,127,167,0.4);
+    box-shadow: 0 0 0 1px rgba(224,145,69,0.5), 0 4px 24px rgba(224,145,69,0.4);
     transition: var(--transition);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 0 1px rgba(74,127,167,0.7), 0 8px 32px rgba(74,127,167,0.6);
+    box-shadow: 0 0 0 1px rgba(224,145,69,0.7), 0 8px 32px rgba(224,145,69,0.6);
 }
 
 .btn-primary:active {
@@ -225,7 +225,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-secondary:hover {
-    background-color: rgba(74,127,167,0.1);
+    background-color: rgba(224,145,69,0.1);
     transform: translateY(-2px);
 }
 
@@ -235,14 +235,14 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Efectos de brillo */
 .glow-primary {
-    filter: drop-shadow(0 0 20px rgba(74,127,167,0.6))
-            drop-shadow(0 0 40px rgba(74,127,167,0.4));
+    filter: drop-shadow(0 0 20px rgba(224,145,69,0.6))
+            drop-shadow(0 0 40px rgba(224,145,69,0.4));
 }
 
 .glow-text {
-    text-shadow: 0 0 10px rgba(74,127,167,0.8),
-                 0 0 20px rgba(74,127,167,0.6),
-                 0 0 40px rgba(74,127,167,0.4);
+    text-shadow: 0 0 10px rgba(224,145,69,0.8),
+                 0 0 20px rgba(224,145,69,0.6),
+                 0 0 40px rgba(224,145,69,0.4);
 }
 
 /* Fade in animation */
@@ -265,9 +265,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar.scrolled {
-    background: rgba(10,25,49,0.8);
+    background: rgba(23,24,29,0.8);
     backdrop-filter: blur(24px);
-    border-bottom: 1px solid rgba(74,127,167,0.1);
+    border-bottom: 1px solid rgba(224,145,69,0.1);
     box-shadow: 0 4px 24px rgba(0,0,0,0.4);
     padding: 16px 0;
 }
@@ -500,7 +500,7 @@ h1, h2, h3, h4, h5, h6 {
    MÉTRICAS STRIP
 ============================================ */
 .metrics-strip {
-    background: linear-gradient(90deg, rgba(10,25,49,0.5), rgba(26,61,99,0.8), rgba(10,25,49,0.5));
+    background: linear-gradient(90deg, rgba(23,24,29,0.5), rgba(41,44,53,0.8), rgba(23,24,29,0.5));
     backdrop-filter: blur(10px);
     border-top: 1px solid rgba(74,127,167,0.1);
     border-bottom: 1px solid rgba(74,127,167,0.1);
@@ -1109,7 +1109,7 @@ h1, h2, h3, h4, h5, h6 {
    FOOTER
 ============================================ */
 .footer {
-    background: linear-gradient(135deg, rgba(10,25,49,0.5) 0%, rgba(26,61,99,0.8) 100%);
+    background: linear-gradient(135deg, rgba(23,24,29,0.5) 0%, rgba(41,44,53,0.8) 100%);
     border-top: 1px solid rgba(74,127,167,0.1);
     padding: 60px 40px 20px;
 }
@@ -1166,6 +1166,26 @@ h1, h2, h3, h4, h5, h6 {
 
 .footer-bottom p {
     margin-bottom: 8px;
+}
+
+/* ============================================
+   MAPA
+============================================ */
+.cta-map {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto 0;
+}
+
+.cta-map iframe {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+.map-address {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 13px;
+    margin-top: 10px;
 }
 
 /* ============================================
@@ -1693,7 +1713,283 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ============================================
-   RESPONSIVE - ADMIN PANEL
+   MODAL DE STOCK DE VEHÍCULOS
+============================================ */
+
+/* Overlay del modal */
+#stockModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+    overflow-y: auto;
+    animation: fadeInOverlay 0.3s ease forwards;
+}
+
+#stockModal.active {
+    display: flex;
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(8px);
+    }
+}
+
+/* Contenedor del modal */
+.modal-content {
+    background: linear-gradient(135deg, rgba(26, 61, 99, 0.95) 0%, rgba(10, 25, 49, 0.98) 100%);
+    border: 1px solid rgba(74, 127, 167, 0.3);
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 1200px;
+    width: 100%;
+    box-shadow: 0 25px 50px -12px rgba(74, 127, 167, 0.4),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideInModal 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideInModal {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Botón cerrar modal */
+.modal-close {
+    position: sticky;
+    top: 0;
+    right: 0;
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #FF3B30;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 28px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+.modal-close:hover {
+    background: rgba(255, 59, 48, 0.2);
+    border-color: rgba(255, 59, 48, 0.5);
+    transform: rotate(90deg);
+}
+
+.modal-close:active {
+    transform: scale(0.95) rotate(90deg);
+}
+
+/* Título del modal */
+.modal-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 30px;
+    margin-top: 10px;
+    background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-500) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Filtro de stock */
+.stock-filter {
+    margin-bottom: 20px;
+}
+
+.stock-filter input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(74,127,167,0.3);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.stock-filter input:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    background: rgba(255,255,255,0.08);
+    box-shadow: 0 0 0 3px rgba(224,145,69,0.1);
+}
+
+.stock-filter input::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* Contenedor de vehículos */
+.stock-vehicles-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 20px;
+}
+
+/* Card de vehículo en modal */
+.vehicle-card {
+    background: linear-gradient(135deg, rgba(26, 61, 99, 0.6) 0%, rgba(10, 25, 49, 0.8) 100%);
+    border: 1px solid rgba(74, 127, 167, 0.2);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    height: 100%;
+}
+
+.vehicle-card:hover {
+    border-color: rgba(74, 127, 167, 0.5);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(74, 127, 167, 0.2);
+    background: linear-gradient(135deg, rgba(26, 61, 99, 0.8) 0%, rgba(10, 25, 49, 0.95) 100%);
+}
+
+/* Imagen del vehículo */
+.vehicle-image-wrapper {
+    width: 100%;
+    height: 220px;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    overflow: hidden;
+    position: relative;
+}
+
+.vehicle-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+    display: block;
+}
+
+.vehicle-card:hover .vehicle-image {
+    transform: scale(1.08);
+}
+
+/* Información del vehículo */
+.vehicle-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.vehicle-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Detalles del vehículo */
+.vehicle-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 0;
+    border-top: 1px solid rgba(74, 127, 167, 0.1);
+    border-bottom: 1px solid rgba(74, 127, 167, 0.1);
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.detail-item strong {
+    color: var(--text-tertiary);
+    font-weight: 600;
+}
+
+/* Precio del vehículo */
+.vehicle-price {
+    font-size: 24px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-500) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 12px 0;
+}
+
+/* Botón de consulta */
+.btn-consultar {
+    background: linear-gradient(135deg, #4A7FA7 0%, #1A3D63 100%);
+    color: var(--text-primary);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: auto;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-consultar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 127, 167, 0.3);
+}
+
+.btn-consultar:active {
+    transform: translateY(0);
+}
+
+/* Acciones del modal */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(74, 127, 167, 0.1);
+}
+
+.modal-actions .btn-primary {
+    min-width: 150px;
+}
+
+/* ============================================
+   RESPONSIVE - MODAL DE STOCK
 ============================================ */
 @media (max-width: 1023px) {
     .admin-panel {
@@ -1728,5 +2024,128 @@ h1, h2, h3, h4, h5, h6 {
 
     .modal-title {
         font-size: 22px;
+    }
+
+    /* Modal de Stock - Responsive */
+    #stockModal {
+        padding: 10px;
+    }
+
+    .modal-content {
+        padding: 20px;
+        border-radius: 16px;
+        max-height: 95vh;
+    }
+
+    .modal-close {
+        width: 36px;
+        height: 36px;
+        font-size: 24px;
+        top: 15px;
+        right: 15px;
+    }
+
+    .section-title {
+        font-size: 22px;
+    }
+
+    .stock-vehicles-container {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    .vehicle-card {
+        border-radius: 12px;
+    }
+
+    .vehicle-image-wrapper {
+        height: 160px;
+    }
+
+    .vehicle-info {
+        padding: 14px;
+        gap: 8px;
+    }
+
+    .vehicle-title {
+        font-size: 15px;
+    }
+
+    .vehicle-details {
+        gap: 6px;
+        padding: 8px 0;
+    }
+
+    .detail-item {
+        font-size: 11px;
+    }
+
+    .vehicle-price {
+        font-size: 18px;
+        margin: 10px 0;
+    }
+
+    .btn-consultar {
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-actions .btn-primary {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    #stockModal {
+        padding: 0;
+        align-items: flex-start;
+    }
+
+    .modal-content {
+        padding: 16px;
+        border-radius: 12px 12px 0 0;
+        max-height: 100vh;
+        width: 100%;
+        margin-top: auto;
+    }
+
+    .modal-title {
+        font-size: 20px;
+        margin-bottom: 16px;
+    }
+
+    .stock-vehicles-container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .vehicle-image-wrapper {
+        height: 140px;
+    }
+
+    .vehicle-info {
+        padding: 12px;
+    }
+
+    .vehicle-title {
+        font-size: 14px;
+    }
+
+    .vehicle-price {
+        font-size: 16px;
+    }
+
+    .detail-item {
+        font-size: 11px;
+    }
+
+    .btn-consultar {
+        padding: 10px 14px;
+        font-size: 11px;
     }
 }

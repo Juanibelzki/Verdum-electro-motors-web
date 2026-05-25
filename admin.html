@@ -5,7 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Administrativo - Verdun Automotores</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --bg-primary: #17181D;
+            --bg-secondary: #292C35;
+            --bg-tertiary: #E09145;
+            --primary-400: #F0B87F;
+            --primary-500: #E09145;
+            --primary-600: #292C35;
+            --primary-700: #17181D;
+            --text-primary: #F6FAFD;
+            --text-secondary: #D1DFE8;
+            --text-tertiary: #8B8F99;
+            --text-quaternary: #E09145;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+    </style>
     <link rel="stylesheet" href="admin-styles.css">
 </head>
 <body>
@@ -58,6 +79,12 @@
                 <button class="admin-nav-btn" data-section="contenido">
                     📝 Contenido
                 </button>
+                <button class="admin-nav-btn" data-section="imagenes">
+                    🖼️ Imágenes
+                </button>
+                <button class="admin-nav-btn" data-section="testimonios">
+                    💬 Testimonios
+                </button>
                 <button class="admin-nav-btn" data-section="estadisticas">
                     📈 Estadísticas
                 </button>
@@ -105,7 +132,7 @@
                                     value="0KM y Usados"
                                     placeholder="Texto de la métrica"
                                 >
-                                <button class="btn-update" onclick="updateMetric(0)">✓ Guardar</button>
+                                <button type="button" class="btn-update" onclick="updateMetric(0)">✓ Guardar</button>
                             </div>
                         </div>
 
@@ -131,7 +158,7 @@
                                     value="Financiación sin banco"
                                     placeholder="Texto de la métrica"
                                 >
-                                <button class="btn-update" onclick="updateMetric(1)">✓ Guardar</button>
+                                <button type="button" class="btn-update" onclick="updateMetric(1)">✓ Guardar</button>
                             </div>
                         </div>
 
@@ -157,7 +184,7 @@
                                     value="Motos y Bicicletas Eléctricas"
                                     placeholder="Texto de la métrica"
                                 >
-                                <button class="btn-update" onclick="updateMetric(2)">✓ Guardar</button>
+                                <button type="button" class="btn-update" onclick="updateMetric(2)">✓ Guardar</button>
                             </div>
                         </div>
 
@@ -183,7 +210,7 @@
                                     value="Av. Chacabuco 1725, Corrientes"
                                     placeholder="Texto de la métrica"
                                 >
-                                <button class="btn-update" onclick="updateMetric(3)">✓ Guardar</button>
+                                <button type="button" class="btn-update" onclick="updateMetric(3)">✓ Guardar</button>
                             </div>
                         </div>
                     </div>
@@ -208,7 +235,7 @@
                                 <label>Características (separadas por coma)</label>
                                 <input type="text" id="serviceFeatures0" value="VW,Nissan,Chevrolet" placeholder="VW,Nissan,Chevrolet">
                             </div>
-                            <button class="btn-update" onclick="updateService(0)">✓ Guardar Servicio</button>
+                            <button type="button" class="btn-update" onclick="updateService(0)">✓ Guardar Servicio</button>
                         </div>
 
                         <!-- Servicio 2 -->
@@ -222,7 +249,7 @@
                                 <label>Características (separadas por coma)</label>
                                 <input type="text" id="serviceFeatures1" value="Garantía,Revisados,Legales" placeholder="Garantía,Revisados,Legales">
                             </div>
-                            <button class="btn-update" onclick="updateService(1)">✓ Guardar Servicio</button>
+                            <button type="button" class="btn-update" onclick="updateService(1)">✓ Guardar Servicio</button>
                         </div>
 
                         <!-- Servicio 3 -->
@@ -236,7 +263,49 @@
                                 <label>Características (separadas por coma)</label>
                                 <input type="text" id="serviceFeatures2" value="Eco-friendly,Rápida,Potente" placeholder="Eco-friendly,Rápida,Potente">
                             </div>
-                            <button class="btn-update" onclick="updateService(2)">✓ Guardar Servicio</button>
+                            <button type="button" class="btn-update" onclick="updateService(2)">✓ Guardar Servicio</button>
+                        </div>
+
+                        <!-- Servicio 4 -->
+                        <div class="service-edit-card">
+                            <h3>Patinetas Eléctricas</h3>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="serviceDesc3" placeholder="Descripción">Movilidad urbana sostenible y económica. Perfecta para desplazamientos.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Características (separadas por coma)</label>
+                                <input type="text" id="serviceFeatures3" value="Sostenible,Práctica,Urbana" placeholder="Sostenible,Práctica,Urbana">
+                            </div>
+                            <button type="button" class="btn-update" onclick="updateService(3)">✓ Guardar Servicio</button>
+                        </div>
+
+                        <!-- Servicio 5 -->
+                        <div class="service-edit-card">
+                            <h3>Financiación</h3>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="serviceDesc4" placeholder="Descripción">Sin banco. Aprobación en el día con cuotas fijas en pesos.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Características (separadas por coma)</label>
+                                <input type="text" id="serviceFeatures4" value="Sin banco,Rápido,Flexible" placeholder="Sin banco,Rápido,Flexible">
+                            </div>
+                            <button type="button" class="btn-update" onclick="updateService(4)">✓ Guardar Servicio</button>
+                        </div>
+
+                        <!-- Servicio 6 -->
+                        <div class="service-edit-card">
+                            <h3>Trámites</h3>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="serviceDesc5" placeholder="Descripción">Transferencia y documentación completa. Nos ocupamos de todo.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Características (separadas por coma)</label>
+                                <input type="text" id="serviceFeatures5" value="Transferencia,Legal,Completo" placeholder="Transferencia,Legal,Completo">
+                            </div>
+                            <button type="button" class="btn-update" onclick="updateService(5)">✓ Guardar Servicio</button>
                         </div>
                     </div>
                 </div>
@@ -270,7 +339,156 @@
                             <input type="number" id="statVehicles" value="500">
                         </div>
 
-                        <button class="btn-update" onclick="updateContent()">✓ Guardar Contenido</button>
+                        <button type="button" class="btn-update" onclick="updateContent()">✓ Guardar Contenido</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Imágenes -->
+            <section id="imagenes-section" class="admin-section">
+                <div class="admin-content">
+                    <h2>Gestionar Imágenes</h2>
+                    <p class="section-description">Logo, imágenes del sitio y fotos del stock de vehículos</p>
+
+                    <div class="images-subsection">
+                        <h3 class="subsection-title">A) Logo de la empresa</h3>
+                        <div class="logo-upload-block">
+                            <div class="image-preview-box" id="logoPreviewBox">
+                                <img id="logoPreview" src="" alt="Logo actual" class="preview-img" style="display: none;">
+                                <span class="preview-placeholder" id="logoPlaceholder">Sin logo personalizado</span>
+                            </div>
+                            <div class="upload-controls">
+                                <input type="file" id="logoFileInput" accept="image/*" hidden>
+                                <button type="button" class="btn-update" id="logoUploadBtn">📤 Subir logo</button>
+                                <button type="button" class="btn-secondary-outline" id="logoRemoveBtn">🗑️ Eliminar</button>
+                                <button type="button" class="btn-update" id="logoSaveBtn">✓ Guardar logo</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="images-subsection">
+                        <h3 class="subsection-title">B) Imágenes generales del sitio</h3>
+                        <p class="subsection-hint">Hero y tarjetas de servicios (se aplican en index.html)</p>
+                        <div id="siteImagesGrid" class="site-images-grid"></div>
+                    </div>
+
+                    <div class="images-subsection">
+                        <h3 class="subsection-title">C) Cards de vehículos (stock)</h3>
+                        <p class="subsection-hint">Nombre, precio, descripción y foto de cada vehículo del modal de stock</p>
+                        <button type="button" class="btn-update" onclick="showAddVehicleForm()" style="margin-bottom:20px">➕ Agregar Vehículo</button>
+                        <div id="vehiclesEditor" class="vehicles-editor"></div>
+                    </div>
+
+                    <!-- Modal para agregar vehículo -->
+                    <div id="addVehicleModal" class="admin-modal" style="display:none">
+                        <div class="admin-modal-content">
+                            <h3>Agregar Vehículo</h3>
+                            <div class="form-group">
+                                <label>Categoría</label>
+                                <select id="newVehicleCategory">
+                                    <option value="autos-0km">Autos 0KM</option>
+                                    <option value="autos-usados">Autos Usados</option>
+                                    <option value="motos-electricas">Motos Eléctricas</option>
+                                    <option value="patinetas-electricas">Patinetas Eléctricas</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Marca</label>
+                                <input type="text" id="newVehicleMarca" placeholder="Ej: Volkswagen">
+                            </div>
+                            <div class="form-group">
+                                <label>Modelo</label>
+                                <input type="text" id="newVehicleModelo" placeholder="Ej: Virtus">
+                            </div>
+                            <div class="form-group">
+                                <label>Año</label>
+                                <input type="number" id="newVehicleAnio" value="2024">
+                            </div>
+                            <div class="form-group">
+                                <label>Precio (ARS)</label>
+                                <input type="number" id="newVehiclePrecio" value="1000000">
+                            </div>
+                            <div class="form-group">
+                                <label>KM</label>
+                                <input type="text" id="newVehicleKm" value="0 KM">
+                            </div>
+                            <div class="form-group">
+                                <label>Color</label>
+                                <input type="text" id="newVehicleColor" placeholder="Ej: Blanco">
+                            </div>
+                            <div class="form-group">
+                                <label>Descripción (opcional)</label>
+                                <textarea id="newVehicleDesc" rows="2"></textarea>
+                            </div>
+                            <div style="display:flex;gap:12px;margin-top:16px">
+                                <button type="button" class="btn-update" onclick="saveNewVehicle()">✓ Guardar</button>
+                                <button type="button" class="btn-secondary-outline" onclick="closeAddVehicleForm()">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Testimonios -->
+            <section id="testimonios-section" class="admin-section">
+                <div class="admin-content">
+                    <h2>Editar Testimonios</h2>
+                    <p class="section-description">Personaliza los testimonios de clientes</p>
+
+                    <div class="testimonios-editor">
+                        <!-- Testimonio 1 -->
+                        <div class="testimonio-edit-card">
+                            <h3>Testimonio 1</h3>
+                            <div class="form-group">
+                                <label>Texto</label>
+                                <textarea id="testimonioText0" rows="3">Excelente atención y vehículos de primera calidad. Compré mi Volkswagen con Verdun y no me arrepiento. Recomiendo a todos mis amigos.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Autor</label>
+                                <input type="text" id="testimonioAuthor0" value="Carlos M.">
+                            </div>
+                            <div class="form-group">
+                                <label>Rol</label>
+                                <input type="text" id="testimonioRole0" value="Cliente satisfecho">
+                            </div>
+                            <button type="button" class="btn-update" onclick="updateTestimonio(0)">✓ Guardar</button>
+                        </div>
+
+                        <!-- Testimonio 2 -->
+                        <div class="testimonio-edit-card">
+                            <h3>Testimonio 2</h3>
+                            <div class="form-group">
+                                <label>Texto</label>
+                                <textarea id="testimonioText1" rows="3">La financiación sin banco fue súper rápida. En una tarde resolvimos todo y me llevé el auto. Transparencia total.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Autor</label>
+                                <input type="text" id="testimonioAuthor1" value="María L.">
+                            </div>
+                            <div class="form-group">
+                                <label>Rol</label>
+                                <input type="text" id="testimonioRole1" value="Compradora 0KM">
+                            </div>
+                            <button type="button" class="btn-update" onclick="updateTestimonio(1)">✓ Guardar</button>
+                        </div>
+
+                        <!-- Testimonio 3 -->
+                        <div class="testimonio-edit-card">
+                            <h3>Testimonio 3</h3>
+                            <div class="form-group">
+                                <label>Texto</label>
+                                <textarea id="testimonioText2" rows="3">Traté con muchas concesionarias. Verdun se destaca por profesionalismo y honestidad. El mejor lugar para comprar en Corrientes.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Autor</label>
+                                <input type="text" id="testimonioAuthor2" value="Juan P.">
+                            </div>
+                            <div class="form-group">
+                                <label>Rol</label>
+                                <input type="text" id="testimonioRole2" value="Cliente recurrente">
+                            </div>
+                            <button type="button" class="btn-update" onclick="updateTestimonio(2)">✓ Guardar</button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -299,7 +517,7 @@
                         </div>
                     </div>
 
-                    <button class="btn-reset" onclick="if(confirm('¿Deseas limpiar el historial?')) { clearChangesLog(); }">
+                    <button type="button" class="btn-reset" onclick="if(confirm('¿Deseas limpiar el historial?')) { clearChangesLog(); }">
                         🗑️ Limpiar Historial
                     </button>
                 </div>

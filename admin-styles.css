@@ -422,6 +422,66 @@ body {
     background: rgba(41, 44, 53, 0.7);
 }
 
+/* Testimonios Editor */
+.testimonios-editor {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.testimonio-edit-card {
+    background: rgba(41, 44, 53, 0.5);
+    border: 1px solid rgba(224, 145, 69, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.testimonio-edit-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.testimonio-edit-card:hover {
+    border-color: rgba(224, 145, 69, 0.5);
+    background: rgba(41, 44, 53, 0.7);
+}
+
+/* Admin Modal */
+.admin-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.admin-modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(224,145,69,0.3);
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.admin-modal-content h3 {
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.admin-modal-content .form-group {
+    margin-bottom: 12px;
+}
+
 /* Content Editor */
 .content-editor {
     display: flex;
@@ -594,6 +654,209 @@ body {
     text-align: center;
     padding: 20px;
     font-size: 13px;
+}
+
+/* ============================================
+   SECCIÓN IMÁGENES
+============================================ */
+.images-subsection {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid rgba(224, 145, 69, 0.15);
+}
+
+.subsection-title {
+    font-size: 18px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.subsection-hint {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-bottom: 20px;
+}
+
+.logo-upload-block {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.upload-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 200px;
+}
+
+.image-preview-box {
+    background: rgba(23, 24, 29, 0.6);
+    border: 1px dashed rgba(224, 145, 69, 0.4);
+    border-radius: 12px;
+    min-height: 140px;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    position: relative;
+}
+
+.site-preview-box {
+    min-height: 120px;
+    width: 100%;
+}
+
+.preview-img {
+    max-width: 100%;
+    max-height: 160px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.preview-placeholder {
+    color: var(--text-tertiary);
+    font-size: 12px;
+    text-align: center;
+}
+
+.btn-secondary-outline {
+    background: transparent;
+    border: 1px solid rgba(224, 145, 69, 0.4);
+    color: var(--text-secondary);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-outline:hover {
+    border-color: var(--primary-500);
+    color: var(--text-primary);
+}
+
+.site-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.site-image-card {
+    background: rgba(41, 44, 53, 0.5);
+    border: 1px solid rgba(224, 145, 69, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.site-image-card h4 {
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.image-file-hint {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+}
+
+.image-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.vehicles-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.vehicle-edit-card {
+    background: rgba(41, 44, 53, 0.5);
+    border: 1px solid rgba(224, 145, 69, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.vehicle-edit-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.vehicle-category-tag {
+    font-size: 12px;
+    color: var(--primary-400);
+    font-weight: 600;
+}
+
+.vehicle-id-tag {
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+.vehicle-edit-body {
+    display: grid;
+    grid-template-columns: minmax(160px, 220px) 1fr;
+    gap: 24px;
+}
+
+.vehicle-edit-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.vehicle-edit-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vehicle-edit-fields label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vehicle-edit-fields input,
+.vehicle-edit-fields textarea {
+    background: rgba(23, 24, 29, 0.5);
+    border: 1px solid rgba(224, 145, 69, 0.3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+}
+
+.vehicle-edit-fields input:focus,
+.vehicle-edit-fields textarea:focus {
+    outline: none;
+    border-color: var(--primary-500);
+}
+
+.vehicle-photo-btn {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .vehicle-edit-body {
+        grid-template-columns: 1fr;
+    }
+
+    .logo-upload-block {
+        flex-direction: column;
+    }
 }
 
 /* Responsive */

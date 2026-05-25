@@ -5,7 +5,9 @@
 // ============================================
 // DATOS DE INVENTARIO DE VEHÍCULOS
 // ============================================
-const vehicleInventory = {
+const STOCK_STORAGE_KEY = 'verdun_stock';
+
+const DEFAULT_VEHICLE_INVENTORY = {
     'autos-0km': {
         title: 'Autos 0KM',
         vehicles: [
@@ -188,19 +190,95 @@ const vehicleInventory = {
     }
 };
 
+const IMAGES_STORAGE_KEY = 'verdun_images';
+const VEHICLES_STORAGE_KEY = 'verdun_vehicles';
+const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
+
+const PAGE_IMAGE_SELECTORS = {
+    logo: '.logo-image',
+    hero_visual: '.hero-image',
+    service_1: 'img[src*="service_1"]',
+    service_2: 'img[src*="service_2"]',
+    service_3: 'img[src*="service_3"]',
+    service_4: 'img[src*="service_4"]',
+    service_5: 'img[src*="service_5"]',
+    service_6: 'img[src*="service_6"]'
+};
+
+async function getMergedVehicleInventory() {
+    const overrides = await FB.get(VEHICLES_STORAGE_KEY, {});
+    const inventory = JSON.parse(JSON.stringify(DEFAULT_VEHICLE_INVENTORY));
+
+    Object.keys(inventory).forEach((category) => {
+        inventory[category].vehicles = inventory[category].vehicles.map((vehicle) => {
+            const o = overrides[vehicle.id];
+            if (!o) return vehicle;
+            return {
+                ...vehicle,
+                nombre: o.nombre,
+                descripcion: o.descripcion,
+                precio: o.precio !== undefined ? o.precio : vehicle.precio,
+                image: o.image || vehicle.image
+            };
+        });
+    });
+
+    // Agregar vehículos personalizados del admin
+    const customVehicles = await FB.get(CUSTOM_VEHICLES_KEY, []);
+    customVehicles.forEach((cv) => {
+        if (inventory[cv.category]) {
+            inventory[cv.category].vehicles.push({
+                id: cv.id,
+                marca: cv.marca,
+                modelo: cv.modelo,
+                año: cv.anio,
+                precio: cv.precio,
+                km: cv.km,
+                color: cv.color,
+                descripcion: cv.descripcion || '',
+                image: cv.image || `https://via.placeholder.com/400x225?text=${encodeURIComponent(cv.marca + ' ' + cv.modelo)}`
+            });
+        }
+    });
+
+    return inventory;
+}
+
+function getVehicleDisplayName(vehicle) {
+    return vehicle.nombre || `${vehicle.marca} ${vehicle.modelo}`;
+}
+
+async function updatePageImages() {
+    const images = await FB.get(IMAGES_STORAGE_KEY, {});
+
+    Object.keys(images).forEach((key) => {
+        const data = images[key] && images[key].data;
+        if (!data) return;
+        const selector = PAGE_IMAGE_SELECTORS[key];
+        if (selector) {
+            document.querySelectorAll(selector).forEach((el) => {
+                el.src = data;
+            });
+        }
+    });
+}
+
 // Número de WhatsApp (reemplazar con número real)
-const WHATSAPP_NUMBER = '543765345678'; // Formato: 54 (Argentina) + 9 (celular) + número
+const WHATSAPP_NUMBER = '543795300020';
 
 // ============================================
 // FUNCIONES DE MODAL DE STOCK
 // ============================================
 
+let currentStockVehicles = [];
+
 /**
  * Abre el modal de stock para la categoría especificada
  */
-function openStockModal(category) {
+async function openStockModal(category) {
     const modal = document.getElementById('stockModal');
-    const inventory = vehicleInventory[category];
+    const merged = await getMergedVehicleInventory();
+    const inventory = merged[category];
     
     if (!inventory) {
         console.error(`Categoría ${category} no encontrada`);
@@ -209,13 +287,33 @@ function openStockModal(category) {
     
     // Actualizar título
     document.getElementById('stockModalTitle').textContent = inventory.title;
+    currentStockVehicles = inventory.vehicles;
+    
+    // Limpiar filtro
+    const filterInput = document.getElementById('stockFilter');
+    if (filterInput) filterInput.value = '';
     
     // Renderizar vehículos
-    renderVehicles(inventory.vehicles, category);
+    renderVehicles(currentStockVehicles, category);
     
     // Mostrar modal con animación
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden'; // Prevenir scroll
+}
+
+function filterStock() {
+    const query = document.getElementById('stockFilter').value.toLowerCase().trim();
+    if (!query) {
+        renderVehicles(currentStockVehicles);
+        return;
+    }
+    const filtered = currentStockVehicles.filter(v => {
+        const name = getVehicleDisplayName(v).toLowerCase();
+        const marca = (v.marca || '').toLowerCase();
+        const modelo = (v.modelo || '').toLowerCase();
+        return name.includes(query) || marca.includes(query) || modelo.includes(query);
+    });
+    renderVehicles(filtered);
 }
 
 /**
@@ -237,20 +335,27 @@ function renderVehicles(vehicles, category) {
     vehicles.forEach(vehicle => {
         const vehicleCard = document.createElement('div');
         vehicleCard.className = 'vehicle-card';
-        
+
+        const displayName = getVehicleDisplayName(vehicle);
         const priceFormatted = formatPrice(vehicle.precio);
-        
+        const descripcionHtml = vehicle.descripcion
+            ? `<p class="vehicle-description">${vehicle.descripcion}</p>`
+            : '';
+        const safeMarca = String(vehicle.marca).replace(/'/g, "\\'");
+        const safeModelo = String(vehicle.modelo).replace(/'/g, "\\'");
+
         vehicleCard.innerHTML = `
             <div class="vehicle-image-wrapper">
                 <img 
                     src="${vehicle.image}" 
-                    alt="${vehicle.marca} ${vehicle.modelo}" 
+                    alt="${displayName}" 
                     class="vehicle-image"
                     onerror="this.src='https://via.placeholder.com/400x225?text=Sin+imagen'"
                 >
             </div>
             <div class="vehicle-info">
-                <h4 class="vehicle-title">${vehicle.marca} ${vehicle.modelo}</h4>
+                <h4 class="vehicle-title">${displayName}</h4>
+                ${descripcionHtml}
                 <div class="vehicle-details">
                     <span class="detail-item">
                         <strong>Año:</strong> ${vehicle.año}
@@ -265,22 +370,30 @@ function renderVehicles(vehicles, category) {
                 <div class="vehicle-price">${priceFormatted}</div>
                 <button 
                     class="btn-consultar" 
-                    onclick="consultarWhatsApp('${vehicle.marca}', '${vehicle.modelo}', ${vehicle.año})"
+                    onclick="consultarWhatsApp('${safeMarca}', '${safeModelo}', ${vehicle.año})"
                 >
                     Consultar por WhatsApp
                 </button>
             </div>
         `;
-        
+
         container.appendChild(vehicleCard);
     });
 }
 
 /**
- * Abre WhatsApp con mensaje predefinido
+ * Abre WhatsApp con mensaje predefinido para un vehículo
  */
 function consultarWhatsApp(marca, modelo, año) {
     const mensaje = `Hola! Me interesa el ${marca} ${modelo} ${año} que vi en su sitio web. ¿Podrían darme más información?`;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+}
+
+/**
+ * Abre WhatsApp con un mensaje personalizado
+ */
+function enviarWhatsApp(mensaje) {
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 }
@@ -317,10 +430,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// 0. CARGAR DATOS EDITADOS DEL ADMIN (DESDE FIREBASE)
+// 0. CARGAR DATOS EDITADOS DEL ADMIN
 // ============================================
 async function loadAdminContent() {
-    // Cargar métricas editadas desde Firebase
+    // Cargar métricas editadas
     const metrics = await FB.get('metrics', null);
     if (metrics) {
         const metricsItems = document.querySelectorAll('.metric-item');
@@ -332,7 +445,7 @@ async function loadAdminContent() {
         });
     }
     
-    // Cargar contenido editado desde Firebase
+    // Cargar contenido editado
     const content = await FB.get('content', null);
     if (content) {
         const heroTitle = document.querySelector('.hero-title');
@@ -355,28 +468,44 @@ async function loadAdminContent() {
         }
     }
     
-    // Cargar servicios editados desde Firebase
+    // Cargar servicios editados
     const services = await FB.get('services', null);
     if (services) {
         const serviceCards = document.querySelectorAll('.service-card-flip');
-        services.forEach((service, index) => {
-            if (serviceCards[index]) {
-                const backCard = serviceCards[index].querySelector('.service-card-back');
-                if (backCard) {
-                    const p = backCard.querySelector('p');
-                    const featuresDiv = backCard.querySelector('.service-features');
-                    
-                    if (p) p.textContent = service.desc;
-                    
-                    if (featuresDiv && service.features) {
-                        featuresDiv.innerHTML = service.features.map(f => 
-                            `<span class="feature-tag">${f}</span>`
-                        ).join('');
-                    }
-                }
+        serviceCards.forEach((card, index) => {
+            const service = services[index];
+            if (!service || !card) return;
+            const backCard = card.querySelector('.service-card-back');
+            if (!backCard) return;
+            const p = backCard.querySelector('p');
+            const featuresDiv = backCard.querySelector('.service-features');
+            
+            if (p) p.textContent = service.desc;
+            if (featuresDiv && service.features) {
+                featuresDiv.innerHTML = service.features.map(f => 
+                    `<span class="feature-tag">${f}</span>`
+                ).join('');
             }
         });
     }
+
+    // Cargar testimonios editados
+    const testimonios = await FB.get('testimonios', null);
+    if (testimonios) {
+        const testimonioCards = document.querySelectorAll('.testimonio-card');
+        testimonioCards.forEach((card, index) => {
+            const t = testimonios[index];
+            if (!t || !card) return;
+            const textEl = card.querySelector('.testimonio-text');
+            const nameEl = card.querySelector('.author-name');
+            const roleEl = card.querySelector('.author-role');
+            if (textEl) textEl.textContent = t.text;
+            if (nameEl) nameEl.textContent = t.author;
+            if (roleEl) roleEl.textContent = t.role;
+        });
+    }
+
+    updatePageImages();
 }
 
 // Ejecutar cuando el DOM esté listo
@@ -385,6 +514,8 @@ if (document.readyState === 'loading') {
 } else {
     loadAdminContent();
 }
+
+window.addEventListener('load', () => { updatePageImages(); });
 
 // ============================================
 // 1. NAVBAR STICKY CON SCROLL
@@ -573,8 +704,7 @@ function enviarWA(event) {
     textoCompleto += '.';
     
     // Número de WhatsApp de Verdun
-    const numeroWhatsApp = '5493704724077';
-    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(textoCompleto)}`;
+    const urlWhatsApp = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(textoCompleto)}`;
     
     // Abrir WhatsApp
     window.open(urlWhatsApp, '_blank');
@@ -640,7 +770,7 @@ function createFloatingWhatsAppButton() {
     if (document.querySelector('.whatsapp-floating')) return;
     
     const button = document.createElement('a');
-    button.href = 'https://wa.me/5493704724077';
+    button.href = `https://wa.me/${WHATSAPP_NUMBER}`;
     button.target = '_blank';
     button.className = 'whatsapp-floating';
     button.innerHTML = '💬';
@@ -678,7 +808,7 @@ function createFloatingWhatsAppButton() {
 
 // Crear botón flotante después de cargar
 window.addEventListener('load', () => {
-    // createFloatingWhatsAppButton(); // Comentado por defecto
+    createFloatingWhatsAppButton();
 });
 
 // ============================================
@@ -874,255 +1004,16 @@ document.querySelectorAll('a[target="_blank"]').forEach(link => {
 });
 
 // ============================================
-// 19. SISTEMA DE LOGIN Y ADMIN
+// 19. WHATSAPP NAVBAR
 // ============================================
-
-const ADMIN_PASSWORD = 'admin123';
-const IMAGES_STORAGE_KEY = 'verdun_images';
-
-// Evento del botón login - Con verificación de que existe
 document.addEventListener('DOMContentLoaded', () => {
-    // Login button
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', () => {
-            const modal = document.getElementById('loginModal');
-            const passwordInput = document.getElementById('adminPassword');
-            if (modal && passwordInput) {
-                modal.style.display = 'flex';
-                passwordInput.focus();
-            }
-        });
-    }
-    
-    // WhatsApp button in navbar
     const navWhatsAppBtn = document.getElementById('navWhatsAppBtn');
     if (navWhatsAppBtn) {
         navWhatsAppBtn.addEventListener('click', () => {
-            window.open('https://wa.me/5493704724077', '_blank');
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank');
         });
     }
 });
-
-// Cerrar modal de login
-function closeLoginModal() {
-    document.getElementById('loginModal').style.display = 'none';
-    document.getElementById('loginForm').reset();
-}
-
-// Cerrar panel admin
-function closeAdminPanel() {
-    document.getElementById('adminPanel').style.display = 'none';
-}
-
-// Manejar login
-function handleLogin(event) {
-    event.preventDefault();
-    
-    const password = document.getElementById('adminPassword').value.trim();
-    
-    if (password === ADMIN_PASSWORD) {
-        closeLoginModal();
-        openAdminPanel();
-    } else {
-        alert('❌ Contraseña incorrecta');
-        document.getElementById('adminPassword').value = '';
-        document.getElementById('adminPassword').focus();
-    }
-}
-
-// Abrir panel admin
-function openAdminPanel() {
-    const adminPanel = document.getElementById('adminPanel');
-    if (adminPanel) {
-        adminPanel.style.display = 'flex';
-        loadSavedImages();
-    }
-}
-
-// ============================================
-// MANEJO DE IMÁGENES
-// ============================================
-
-function handleImageUpload(event, imageType) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    // Validar que sea PNG
-    if (file.type !== 'image/png') {
-        showStatus('❌ Solo se permiten archivos PNG', 'error');
-        return;
-    }
-    
-    // Validar tamaño (máx 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        showStatus('❌ Archivo muy grande (máx 5MB)', 'error');
-        return;
-    }
-    
-    // Leer archivo
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        const base64 = e.target.result;
-        
-        // Guardar en Firebase
-        let images = await FB.get('images', {});
-        images[imageType] = {
-            name: file.name,
-            size: (file.size / 1024).toFixed(2) + ' KB',
-            data: base64,
-            timestamp: new Date().toLocaleString('es-AR')
-        };
-        await FB.set('images', images);
-        
-        // Actualizar UI
-        updateImageUI(imageType, base64, file.size);
-        showStatus(`✅ ${imageType} cargado correctamente`, 'success');
-        
-        // Actualizar en la página
-        updatePageImages();
-    };
-    reader.readAsDataURL(file);
-}
-
-function updateImageUI(imageType, base64, size) {
-    // Actualizar tamaño
-    const sizeElement = document.getElementById(imageType + 'Size');
-    if (sizeElement) {
-        sizeElement.textContent = (size / 1024).toFixed(2) + ' KB';
-    }
-    
-    // Mostrar preview
-    const previewElement = document.getElementById('preview' + capitalizeFirstLetter(imageType));
-    if (previewElement) {
-        previewElement.classList.add('active');
-        previewElement.innerHTML = `<img src="${base64}" alt="${imageType}">`;
-    }
-}
-
-function capitalizeFirstLetter(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function showStatus(message, type) {
-    const statusElement = document.getElementById('adminStatus');
-    statusElement.textContent = message;
-    statusElement.className = 'admin-status ' + type;
-    
-    setTimeout(() => {
-        statusElement.className = 'admin-status';
-    }, 3000);
-}
-
-async function loadSavedImages() {
-    const images = await FB.get('images', {});
-    
-    Object.keys(images).forEach(imageType => {
-        const image = images[imageType];
-        updateImageUI(imageType, image.data, parseFloat(image.size) * 1024);
-    });
-}
-
-async function updatePageImages() {
-    const images = await FB.get('images', {});
-    
-    // Actualizar todas las imágenes en la página
-    Object.keys(images).forEach(imageType => {
-        const base64 = images[imageType].data;
-        
-        // Buscar todos los img con src de images/
-        document.querySelectorAll(`img[src*="images/${imageType}.png"]`).forEach(img => {
-            img.src = base64;
-        });
-    });
-}
-
-function exportImages() {
-    const images = JSON.parse(localStorage.getItem(IMAGES_STORAGE_KEY) || '{}');
-    
-    if (Object.keys(images).length === 0) {
-        showStatus('❌ No hay imágenes para exportar', 'error');
-        return;
-    }
-    
-    // Crear objeto exportable
-    const exportData = {};
-    Object.keys(images).forEach(imageType => {
-        exportData[imageType] = {
-            name: images[imageType].name,
-            size: images[imageType].size,
-            timestamp: images[imageType].timestamp
-        };
-    });
-    
-    // Descargar JSON
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'verdun_images_info.json';
-    link.click();
-    
-    showStatus('✅ Información de imágenes exportada', 'success');
-}
-
-async function clearAllImages() {
-    if (confirm('⚠️ ¿Estás seguro? Se borrarán TODAS las imágenes cargadas.')) {
-        await FB.set('images', {});
-        localStorage.removeItem(IMAGES_STORAGE_KEY);
-        
-        // Limpiar UI
-        document.querySelectorAll('.preview-mini').forEach(el => {
-            el.classList.remove('active');
-            el.innerHTML = '';
-        });
-        
-        document.querySelectorAll('.file-size').forEach(el => {
-            el.textContent = '';
-        });
-        
-        showStatus('✅ Todas las imágenes fueron eliminadas', 'success');
-    }
-}
-
-// ============================================
-// CARGAR IMÁGENES AL CARGAR LA PÁGINA
-// ============================================
-
-window.addEventListener('load', () => {
-    updatePageImages();
-});
-
-// ============================================
-// CERRAR MODAL AL PRESIONAR ESC
-// ============================================
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        const loginModal = document.getElementById('loginModal');
-        const adminPanel = document.getElementById('adminPanel');
-        if (loginModal) loginModal.style.display = 'none';
-        if (adminPanel) adminPanel.style.display = 'none';
-    }
-});
-
-// ============================================
-// CERRAR MODAL AL HACER CLICK FUERA
-// ============================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    const loginModal = document.getElementById('loginModal');
-    if (loginModal) {
-        loginModal.addEventListener('click', (e) => {
-            if (e.target === loginModal) {
-                closeLoginModal();
-            }
-        });
-    }
-});
-
-console.log('✅ Sistema de admin cargado correctamente');
 
 // ============================================
 // FIN DEL SCRIPT
