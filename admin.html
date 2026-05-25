@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Verdun Automotores</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <!-- ============================================
+         PANTALLA DE LOGIN
+    ============================================ -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-card">
+                <h1 class="login-title">Panel Administrativo</h1>
+                <p class="login-subtitle">Verdun Automotores</p>
+                
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="password">Contraseña Administrativa</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            placeholder="Ingresa la contraseña" 
+                            required
+                        >
+                    </div>
+                    <button type="submit" class="btn-login">Ingresar</button>
+                    <a href="index.html" class="btn-back">← Volver al sitio</a>
+                </form>
+                
+                <div id="loginError" class="login-error" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         PANEL ADMINISTRATIVO
+    ============================================ -->
+    <div id="adminPanel" class="admin-panel" style="display: none;">
+        <!-- Sidebar -->
+        <div class="admin-sidebar">
+            <div class="admin-header">
+                <h2>ADMIN VERDUN</h2>
+                <p>Panel de Control</p>
+            </div>
+            
+            <nav class="admin-nav">
+                <button class="admin-nav-btn active" data-section="metricas">
+                    📊 Métricas
+                </button>
+                <button class="admin-nav-btn" data-section="servicios">
+                    🔧 Servicios
+                </button>
+                <button class="admin-nav-btn" data-section="contenido">
+                    📝 Contenido
+                </button>
+                <button class="admin-nav-btn" data-section="estadisticas">
+                    📈 Estadísticas
+                </button>
+            </nav>
+            
+            <button class="btn-logout" id="logoutBtn">🚪 Cerrar Sesión</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="admin-main">
+            <!-- Top Bar -->
+            <div class="admin-topbar">
+                <h1 id="sectionTitle">Gestionar Métricas</h1>
+                <button class="btn-back-to-site" onclick="window.location.href='index.html'">
+                    ← Volver al sitio
+                </button>
+            </div>
+
+            <!-- Sección: Métricas -->
+            <section id="metricas-section" class="admin-section active">
+                <div class="admin-content">
+                    <h2>Editar Métricas del Sitio</h2>
+                    <p class="section-description">Personaliza los iconos y textos de las métricas</p>
+                    
+                    <div class="metrics-editor">
+                        <!-- Métrica 1 -->
+                        <div class="metric-edit-card">
+                            <div class="metric-preview">
+                                <span id="metricIcon0" class="metric-icon-large">🚗</span>
+                                <p id="metricText0">0KM y Usados</p>
+                            </div>
+                            <div class="metric-editor-form">
+                                <label>Emoji/Icono</label>
+                                <input 
+                                    type="text" 
+                                    id="metricIconInput0" 
+                                    value="🚗" 
+                                    maxlength="2"
+                                    placeholder="Pega un emoji"
+                                >
+                                <label>Texto</label>
+                                <input 
+                                    type="text" 
+                                    id="metricTextInput0" 
+                                    value="0KM y Usados"
+                                    placeholder="Texto de la métrica"
+                                >
+                                <button class="btn-update" onclick="updateMetric(0)">✓ Guardar</button>
+                            </div>
+                        </div>
+
+                        <!-- Métrica 2 -->
+                        <div class="metric-edit-card">
+                            <div class="metric-preview">
+                                <span id="metricIcon1" class="metric-icon-large">💳</span>
+                                <p id="metricText1">Financiación sin banco</p>
+                            </div>
+                            <div class="metric-editor-form">
+                                <label>Emoji/Icono</label>
+                                <input 
+                                    type="text" 
+                                    id="metricIconInput1" 
+                                    value="💳" 
+                                    maxlength="2"
+                                    placeholder="Pega un emoji"
+                                >
+                                <label>Texto</label>
+                                <input 
+                                    type="text" 
+                                    id="metricTextInput1" 
+                                    value="Financiación sin banco"
+                                    placeholder="Texto de la métrica"
+                                >
+                                <button class="btn-update" onclick="updateMetric(1)">✓ Guardar</button>
+                            </div>
+                        </div>
+
+                        <!-- Métrica 3 -->
+                        <div class="metric-edit-card">
+                            <div class="metric-preview">
+                                <span id="metricIcon2" class="metric-icon-large">⚡</span>
+                                <p id="metricText2">Motos y Bicicletas Eléctricas</p>
+                            </div>
+                            <div class="metric-editor-form">
+                                <label>Emoji/Icono</label>
+                                <input 
+                                    type="text" 
+                                    id="metricIconInput2" 
+                                    value="⚡" 
+                                    maxlength="2"
+                                    placeholder="Pega un emoji"
+                                >
+                                <label>Texto</label>
+                                <input 
+                                    type="text" 
+                                    id="metricTextInput2" 
+                                    value="Motos y Bicicletas Eléctricas"
+                                    placeholder="Texto de la métrica"
+                                >
+                                <button class="btn-update" onclick="updateMetric(2)">✓ Guardar</button>
+                            </div>
+                        </div>
+
+                        <!-- Métrica 4 -->
+                        <div class="metric-edit-card">
+                            <div class="metric-preview">
+                                <span id="metricIcon3" class="metric-icon-large">📍</span>
+                                <p id="metricText3">Av. Chacabuco 1725, Corrientes</p>
+                            </div>
+                            <div class="metric-editor-form">
+                                <label>Emoji/Icono</label>
+                                <input 
+                                    type="text" 
+                                    id="metricIconInput3" 
+                                    value="📍" 
+                                    maxlength="2"
+                                    placeholder="Pega un emoji"
+                                >
+                                <label>Texto</label>
+                                <input 
+                                    type="text" 
+                                    id="metricTextInput3" 
+                                    value="Av. Chacabuco 1725, Corrientes"
+                                    placeholder="Texto de la métrica"
+                                >
+                                <button class="btn-update" onclick="updateMetric(3)">✓ Guardar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Servicios -->
+            <section id="servicios-section" class="admin-section">
+                <div class="admin-content">
+                    <h2>Editar Servicios</h2>
+                    <p class="section-description">Personaliza los servicios y características</p>
+                    
+                    <div class="services-editor">
+                        <!-- Servicio 1 -->
+                        <div class="service-edit-card">
+                            <h3>Autos 0KM</h3>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="serviceDesc0" placeholder="Descripción">Nacionales e importados. Las mejores marcas con financiación propia.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Características (separadas por coma)</label>
+                                <input type="text" id="serviceFeatures0" value="VW,Nissan,Chevrolet" placeholder="VW,Nissan,Chevrolet">
+                            </div>
+                            <button class="btn-update" onclick="updateService(0)">✓ Guardar Servicio</button>
+                        </div>
+
+                        <!-- Servicio 2 -->
+                        <div class="service-edit-card">
+                            <h3>Autos Usados</h3>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="serviceDesc1" placeholder="Descripción">Revisados y garantizados. Todas las marcas con documentación completa.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Características (separadas por coma)</label>
+                                <input type="text" id="serviceFeatures1" value="Garantía,Revisados,Legales" placeholder="Garantía,Revisados,Legales">
+                            </div>
+                            <button class="btn-update" onclick="updateService(1)">✓ Guardar Servicio</button>
+                        </div>
+
+                        <!-- Servicio 3 -->
+                        <div class="service-edit-card">
+                            <h3>Motos Eléctricas</h3>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="serviceDesc2" placeholder="Descripción">Eficiencia y potencia eléctrica para la ciudad. Bajos costos operativos.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Características (separadas por coma)</label>
+                                <input type="text" id="serviceFeatures2" value="Eco-friendly,Rápida,Potente" placeholder="Eco-friendly,Rápida,Potente">
+                            </div>
+                            <button class="btn-update" onclick="updateService(2)">✓ Guardar Servicio</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Contenido -->
+            <section id="contenido-section" class="admin-section">
+                <div class="admin-content">
+                    <h2>Editar Contenido Principal</h2>
+                    <p class="section-description">Personaliza los textos principales del sitio</p>
+                    
+                    <div class="content-editor">
+                        <div class="edit-group">
+                            <label>Título Principal (Hero)</label>
+                            <input type="text" id="heroTitle" placeholder="Título" value="Vehículos Premium">
+                            <input type="text" id="heroHighlight" placeholder="Subtítulo destacado" value="Para tu Estilo">
+                        </div>
+
+                        <div class="edit-group">
+                            <label>Subtítulo Hero</label>
+                            <textarea id="heroSubtitle" placeholder="Subtítulo">Autos 0KM, Usados garantizados y Motos Eléctricas. 30 años brindando la mejor experiencia en movilidad.</textarea>
+                        </div>
+
+                        <div class="edit-group">
+                            <label>Años de Trayectoria</label>
+                            <input type="number" id="statYears" value="30">
+                        </div>
+
+                        <div class="edit-group">
+                            <label>Vehículos Disponibles</label>
+                            <input type="number" id="statVehicles" value="500">
+                        </div>
+
+                        <button class="btn-update" onclick="updateContent()">✓ Guardar Contenido</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Estadísticas -->
+            <section id="estadisticas-section" class="admin-section">
+                <div class="admin-content">
+                    <h2>Cambios Realizados</h2>
+                    <p class="section-description">Historial de ediciones</p>
+                    
+                    <div class="stats-container">
+                        <div class="stat-box">
+                            <span class="stat-value" id="editCount">0</span>
+                            <span class="stat-label">Cambios Realizados</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="lastEditTime">--:--</span>
+                            <span class="stat-label">Última Edición</span>
+                        </div>
+                    </div>
+
+                    <div class="changes-log">
+                        <h3>Registro de Cambios</h3>
+                        <div id="changesList" class="changes-list">
+                            <p class="empty-message">No hay cambios registrados aún</p>
+                        </div>
+                    </div>
+
+                    <button class="btn-reset" onclick="if(confirm('¿Deseas limpiar el historial?')) { clearChangesLog(); }">
+                        🗑️ Limpiar Historial
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="firebase.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

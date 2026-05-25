@@ -3,6 +3,390 @@
    ============================================ */
 
 // ============================================
+// DATOS DE INVENTARIO DE VEHÍCULOS
+// ============================================
+const vehicleInventory = {
+    'autos-0km': {
+        title: 'Autos 0KM',
+        vehicles: [
+            {
+                id: 1,
+                marca: 'Volkswagen',
+                modelo: 'Virtus',
+                año: 2024,
+                precio: 2850000,
+                km: '0 KM',
+                color: 'Blanco',
+                image: 'https://via.placeholder.com/400x225?text=VW+Virtus'
+            },
+            {
+                id: 2,
+                marca: 'Nissan',
+                modelo: 'Versa',
+                año: 2024,
+                precio: 2450000,
+                km: '0 KM',
+                color: 'Plata',
+                image: 'https://via.placeholder.com/400x225?text=Nissan+Versa'
+            },
+            {
+                id: 3,
+                marca: 'Chevrolet',
+                modelo: 'Onix',
+                año: 2024,
+                precio: 2100000,
+                km: '0 KM',
+                color: 'Negro',
+                image: 'https://via.placeholder.com/400x225?text=Chevrolet+Onix'
+            },
+            {
+                id: 4,
+                marca: 'Toyota',
+                modelo: 'Corolla',
+                año: 2024,
+                precio: 3150000,
+                km: '0 KM',
+                color: 'Gris',
+                image: 'https://via.placeholder.com/400x225?text=Toyota+Corolla'
+            }
+        ]
+    },
+    'autos-usados': {
+        title: 'Autos Usados',
+        vehicles: [
+            {
+                id: 5,
+                marca: 'Volkswagen',
+                modelo: 'Gol',
+                año: 2019,
+                precio: 1450000,
+                km: '85000',
+                color: 'Rojo',
+                image: 'https://via.placeholder.com/400x225?text=VW+Gol'
+            },
+            {
+                id: 6,
+                marca: 'Ford',
+                modelo: 'EcoSport',
+                año: 2020,
+                precio: 1850000,
+                km: '72500',
+                color: 'Blanco',
+                image: 'https://via.placeholder.com/400x225?text=Ford+EcoSport'
+            },
+            {
+                id: 7,
+                marca: 'Peugeot',
+                modelo: '208',
+                año: 2018,
+                precio: 1250000,
+                km: '95000',
+                color: 'Azul',
+                image: 'https://via.placeholder.com/400x225?text=Peugeot+208'
+            },
+            {
+                id: 8,
+                marca: 'Honda',
+                modelo: 'Civic',
+                año: 2019,
+                precio: 1650000,
+                km: '68000',
+                color: 'Plateado',
+                image: 'https://via.placeholder.com/400x225?text=Honda+Civic'
+            },
+            {
+                id: 9,
+                marca: 'Renault',
+                modelo: 'Kwid',
+                año: 2020,
+                precio: 950000,
+                km: '45000',
+                color: 'Negro',
+                image: 'https://via.placeholder.com/400x225?text=Renault+Kwid'
+            }
+        ]
+    },
+    'motos-electricas': {
+        title: 'Motos Eléctricas',
+        vehicles: [
+            {
+                id: 10,
+                marca: 'Energica',
+                modelo: 'EVA',
+                año: 2024,
+                precio: 450000,
+                km: '0 KM',
+                color: 'Negro',
+                image: 'https://via.placeholder.com/400x225?text=Energica+EVA'
+            },
+            {
+                id: 11,
+                marca: 'Super Soco',
+                modelo: 'TC Max',
+                año: 2024,
+                precio: 280000,
+                km: '0 KM',
+                color: 'Rojo',
+                image: 'https://via.placeholder.com/400x225?text=Super+Soco'
+            },
+            {
+                id: 12,
+                marca: 'Volta',
+                modelo: 'V1',
+                año: 2023,
+                precio: 350000,
+                km: '5000',
+                color: 'Blanco',
+                image: 'https://via.placeholder.com/400x225?text=Volta+V1'
+            }
+        ]
+    },
+    'patinetas-electricas': {
+        title: 'Patinetas Eléctricas',
+        vehicles: [
+            {
+                id: 13,
+                marca: 'Xiaomi',
+                modelo: 'Mi 3 Pro',
+                año: 2024,
+                precio: 95000,
+                km: '0 KM',
+                color: 'Negro',
+                image: 'https://via.placeholder.com/400x225?text=Xiaomi+Mi+3'
+            },
+            {
+                id: 14,
+                marca: 'Ninebot',
+                modelo: 'Max G30',
+                año: 2024,
+                precio: 125000,
+                km: '0 KM',
+                color: 'Gris',
+                image: 'https://via.placeholder.com/400x225?text=Ninebot+Max'
+            },
+            {
+                id: 15,
+                marca: 'Segway',
+                modelo: 'Ninebot Pro',
+                año: 2023,
+                precio: 140000,
+                km: '2000',
+                color: 'Blanco',
+                image: 'https://via.placeholder.com/400x225?text=Segway+Pro'
+            },
+            {
+                id: 16,
+                marca: 'Hiboy',
+                modelo: 'S2 Pro',
+                año: 2024,
+                precio: 110000,
+                km: '0 KM',
+                color: 'Negro',
+                image: 'https://via.placeholder.com/400x225?text=Hiboy+S2'
+            }
+        ]
+    }
+};
+
+// Número de WhatsApp (reemplazar con número real)
+const WHATSAPP_NUMBER = '543765345678'; // Formato: 54 (Argentina) + 9 (celular) + número
+
+// ============================================
+// FUNCIONES DE MODAL DE STOCK
+// ============================================
+
+/**
+ * Abre el modal de stock para la categoría especificada
+ */
+function openStockModal(category) {
+    const modal = document.getElementById('stockModal');
+    const inventory = vehicleInventory[category];
+    
+    if (!inventory) {
+        console.error(`Categoría ${category} no encontrada`);
+        return;
+    }
+    
+    // Actualizar título
+    document.getElementById('stockModalTitle').textContent = inventory.title;
+    
+    // Renderizar vehículos
+    renderVehicles(inventory.vehicles, category);
+    
+    // Mostrar modal con animación
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevenir scroll
+}
+
+/**
+ * Cierra el modal de stock
+ */
+function closeStockModal() {
+    const modal = document.getElementById('stockModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Restaurar scroll
+}
+
+/**
+ * Renderiza los vehículos en el contenedor del modal
+ */
+function renderVehicles(vehicles, category) {
+    const container = document.getElementById('stockVehiclesContainer');
+    container.innerHTML = '';
+    
+    vehicles.forEach(vehicle => {
+        const vehicleCard = document.createElement('div');
+        vehicleCard.className = 'vehicle-card';
+        
+        const priceFormatted = formatPrice(vehicle.precio);
+        
+        vehicleCard.innerHTML = `
+            <div class="vehicle-image-wrapper">
+                <img 
+                    src="${vehicle.image}" 
+                    alt="${vehicle.marca} ${vehicle.modelo}" 
+                    class="vehicle-image"
+                    onerror="this.src='https://via.placeholder.com/400x225?text=Sin+imagen'"
+                >
+            </div>
+            <div class="vehicle-info">
+                <h4 class="vehicle-title">${vehicle.marca} ${vehicle.modelo}</h4>
+                <div class="vehicle-details">
+                    <span class="detail-item">
+                        <strong>Año:</strong> ${vehicle.año}
+                    </span>
+                    <span class="detail-item">
+                        <strong>KM:</strong> ${vehicle.km}
+                    </span>
+                    <span class="detail-item">
+                        <strong>Color:</strong> ${vehicle.color}
+                    </span>
+                </div>
+                <div class="vehicle-price">${priceFormatted}</div>
+                <button 
+                    class="btn-consultar" 
+                    onclick="consultarWhatsApp('${vehicle.marca}', '${vehicle.modelo}', ${vehicle.año})"
+                >
+                    Consultar por WhatsApp
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(vehicleCard);
+    });
+}
+
+/**
+ * Abre WhatsApp con mensaje predefinido
+ */
+function consultarWhatsApp(marca, modelo, año) {
+    const mensaje = `Hola! Me interesa el ${marca} ${modelo} ${año} que vi en su sitio web. ¿Podrían darme más información?`;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+}
+
+/**
+ * Formatea el precio en pesos argentinos
+ */
+function formatPrice(price) {
+    return `$${price.toLocaleString('es-AR')}`;
+}
+
+// ============================================
+// EVENT LISTENERS PARA MODAL
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('stockModal');
+    
+    // Cerrar modal al hacer clic en el overlay
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeStockModal();
+            }
+        });
+    }
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            closeStockModal();
+        }
+    });
+});
+
+// ============================================
+// 0. CARGAR DATOS EDITADOS DEL ADMIN (DESDE FIREBASE)
+// ============================================
+async function loadAdminContent() {
+    // Cargar métricas editadas desde Firebase
+    const metrics = await FB.get('metrics', null);
+    if (metrics) {
+        const metricsItems = document.querySelectorAll('.metric-item');
+        metrics.forEach((metric, index) => {
+            if (metricsItems[index]) {
+                metricsItems[index].querySelector('.metric-icon').textContent = metric.icon;
+                metricsItems[index].querySelector('.metric-text').textContent = metric.text;
+            }
+        });
+    }
+    
+    // Cargar contenido editado desde Firebase
+    const content = await FB.get('content', null);
+    if (content) {
+        const heroTitle = document.querySelector('.hero-title');
+        const heroSubtitle = document.querySelector('.hero-subtitle');
+        const statNumbers = document.querySelectorAll('.stat-number');
+        
+        if (heroTitle) {
+            heroTitle.innerHTML = `${content.heroTitle}<br><span class="highlight">${content.heroHighlight}</span>`;
+        }
+        
+        if (heroSubtitle) {
+            heroSubtitle.textContent = content.heroSubtitle;
+        }
+        
+        if (statNumbers[0]) {
+            statNumbers[0].textContent = content.statYears;
+        }
+        if (statNumbers[1]) {
+            statNumbers[1].textContent = content.statVehicles;
+        }
+    }
+    
+    // Cargar servicios editados desde Firebase
+    const services = await FB.get('services', null);
+    if (services) {
+        const serviceCards = document.querySelectorAll('.service-card-flip');
+        services.forEach((service, index) => {
+            if (serviceCards[index]) {
+                const backCard = serviceCards[index].querySelector('.service-card-back');
+                if (backCard) {
+                    const p = backCard.querySelector('p');
+                    const featuresDiv = backCard.querySelector('.service-features');
+                    
+                    if (p) p.textContent = service.desc;
+                    
+                    if (featuresDiv && service.features) {
+                        featuresDiv.innerHTML = service.features.map(f => 
+                            `<span class="feature-tag">${f}</span>`
+                        ).join('');
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Ejecutar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { loadAdminContent(); });
+} else {
+    loadAdminContent();
+}
+
+// ============================================
 // 1. NAVBAR STICKY CON SCROLL
 // ============================================
 window.addEventListener('scroll', () => {
@@ -578,18 +962,18 @@ function handleImageUpload(event, imageType) {
     
     // Leer archivo
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
         const base64 = e.target.result;
         
-        // Guardar en localStorage
-        let images = JSON.parse(localStorage.getItem(IMAGES_STORAGE_KEY) || '{}');
+        // Guardar en Firebase
+        let images = await FB.get('images', {});
         images[imageType] = {
             name: file.name,
             size: (file.size / 1024).toFixed(2) + ' KB',
             data: base64,
             timestamp: new Date().toLocaleString('es-AR')
         };
-        localStorage.setItem(IMAGES_STORAGE_KEY, JSON.stringify(images));
+        await FB.set('images', images);
         
         // Actualizar UI
         updateImageUI(imageType, base64, file.size);
@@ -630,8 +1014,8 @@ function showStatus(message, type) {
     }, 3000);
 }
 
-function loadSavedImages() {
-    const images = JSON.parse(localStorage.getItem(IMAGES_STORAGE_KEY) || '{}');
+async function loadSavedImages() {
+    const images = await FB.get('images', {});
     
     Object.keys(images).forEach(imageType => {
         const image = images[imageType];
@@ -639,8 +1023,8 @@ function loadSavedImages() {
     });
 }
 
-function updatePageImages() {
-    const images = JSON.parse(localStorage.getItem(IMAGES_STORAGE_KEY) || '{}');
+async function updatePageImages() {
+    const images = await FB.get('images', {});
     
     // Actualizar todas las imágenes en la página
     Object.keys(images).forEach(imageType => {
@@ -683,8 +1067,9 @@ function exportImages() {
     showStatus('✅ Información de imágenes exportada', 'success');
 }
 
-function clearAllImages() {
+async function clearAllImages() {
     if (confirm('⚠️ ¿Estás seguro? Se borrarán TODAS las imágenes cargadas.')) {
+        await FB.set('images', {});
         localStorage.removeItem(IMAGES_STORAGE_KEY);
         
         // Limpiar UI
