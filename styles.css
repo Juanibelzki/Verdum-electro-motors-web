@@ -568,16 +568,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .services-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 40px;
 }
 
-/* Flip Card */
 .service-card-flip {
     perspective: 1000px;
     height: 360px;
     cursor: pointer;
+    flex: 0 0 calc(33.33% - 40px);
+    max-width: 400px;
+    min-width: 280px;
 }
 
 .service-card-inner {
@@ -1221,7 +1224,10 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     .services-grid {
-        grid-template-columns: repeat(2, 1fr);
+        justify-content: center;
+    }
+    .service-card-flip {
+        flex: 0 0 calc(50% - 40px);
     }
 
     .nosotros-features {
@@ -1287,10 +1293,11 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     .services-grid {
-        grid-template-columns: 1fr;
+        gap: 24px;
     }
-
     .service-card-flip {
+        flex: 0 0 100%;
+        max-width: 100%;
         height: 280px;
     }
 

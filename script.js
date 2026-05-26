@@ -201,8 +201,7 @@ const PAGE_IMAGE_SELECTORS = {
     service_2: 'img[data-src*="service_2"]',
     service_3: 'img[data-src*="service_3"]',
     service_4: 'img[data-src*="service_4"]',
-    service_5: 'img[data-src*="service_5"]',
-    service_6: 'img[data-src*="service_6"]'
+    service_5: 'img[data-src*="service_5"]'
 };
 
 async function getMergedVehicleInventory() {

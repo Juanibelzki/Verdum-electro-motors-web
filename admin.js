@@ -17,8 +17,7 @@ const SITE_IMAGE_SLOTS = [
     { key: 'service_2', label: 'Servicio 2 — Autos Usados', fileHint: 'service_2.png' },
     { key: 'service_3', label: 'Servicio 3 — Motos Eléctricas', fileHint: 'service_3.png' },
     { key: 'service_4', label: 'Servicio 4 — Patinetas', fileHint: 'service_4.png' },
-    { key: 'service_5', label: 'Servicio 5 — Financiación', fileHint: 'service_5.png' },
-    { key: 'service_6', label: 'Servicio 6 — Trámites', fileHint: 'service_6.png' }
+    { key: 'service_5', label: 'Servicio 5 — Vehículos Especiales', fileHint: 'service_5.png' }
 ];
 
 const DEFAULT_VEHICLES = [
@@ -183,14 +182,21 @@ async function loadMetrics() {
 }
 
 async function loadServices() {
-    const services = await loadStoredData('services', [
+    const defaults = [
         { desc: 'Nacionales e importados. Las mejores marcas con financiación propia.', features: ['VW', 'Nissan', 'Chevrolet'] },
         { desc: 'Revisados y garantizados. Todas las marcas con documentación completa.', features: ['Garantía', 'Revisados', 'Legales'] },
         { desc: 'Eficiencia y potencia eléctrica para la ciudad. Bajos costos operativos.', features: ['Eco-friendly', 'Rápida', 'Potente'] },
         { desc: 'Movilidad urbana sostenible y económica. Perfecta para desplazamientos.', features: ['Sostenible', 'Práctica', 'Urbana'] },
-        { desc: 'Sin banco. Aprobación en el día con cuotas fijas en pesos.', features: ['Sin banco', 'Rápido', 'Flexible'] },
-        { desc: 'Transferencia y documentación completa. Nos ocupamos de todo.', features: ['Transferencia', 'Legal', 'Completo'] }
-    ]);
+        { desc: 'Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.', features: ['4x4', 'Comerciales', 'A medida'] }
+    ];
+    const services = await loadStoredData('services', defaults);
+    if (services.length !== 5) {
+        services.length = 5;
+        defaults.forEach((d, i) => { if (!services[i]) services[i] = d; });
+        dataCache.services = services;
+        try { localStorage.setItem('services', JSON.stringify(services)); } catch {}
+        FB.set('services', services);
+    }
 
     services.forEach((service, index) => {
         const descEl = document.getElementById(`serviceDesc${index}`);
