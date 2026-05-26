@@ -435,8 +435,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // 0. CARGAR DATOS EDITADOS DEL ADMIN
 // ============================================
 async function loadAdminContent() {
-    // Cargar métricas editadas
-    const metrics = await FB.get('metrics', null);
+    const [metrics, content, services, testimonios] = await Promise.all([
+        FB.get('metrics', null),
+        FB.get('content', null),
+        FB.get('services', null),
+        FB.get('testimonios', null)
+    ]);
+    updatePageImages();
+
     if (metrics) {
         const metricsItems = document.querySelectorAll('.metric-item');
         metrics.forEach((metric, index) => {
@@ -446,22 +452,17 @@ async function loadAdminContent() {
             }
         });
     }
-    
-    // Cargar contenido editado
-    const content = await FB.get('content', null);
+
     if (content) {
         const heroTitle = document.querySelector('.hero-title');
         const heroSubtitle = document.querySelector('.hero-subtitle');
         const statNumbers = document.querySelectorAll('.stat-number');
-        
         if (heroTitle) {
             heroTitle.innerHTML = `${content.heroTitle}<br><span class="highlight">${content.heroHighlight}</span>`;
         }
-        
         if (heroSubtitle) {
             heroSubtitle.textContent = content.heroSubtitle;
         }
-        
         if (statNumbers[0]) {
             statNumbers[0].textContent = content.statYears;
         }
@@ -469,9 +470,7 @@ async function loadAdminContent() {
             statNumbers[1].textContent = content.statVehicles;
         }
     }
-    
-    // Cargar servicios editados
-    const services = await FB.get('services', null);
+
     if (services) {
         const serviceCards = document.querySelectorAll('.service-card-flip');
         serviceCards.forEach((card, index) => {
@@ -481,18 +480,15 @@ async function loadAdminContent() {
             if (!backCard) return;
             const p = backCard.querySelector('p');
             const featuresDiv = backCard.querySelector('.service-features');
-            
             if (p) p.textContent = service.desc;
             if (featuresDiv && service.features) {
-                featuresDiv.innerHTML = service.features.map(f => 
+                featuresDiv.innerHTML = service.features.map(f =>
                     `<span class="feature-tag">${f}</span>`
                 ).join('');
             }
         });
     }
 
-    // Cargar testimonios editados
-    const testimonios = await FB.get('testimonios', null);
     if (testimonios) {
         const testimonioCards = document.querySelectorAll('.testimonio-card');
         testimonioCards.forEach((card, index) => {
@@ -506,8 +502,6 @@ async function loadAdminContent() {
             if (roleEl) roleEl.textContent = t.role;
         });
     }
-
-    updatePageImages();
 }
 
 // Ejecutar cuando el DOM esté listo
@@ -516,8 +510,6 @@ if (document.readyState === 'loading') {
 } else {
     loadAdminContent();
 }
-
-window.addEventListener('load', () => { updatePageImages(); });
 
 // ============================================
 // 1. NAVBAR STICKY CON SCROLL
