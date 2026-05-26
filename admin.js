@@ -384,13 +384,19 @@ async function loadStoredData(key, defaultValue) {
     if (dataCache[key] !== undefined) return dataCache[key];
     const data = await FB.get(key, defaultValue);
     dataCache[key] = data;
-    try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
+    try {
+        const json = JSON.stringify(data);
+        if (json.length < 1_000_000) localStorage.setItem(key, json);
+    } catch {}
     return data;
 }
 
 async function saveStoredData(key, value) {
     dataCache[key] = value;
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    try {
+        const json = JSON.stringify(value);
+        if (json.length < 1_000_000) localStorage.setItem(key, json);
+    } catch {}
     FB.set(key, value);
 }
 

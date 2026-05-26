@@ -28,7 +28,8 @@ window.FB = {
             await FB_DB.ref(path).set(val);
         } catch {}
         try {
-            localStorage.setItem('fb_' + path, JSON.stringify(val));
+            const json = JSON.stringify(val);
+            if (json.length < 1_000_000) localStorage.setItem('fb_' + path, json);
         } catch {}
     }
 };
