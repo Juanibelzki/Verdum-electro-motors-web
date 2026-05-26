@@ -9,6 +9,7 @@ const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
 
 let pendingLogoData = null;
 let imagesUiInitialized = false;
+const dataCache = {};
 
 const SITE_IMAGE_SLOTS = [
     { key: 'hero_visual', label: 'Hero Visual', fileHint: 'hero_visual.png' },
@@ -380,14 +381,17 @@ async function clearChangesLog() {
 }
 
 async function loadStoredData(key, defaultValue) {
+    if (dataCache[key] !== undefined) return dataCache[key];
     const data = await FB.get(key, defaultValue);
+    dataCache[key] = data;
     try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
     return data;
 }
 
 async function saveStoredData(key, value) {
-    await FB.set(key, value);
+    dataCache[key] = value;
     try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    FB.set(key, value);
 }
 
 function escapeHtml(str) {
@@ -548,7 +552,6 @@ function initImagesSection() {
     }
 
     imagesUiInitialized = true;
-    loadImagesSection();
 }
 
 function updateLogoPreview(base64) {
