@@ -36,7 +36,10 @@ const DEFAULT_VEHICLES = [
     { id: 13, category: 'Patinetas Eléctricas', marca: 'Xiaomi', modelo: 'Mi 3 Pro', precio: 95000, anio: 2024, km: '0 KM', color: 'Negro' },
     { id: 14, category: 'Patinetas Eléctricas', marca: 'Ninebot', modelo: 'Max G30', precio: 125000, anio: 2024, km: '0 KM', color: 'Gris' },
     { id: 15, category: 'Patinetas Eléctricas', marca: 'Segway', modelo: 'Ninebot Pro', precio: 140000, anio: 2023, km: '2000', color: 'Blanco' },
-    { id: 16, category: 'Patinetas Eléctricas', marca: 'Hiboy', modelo: 'S2 Pro', precio: 110000, anio: 2024, km: '0 KM', color: 'Negro' }
+    { id: 16, category: 'Patinetas Eléctricas', marca: 'Hiboy', modelo: 'S2 Pro', precio: 110000, anio: 2024, km: '0 KM', color: 'Negro' },
+    { id: 17, category: 'Vehículos Especiales', marca: 'Ford', modelo: 'Ranger', precio: 4200000, anio: 2024, km: '0 KM', color: 'Gris' },
+    { id: 18, category: 'Vehículos Especiales', marca: 'Toyota', modelo: 'Hilux', precio: 4800000, anio: 2024, km: '0 KM', color: 'Blanco' },
+    { id: 19, category: 'Vehículos Especiales', marca: 'Fiat', modelo: 'Fiorino', precio: 1800000, anio: 2023, km: '15000', color: 'Blanco' }
 ];
 
 const SECTION_MAP = {
@@ -833,7 +836,8 @@ async function saveNewVehicle() {
         'autos-0km': 'Autos 0KM',
         'autos-usados': 'Autos Usados',
         'motos-electricas': 'Motos Eléctricas',
-        'patinetas-electricas': 'Patinetas Eléctricas'
+        'patinetas-electricas': 'Patinetas Eléctricas',
+        'vehiculos-especiales': 'Vehículos Especiales'
     };
 
     customVehicles.push({

@@ -187,6 +187,41 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 image: 'https://via.placeholder.com/400x225?text=Hiboy+S2'
             }
         ]
+    },
+    'vehiculos-especiales': {
+        title: 'Vehículos Especiales',
+        vehicles: [
+            {
+                id: 17,
+                marca: 'Ford',
+                modelo: 'Ranger',
+                año: 2024,
+                precio: 4200000,
+                km: '0 KM',
+                color: 'Gris',
+                image: 'https://via.placeholder.com/400x225?text=Ford+Ranger'
+            },
+            {
+                id: 18,
+                marca: 'Toyota',
+                modelo: 'Hilux',
+                año: 2024,
+                precio: 4800000,
+                km: '0 KM',
+                color: 'Blanco',
+                image: 'https://via.placeholder.com/400x225?text=Toyota+Hilux'
+            },
+            {
+                id: 19,
+                marca: 'Fiat',
+                modelo: 'Fiorino',
+                año: 2023,
+                precio: 1800000,
+                km: '15000',
+                color: 'Blanco',
+                image: 'https://via.placeholder.com/400x225?text=Fiat+Fiorino'
+            }
+        ]
     }
 };
 
