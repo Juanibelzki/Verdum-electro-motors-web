@@ -381,13 +381,13 @@ async function clearChangesLog() {
 
 async function loadStoredData(key, defaultValue) {
     const data = await FB.get(key, defaultValue);
-    localStorage.setItem(key, JSON.stringify(data));
+    try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
     return data;
 }
 
 async function saveStoredData(key, value) {
     await FB.set(key, value);
-    localStorage.setItem(key, JSON.stringify(value));
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
 }
 
 function escapeHtml(str) {

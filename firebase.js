@@ -26,9 +26,9 @@ window.FB = {
     async set(path, val) {
         try {
             await FB_DB.ref(path).set(val);
+        } catch {}
+        try {
             localStorage.setItem('fb_' + path, JSON.stringify(val));
-        } catch {
-            localStorage.setItem('fb_' + path, JSON.stringify(val));
-        }
+        } catch {}
     }
 };
