@@ -13,7 +13,7 @@ const FB_DB = firebase.database();
 const FB_STORAGE = firebase.storage();
 
 window.FB = {
-    TIMEOUT: 5000,
+    TIMEOUT: 10000,
 
     async get(path, fallback) {
         try {
