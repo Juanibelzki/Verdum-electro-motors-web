@@ -289,12 +289,14 @@ async function updatePageImages() {
     const images = await FB.get(IMAGES_STORAGE_KEY, {});
 
     Object.keys(images).forEach((key) => {
-        const data = images[key] && images[key].data;
-        if (!data) return;
+        const img = images[key];
+        if (!img) return;
+        const src = img.url || img.data;
+        if (!src) return;
         const selector = PAGE_IMAGE_SELECTORS[key];
         if (selector) {
             document.querySelectorAll(selector).forEach((el) => {
-                el.src = data;
+                el.src = src;
             });
         }
     });

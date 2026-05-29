@@ -8,6 +8,7 @@ const VEHICLES_STORAGE_KEY = 'verdun_vehicles';
 const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
 
 let pendingLogoData = null;
+let pendingLogoUrl = null;
 let imagesUiInitialized = false;
 const dataCache = {};
 
@@ -466,9 +467,13 @@ function initImagesSection() {
             const file = e.target.files[0];
             readImageAsBase64(
                 file,
-                (base64) => {
+                async (base64) => {
                     pendingLogoData = base64;
+                    pendingLogoUrl = null;
                     updateLogoPreview(base64);
+                    FB.uploadFile('site/logo', file).then(url => {
+                        pendingLogoUrl = url;
+                    }).catch(() => {});
                 },
                 (msg) => alert(msg)
             );
@@ -509,6 +514,11 @@ function initImagesSection() {
                     images[key] = { data: base64, timestamp: new Date().toLocaleString('es-AR') };
                     await setSiteImages(images);
                     renderSiteImagesGrid();
+                    FB.uploadFile(`site/${key}`, file).then(url => {
+                        images[key] = { url, timestamp: new Date().toLocaleString('es-AR') };
+                        setSiteImages(images);
+                        renderSiteImagesGrid();
+                    }).catch(() => {});
                     await addChange(`Imagen de sitio "${key}" actualizada`);
                     alert('✓ Imagen guardada');
                 },
@@ -558,6 +568,18 @@ function initImagesSection() {
                         await setVehicleOverrides(overrides);
                     }
                     renderVehiclesEditor();
+                    FB.uploadFile(`vehicles/${id}`, file).then(url => {
+                        loadStoredData(CUSTOM_VEHICLES_KEY, []).then(cv => {
+                            if (cv.some(v => v.id === id)) {
+                                saveStoredData(CUSTOM_VEHICLES_KEY, cv.map(v => v.id === id ? { ...v, image: url } : v));
+                            } else {
+                                getVehicleOverrides().then(ov => {
+                                    if (ov[id]) { ov[id].image = url; setVehicleOverrides(ov); }
+                                });
+                            }
+                            renderVehiclesEditor();
+                        });
+                    }).catch(() => {});
                     await addChange(`Foto del vehículo #${id} actualizada`);
                 },
                 (msg) => alert(msg)
@@ -587,9 +609,12 @@ function updateLogoPreview(base64) {
 
 async function loadLogoPreview() {
     const images = await getSiteImages();
-    if (images.logo && images.logo.data) {
-        updateLogoPreview(images.logo.data);
-        pendingLogoData = images.logo.data;
+    const logo = images.logo;
+    if (logo && (logo.url || logo.data)) {
+        const src = logo.url || logo.data;
+        updateLogoPreview(src);
+        pendingLogoData = logo.data || null;
+        pendingLogoUrl = logo.url || null;
     }
 }
 
@@ -599,10 +624,11 @@ async function saveLogo() {
         return;
     }
     const images = await getSiteImages();
-    images.logo = {
-        data: pendingLogoData,
-        timestamp: new Date().toLocaleString('es-AR')
-    };
+    if (pendingLogoUrl) {
+        images.logo = { url: pendingLogoUrl, timestamp: new Date().toLocaleString('es-AR') };
+    } else {
+        images.logo = { data: pendingLogoData, timestamp: new Date().toLocaleString('es-AR') };
+    }
     await setSiteImages(images);
     await addChange('Logo de empresa actualizado');
     alert('✓ Logo guardado correctamente');
@@ -615,6 +641,7 @@ async function removeSiteImage(key) {
 
     if (key === 'logo') {
         pendingLogoData = null;
+        pendingLogoUrl = null;
         updateLogoPreview(null);
     } else {
         await renderSiteImagesGrid();
@@ -632,7 +659,7 @@ async function renderSiteImagesGrid() {
 
     grid.innerHTML = SITE_IMAGE_SLOTS.map((slot) => {
         const stored = images[slot.key];
-        const previewSrc = stored && stored.data ? stored.data : '';
+        const previewSrc = stored && (stored.url || stored.data) ? (stored.url || stored.data) : '';
         const previewStyle = previewSrc ? '' : 'display:none';
         const placeholderStyle = previewSrc ? 'display:none' : '';
         return `
@@ -878,4 +905,53 @@ async function loadImagesSection() {
     await loadLogoPreview();
     await renderSiteImagesGrid();
     await renderVehiclesEditor();
+    migrateToStorage();
+}
+
+async function migrateToStorage() {
+    const images = await getSiteImages();
+    const tasks = [];
+    for (const key of Object.keys(images)) {
+        const img = images[key];
+        if (img && img.data && !img.url) {
+            tasks.push(
+                FB.uploadBase64(`site/${key}`, img.data).then(url => {
+                    images[key] = { url, timestamp: img.timestamp || new Date().toLocaleString('es-AR') };
+                }).catch(() => {})
+            );
+        }
+    }
+    if (tasks.length) {
+        await Promise.allSettled(tasks);
+        await setSiteImages(images);
+        renderSiteImagesGrid();
+    }
+    const overrides = await getVehicleOverrides();
+    const ovTasks = [];
+    for (const id of Object.keys(overrides)) {
+        const o = overrides[id];
+        if (o && o.image && o.image.startsWith('data:')) {
+            ovTasks.push(
+                FB.uploadBase64(`vehicles/${id}`, o.image).then(url => { o.image = url; }).catch(() => {})
+            );
+        }
+    }
+    if (ovTasks.length) {
+        await Promise.allSettled(ovTasks);
+        await setVehicleOverrides(overrides);
+    }
+    const customVehicles = await loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const cvTasks = [];
+    for (const cv of customVehicles) {
+        if (cv.image && cv.image.startsWith('data:')) {
+            cvTasks.push(
+                FB.uploadBase64(`vehicles/custom/${cv.id}`, cv.image).then(url => { cv.image = url; }).catch(() => {})
+            );
+        }
+    }
+    if (cvTasks.length) {
+        await Promise.allSettled(cvTasks);
+        await saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+    }
+    if (ovTasks.length || cvTasks.length) renderVehiclesEditor();
 }

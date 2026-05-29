@@ -10,6 +10,7 @@ const FIREBASE_CONFIG = {
 
 firebase.initializeApp(FIREBASE_CONFIG);
 const FB_DB = firebase.database();
+const FB_STORAGE = firebase.storage();
 
 window.FB = {
     async get(path, fallback) {
@@ -18,7 +19,6 @@ window.FB = {
             const val = snap.val();
             return val !== null && val !== undefined ? val : fallback;
         } catch {
-            // Fallback a localStorage si Firebase no está disponible
             const s = localStorage.getItem('fb_' + path);
             return s ? JSON.parse(s) : fallback;
         }
@@ -31,5 +31,17 @@ window.FB = {
             const json = JSON.stringify(val);
             if (json.length < 1_000_000) localStorage.setItem('fb_' + path, json);
         } catch {}
+    },
+    async uploadFile(storagePath, file) {
+        const ref = FB_STORAGE.ref(storagePath);
+        const snapshot = await ref.put(file);
+        return await snapshot.ref.getDownloadURL();
+    },
+    async uploadBase64(storagePath, base64Data) {
+        const ref = FB_STORAGE.ref(storagePath);
+        const res = await fetch(base64Data);
+        const blob = await res.blob();
+        const snapshot = await ref.put(blob);
+        return await snapshot.ref.getDownloadURL();
     }
 };
