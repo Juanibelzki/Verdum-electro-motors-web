@@ -302,6 +302,27 @@ async function updatePageImages() {
     });
 }
 
+async function loadFinancingImages() {
+    const financing = await FB.get('financing_images', {});
+    if (!financing || Object.keys(financing).length === 0) return;
+    Object.entries(financing).forEach(([type, data]) => {
+        const img = document.querySelector(`img[data-image-type="${type}"]`);
+        if (!img) return;
+        if (data.url) img.src = data.url;
+        else if (data.fallback_base64) img.src = data.fallback_base64;
+        const card = img.closest('.financing-card');
+        if (!card) return;
+        const titleEl = card.querySelector('.financing-card-title');
+        const descEl = card.querySelector('.financing-card-description');
+        const featuresEl = card.querySelector('.financing-card-features');
+        if (titleEl && data.title) titleEl.textContent = data.title;
+        if (descEl && data.description) descEl.textContent = data.description;
+        if (featuresEl && data.features && Array.isArray(data.features)) {
+            featuresEl.innerHTML = data.features.map(f => `<li>✓ ${f}</li>`).join('');
+        }
+    });
+}
+
 // Número de WhatsApp (reemplazar con número real)
 const WHATSAPP_NUMBER = '543795300020';
 
@@ -469,23 +490,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ============================================
 // 0. CARGAR DATOS EDITADOS DEL ADMIN
-// ============================================
-async function loadAdminContent() {
-    const [metrics, content, services, testimonios] = await Promise.all([
-        FB.get('metrics', null),
-        FB.get('content', null),
-        FB.get('services', null),
-        FB.get('testimonios', null)
-    ]);
-    updatePageImages();
-
-    if (metrics) {
-        const metricsItems = document.querySelectorAll('.metric-item');
-        metrics.forEach((metric, index) => {
-            if (metricsItems[index]) {
-                metricsItems[index].querySelector('.metric-icon').textContent = metric.icon;
-                metricsItems[index].querySelector('.metric-text').textContent = metric.text;
-            }
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { loadAdminContent(); loadFinancingImages(); });
+} else {
+    loadAdminContent(); loadFinancingImages();
+}
         });
     }
 

@@ -46,6 +46,7 @@ const DEFAULT_VEHICLES = [
 const SECTION_MAP = {
     metricas: 'metricas-section',
     servicios: 'servicios-section',
+    financiacion: 'financiacion-section',
     contenido: 'contenido-section',
     imagenes: 'imagenes-section',
     testimonios: 'testimonios-section',
@@ -55,6 +56,7 @@ const SECTION_MAP = {
 const SECTION_TITLES = {
     metricas: 'Gestionar Métricas',
     servicios: 'Editar Servicios',
+    financiacion: 'Editar Financiación',
     contenido: 'Editar Contenido',
     imagenes: 'Gestionar Imágenes',
     testimonios: 'Editar Testimonios',
@@ -82,6 +84,9 @@ async function initAdmin() {
     }
 
     initImagesSection();
+    document.addEventListener('change', (e) => {
+        if (e.target.classList.contains('financing-file-input')) handleFinancingImageUpload(e);
+    });
     bindGlobalActions();
 }
 
@@ -93,6 +98,7 @@ function bindGlobalActions() {
     window.removeSiteImage = removeSiteImage;
     window.saveLogo = saveLogo;
     window.updateTestimonio = updateTestimonio;
+    window.updateFinancingOption = updateFinancingOption;
     window.showAddVehicleForm = showAddVehicleForm;
     window.closeAddVehicleForm = closeAddVehicleForm;
     window.saveNewVehicle = saveNewVehicle;
@@ -158,6 +164,7 @@ async function loadAllData() {
     await loadMetrics();
     await loadServices();
     await loadContent();
+    await loadFinancingOptions();
     await loadImagesSection();
     await loadTestimonios();
     await loadChangeStats();
@@ -209,6 +216,78 @@ async function loadServices() {
         descEl.value = service.desc;
         featEl.value = service.features.join(',');
     });
+}
+
+/* ============================================
+   EDITAR OPCIONES DE FINANCIACIÓN
+   ============================================ */
+
+async function loadFinancingOptions() {
+    const defaults = {
+        financing_own: { title: 'Financiación Propia', description: 'Sin banco. Aprobación en el día con cuotas fijas en pesos.', features: ['Aprobación inmediata', 'Cuotas fijas', 'Sin comisiones ocultas', 'Hasta 84 meses'] },
+        financing_bank: { title: 'Crédito Bancario', description: 'Mejores tasas del mercado con nuestros bancos aliados.', features: ['Tasas competitivas', 'Múltiples opciones', 'Tramitación rápida', 'Asesoramiento gratuito'] },
+        financing_permuta: { title: 'Permuta', description: 'Tu usado como parte de pago. Tasación justa y transparente.', features: ['Tasación real', 'Proceso transparente', 'Compra de tu usado', 'Trámites incluidos'] }
+    };
+    const financing = await loadStoredData('financing_images', defaults);
+    ['financing_own', 'financing_bank', 'financing_permuta'].forEach(type => {
+        const data = financing[type] || {};
+        const titleEl = document.getElementById(`${type}-title`);
+        const descEl = document.getElementById(`${type}-desc`);
+        const featEl = document.getElementById(`${type}-features`);
+        if (titleEl) titleEl.value = data.title || '';
+        if (descEl) descEl.value = data.description || '';
+        if (featEl && data.features) featEl.value = data.features.join(',');
+        const previewImg = document.getElementById(`preview-${type}`);
+        if (previewImg && (data.url || data.fallback_base64)) {
+            previewImg.src = data.url || data.fallback_base64;
+            previewImg.style.display = 'block';
+            const ph = document.getElementById(`ph-${type}`);
+            if (ph) ph.style.display = 'none';
+        }
+    });
+}
+
+async function updateFinancingOption(type) {
+    const title = document.getElementById(`${type}-title`).value.trim();
+    const description = document.getElementById(`${type}-desc`).value.trim();
+    const featuresStr = document.getElementById(`${type}-features`).value.trim();
+    if (!title || !description) { alert('Completá título y descripción'); return; }
+    const features = featuresStr.split(',').map(f => f.trim()).filter(Boolean);
+    const financing = await loadStoredData('financing_images', {});
+    financing[type] = { ...(financing[type] || {}), title, description, features, updatedAt: new Date().toISOString() };
+    await saveStoredData('financing_images', financing);
+    await addChange(`Opción de financiación "${type}" actualizada`);
+    alert('✓ Guardado');
+}
+
+async function handleFinancingImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const type = event.target.dataset.financingType;
+    if (file.type !== 'image/png') { alert('❌ Solo PNG'); return; }
+    if (file.size > 500 * 1024) { alert('❌ Máx 500KB'); return; }
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64 = e.target.result;
+        const financing = await loadStoredData('financing_images', {});
+        if (!financing[type]) financing[type] = {};
+        financing[type].fallback_base64 = base64;
+        financing[type].name = file.name;
+        financing[type].size = (file.size / 1024).toFixed(1) + 'KB';
+        financing[type].uploadedAt = new Date().toISOString();
+        await saveStoredData('financing_images', financing);
+        const previewImg = document.getElementById(`preview-${type}`);
+        if (previewImg) { previewImg.src = base64; previewImg.style.display = 'block'; }
+        const ph = document.getElementById(`ph-${type}`);
+        if (ph) ph.style.display = 'none';
+        // Upload to Storage in background
+        FB.uploadFile(`financing/${type}`, file).then(url => {
+            financing[type].url = url;
+            saveStoredData('financing_images', financing);
+        }).catch(() => {});
+        alert('✓ Imagen cargada');
+    };
+    reader.readAsDataURL(file);
 }
 
 async function loadContent() {

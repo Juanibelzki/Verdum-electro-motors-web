@@ -79,6 +79,9 @@
                 <button class="admin-nav-btn" data-section="contenido">
                     📝 Contenido
                 </button>
+                <button class="admin-nav-btn" data-section="financiacion">
+                    💰 Financiación
+                </button>
                 <button class="admin-nav-btn" data-section="imagenes">
                     🖼️ Imágenes
                 </button>
@@ -292,6 +295,94 @@
                                 <input type="text" id="serviceFeatures4" value="4x4,Comerciales,A medida" placeholder="4x4,Comerciales,A medida">
                             </div>
                             <button type="button" class="btn-update" onclick="updateService(4)">✓ Guardar Servicio</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Financiación -->
+            <section id="financiacion-section" class="admin-section">
+                <div class="admin-content">
+                    <h2>Editar Opciones de Financiación</h2>
+                    <p class="section-description">Gestiona las imágenes y contenido de las tarjetas de financiación</p>
+
+                    <div class="financing-editor">
+                        <!-- FINANCING 1 -->
+                        <div class="service-edit-card">
+                            <h3>Financiación Propia</h3>
+                            <div class="image-preview-box" style="margin-bottom:12px">
+                                <img id="preview-financing_own" src="" alt="Preview" class="preview-img" style="display:none">
+                                <span class="preview-placeholder" id="ph-financing_own">Sin imagen</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Imagen PNG (máx 500KB)</label>
+                                <input type="file" accept="image/png" class="financing-file-input" data-financing-type="financing_own">
+                            </div>
+                            <div class="form-group">
+                                <label>Título</label>
+                                <input type="text" id="financing_own-title" placeholder="Financiación Propia">
+                            </div>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="financing_own-desc" placeholder="Sin banco. Aprobación en el día..." rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Beneficios (separados por coma)</label>
+                                <textarea id="financing_own-features" placeholder="Aprobación inmediata,Cuotas fijas,Sin comisiones..." rows="3"></textarea>
+                            </div>
+                            <button type="button" class="btn-update" onclick="updateFinancingOption('financing_own')">✓ Guardar Cambios</button>
+                        </div>
+
+                        <!-- FINANCING 2 -->
+                        <div class="service-edit-card">
+                            <h3>Crédito Bancario</h3>
+                            <div class="image-preview-box" style="margin-bottom:12px">
+                                <img id="preview-financing_bank" src="" alt="Preview" class="preview-img" style="display:none">
+                                <span class="preview-placeholder" id="ph-financing_bank">Sin imagen</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Imagen PNG (máx 500KB)</label>
+                                <input type="file" accept="image/png" class="financing-file-input" data-financing-type="financing_bank">
+                            </div>
+                            <div class="form-group">
+                                <label>Título</label>
+                                <input type="text" id="financing_bank-title" placeholder="Crédito Bancario">
+                            </div>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="financing_bank-desc" placeholder="Mejores tasas del mercado..." rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Beneficios (separados por coma)</label>
+                                <textarea id="financing_bank-features" placeholder="Tasas competitivas,Múltiples opciones..." rows="3"></textarea>
+                            </div>
+                            <button type="button" class="btn-update" onclick="updateFinancingOption('financing_bank')">✓ Guardar Cambios</button>
+                        </div>
+
+                        <!-- FINANCING 3 -->
+                        <div class="service-edit-card">
+                            <h3>Permuta</h3>
+                            <div class="image-preview-box" style="margin-bottom:12px">
+                                <img id="preview-financing_permuta" src="" alt="Preview" class="preview-img" style="display:none">
+                                <span class="preview-placeholder" id="ph-financing_permuta">Sin imagen</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Imagen PNG (máx 500KB)</label>
+                                <input type="file" accept="image/png" class="financing-file-input" data-financing-type="financing_permuta">
+                            </div>
+                            <div class="form-group">
+                                <label>Título</label>
+                                <input type="text" id="financing_permuta-title" placeholder="Permuta">
+                            </div>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="financing_permuta-desc" placeholder="Tu usado como parte de pago..." rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Beneficios (separados por coma)</label>
+                                <textarea id="financing_permuta-features" placeholder="Tasación justa,Proceso transparente..." rows="3"></textarea>
+                            </div>
+                            <button type="button" class="btn-update" onclick="updateFinancingOption('financing_permuta')">✓ Guardar Cambios</button>
                         </div>
                     </div>
                 </div>
