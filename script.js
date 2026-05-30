@@ -19,7 +19,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 2850000,
                 km: '0 KM',
                 color: 'Blanco',
-                image: 'https://via.placeholder.com/400x225?text=VW+Virtus'
+                image: 'https://placehold.co/400x225?text=VW+Virtus'
             },
             {
                 id: 2,
@@ -29,7 +29,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 2450000,
                 km: '0 KM',
                 color: 'Plata',
-                image: 'https://via.placeholder.com/400x225?text=Nissan+Versa'
+                image: 'https://placehold.co/400x225?text=Nissan+Versa'
             },
             {
                 id: 3,
@@ -39,7 +39,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 2100000,
                 km: '0 KM',
                 color: 'Negro',
-                image: 'https://via.placeholder.com/400x225?text=Chevrolet+Onix'
+                image: 'https://placehold.co/400x225?text=Chevrolet+Onix'
             },
             {
                 id: 4,
@@ -49,7 +49,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 3150000,
                 km: '0 KM',
                 color: 'Gris',
-                image: 'https://via.placeholder.com/400x225?text=Toyota+Corolla'
+                image: 'https://placehold.co/400x225?text=Toyota+Corolla'
             }
         ]
     },
@@ -64,7 +64,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 1450000,
                 km: '85000',
                 color: 'Rojo',
-                image: 'https://via.placeholder.com/400x225?text=VW+Gol'
+                image: 'https://placehold.co/400x225?text=VW+Gol'
             },
             {
                 id: 6,
@@ -74,7 +74,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 1850000,
                 km: '72500',
                 color: 'Blanco',
-                image: 'https://via.placeholder.com/400x225?text=Ford+EcoSport'
+                image: 'https://placehold.co/400x225?text=Ford+EcoSport'
             },
             {
                 id: 7,
@@ -84,7 +84,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 1250000,
                 km: '95000',
                 color: 'Azul',
-                image: 'https://via.placeholder.com/400x225?text=Peugeot+208'
+                image: 'https://placehold.co/400x225?text=Peugeot+208'
             },
             {
                 id: 8,
@@ -94,7 +94,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 1650000,
                 km: '68000',
                 color: 'Plateado',
-                image: 'https://via.placeholder.com/400x225?text=Honda+Civic'
+                image: 'https://placehold.co/400x225?text=Honda+Civic'
             },
             {
                 id: 9,
@@ -104,7 +104,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 950000,
                 km: '45000',
                 color: 'Negro',
-                image: 'https://via.placeholder.com/400x225?text=Renault+Kwid'
+                image: 'https://placehold.co/400x225?text=Renault+Kwid'
             }
         ]
     },
@@ -119,7 +119,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 450000,
                 km: '0 KM',
                 color: 'Negro',
-                image: 'https://via.placeholder.com/400x225?text=Energica+EVA'
+                image: 'https://placehold.co/400x225?text=Energica+EVA'
             },
             {
                 id: 11,
@@ -129,7 +129,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 280000,
                 km: '0 KM',
                 color: 'Rojo',
-                image: 'https://via.placeholder.com/400x225?text=Super+Soco'
+                image: 'https://placehold.co/400x225?text=Super+Soco'
             },
             {
                 id: 12,
@@ -139,7 +139,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 350000,
                 km: '5000',
                 color: 'Blanco',
-                image: 'https://via.placeholder.com/400x225?text=Volta+V1'
+                image: 'https://placehold.co/400x225?text=Volta+V1'
             }
         ]
     },
@@ -154,7 +154,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 95000,
                 km: '0 KM',
                 color: 'Negro',
-                image: 'https://via.placeholder.com/400x225?text=Xiaomi+Mi+3'
+                image: 'https://placehold.co/400x225?text=Xiaomi+Mi+3'
             },
             {
                 id: 14,
@@ -164,7 +164,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 125000,
                 km: '0 KM',
                 color: 'Gris',
-                image: 'https://via.placeholder.com/400x225?text=Ninebot+Max'
+                image: 'https://placehold.co/400x225?text=Ninebot+Max'
             },
             {
                 id: 15,
@@ -174,7 +174,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 140000,
                 km: '2000',
                 color: 'Blanco',
-                image: 'https://via.placeholder.com/400x225?text=Segway+Pro'
+                image: 'https://placehold.co/400x225?text=Segway+Pro'
             },
             {
                 id: 16,
@@ -184,7 +184,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 110000,
                 km: '0 KM',
                 color: 'Negro',
-                image: 'https://via.placeholder.com/400x225?text=Hiboy+S2'
+                image: 'https://placehold.co/400x225?text=Hiboy+S2'
             }
         ]
     },
@@ -199,7 +199,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 4200000,
                 km: '0 KM',
                 color: 'Gris',
-                image: 'https://via.placeholder.com/400x225?text=Ford+Ranger'
+                image: 'https://placehold.co/400x225?text=Ford+Ranger'
             },
             {
                 id: 18,
@@ -209,7 +209,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 4800000,
                 km: '0 KM',
                 color: 'Blanco',
-                image: 'https://via.placeholder.com/400x225?text=Toyota+Hilux'
+                image: 'https://placehold.co/400x225?text=Toyota+Hilux'
             },
             {
                 id: 19,
@@ -219,7 +219,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 1800000,
                 km: '15000',
                 color: 'Blanco',
-                image: 'https://via.placeholder.com/400x225?text=Fiat+Fiorino'
+                image: 'https://placehold.co/400x225?text=Fiat+Fiorino'
             }
         ]
     }
@@ -273,7 +273,7 @@ async function getMergedVehicleInventory() {
                 km: cv.km,
                 color: cv.color,
                 descripcion: cv.descripcion || '',
-                image: cv.image || `https://via.placeholder.com/400x225?text=${encodeURIComponent(cv.marca + ' ' + cv.modelo)}`
+                image: cv.image || `https://placehold.co/400x225?text=${encodeURIComponent(cv.marca + ' ' + cv.modelo)}`
             });
         }
     });
@@ -409,7 +409,7 @@ function renderVehicles(vehicles, category) {
                     src="${vehicle.image}" 
                     alt="${displayName}" 
                     class="vehicle-image"
-                    onerror="this.src='https://via.placeholder.com/400x225?text=Sin+imagen'"
+                    onerror="this.src='https://placehold.co/400x225/1a1a2e/E09145?text=Sin+imagen'"
                 >
             </div>
             <div class="vehicle-info">
@@ -489,16 +489,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// 0. CARGAR DATOS EDITADOS DEL ADMIN
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { loadAdminContent(); loadFinancingImages(); });
-} else {
-    loadAdminContent(); loadFinancingImages();
-}
-        });
-    }
+// CARGAR DATOS EDITADOS DEL ADMIN
+// ============================================
 
-    if (content) {
+async function loadAdminContent() {
+    const [services, content, testimonios] = await Promise.all([
+        FB.get('services', []),
+        FB.get('content', {}),
+        FB.get('testimonios', [])
+    ]);
+
+    await updatePageImages();
+
+    if (content && Object.keys(content).length > 0) {
         const heroTitle = document.querySelector('.hero-title');
         const heroSubtitle = document.querySelector('.hero-subtitle');
         const statNumbers = document.querySelectorAll('.stat-number');
@@ -508,15 +511,11 @@ if (document.readyState === 'loading') {
         if (heroSubtitle) {
             heroSubtitle.textContent = content.heroSubtitle;
         }
-        if (statNumbers[0]) {
-            statNumbers[0].textContent = content.statYears;
-        }
-        if (statNumbers[1]) {
-            statNumbers[1].textContent = content.statVehicles;
-        }
+        if (statNumbers[0]) statNumbers[0].textContent = content.statYears;
+        if (statNumbers[1]) statNumbers[1].textContent = content.statVehicles;
     }
 
-    if (services) {
+    if (services && services.length > 0) {
         const serviceCards = document.querySelectorAll('.service-card-flip');
         serviceCards.forEach((card, index) => {
             const service = services[index];
@@ -534,7 +533,7 @@ if (document.readyState === 'loading') {
         });
     }
 
-    if (testimonios) {
+    if (testimonios && testimonios.length > 0) {
         const testimonioCards = document.querySelectorAll('.testimonio-card');
         testimonioCards.forEach((card, index) => {
             const t = testimonios[index];
@@ -549,11 +548,11 @@ if (document.readyState === 'loading') {
     }
 }
 
-// Ejecutar cuando el DOM esté listo
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { loadAdminContent(); });
+    document.addEventListener('DOMContentLoaded', () => { loadAdminContent(); loadFinancingImages(); });
 } else {
     loadAdminContent();
+    loadFinancingImages();
 }
 
 // ============================================
