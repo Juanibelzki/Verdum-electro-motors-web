@@ -285,43 +285,6 @@ function getVehicleDisplayName(vehicle) {
     return vehicle.nombre || `${vehicle.marca} ${vehicle.modelo}`;
 }
 
-async function updatePageImages() {
-    const images = await FB.get(IMAGES_STORAGE_KEY, {});
-
-    Object.keys(images).forEach((key) => {
-        const img = images[key];
-        if (!img) return;
-        const src = img.url || img.data;
-        if (!src) return;
-        const selector = PAGE_IMAGE_SELECTORS[key];
-        if (selector) {
-            document.querySelectorAll(selector).forEach((el) => {
-                el.src = src;
-            });
-        }
-    });
-}
-
-async function loadFinancingImages() {
-    const financing = await FB.get('financing_images', {});
-    if (!financing || Object.keys(financing).length === 0) return;
-    Object.entries(financing).forEach(([type, data]) => {
-        const img = document.querySelector(`img[data-image-type="${type}"]`);
-        if (!img) return;
-        if (data.url) img.src = data.url;
-        else if (data.fallback_base64) img.src = data.fallback_base64;
-        const card = img.closest('.financing-card');
-        if (!card) return;
-        const titleEl = card.querySelector('.financing-card-title');
-        const descEl = card.querySelector('.financing-card-description');
-        const featuresEl = card.querySelector('.financing-card-features');
-        if (titleEl && data.title) titleEl.textContent = data.title;
-        if (descEl && data.description) descEl.textContent = data.description;
-        if (featuresEl && data.features && Array.isArray(data.features)) {
-            featuresEl.innerHTML = data.features.map(f => `<li>✓ ${f}</li>`).join('');
-        }
-    });
-}
 
 // Número de WhatsApp (reemplazar con número real)
 const WHATSAPP_NUMBER = '543795300020';
@@ -493,18 +456,18 @@ document.addEventListener('DOMContentLoaded', () => {
 // CARGAR DATOS EDITADOS DEL ADMIN
 // ============================================
 
-async function loadAdminContent() {
+function loadAdminContent() {
     applyCachedData();
 
-    const [services, content, testimonios, images, financing] = await Promise.all([
+    Promise.all([
         FB.get('services', []),
         FB.get('content', {}),
         FB.get('testimonios', []),
         FB.get('verdun_images', {}),
         FB.get('financing_images', {})
-    ]);
-
-    applyFreshData(images, financing, content, services, testimonios);
+    ]).then(([services, content, testimonios, images, financing]) => {
+        applyFreshData(images, financing, content, services, testimonios);
+    }).catch(() => {});
 }
 
 function applyCachedData() {
