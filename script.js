@@ -409,6 +409,7 @@ function renderVehicles(vehicles, category) {
                     src="${vehicle.image}" 
                     alt="${displayName}" 
                     class="vehicle-image"
+                    loading="lazy"
                     onerror="this.src='https://placehold.co/400x225/1a1a2e/E09145?text=Sin+imagen'"
                 >
             </div>
@@ -493,6 +494,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 
 async function loadAdminContent() {
+    applyCachedData();
+
     const [services, content, testimonios, images, financing] = await Promise.all([
         FB.get('services', []),
         FB.get('content', {}),
@@ -501,42 +504,60 @@ async function loadAdminContent() {
         FB.get('financing_images', {})
     ]);
 
-    // Imágenes
-    if (images && Object.keys(images).length > 0) {
-        Object.keys(images).forEach((key) => {
-            const img = images[key];
-            if (!img) return;
-            const src = img.url || img.data;
-            if (!src) return;
-            const selector = PAGE_IMAGE_SELECTORS[key];
-            if (selector) {
-                document.querySelectorAll(selector).forEach((el) => {
-                    el.src = src;
-                });
-            }
-        });
-    }
+    applyFreshData(images, financing, content, services, testimonios);
+}
 
-    // Financiación
-    if (financing && Object.keys(financing).length > 0) {
-        Object.entries(financing).forEach(([type, data]) => {
-            const img = document.querySelector(`img[data-image-type="${type}"]`);
-            if (!img) return;
-            if (data.url) img.src = data.url;
-            else if (data.fallback_base64) img.src = data.fallback_base64;
-            const card = img.closest('.financing-card');
-            if (!card) return;
-            const titleEl = card.querySelector('.financing-card-title');
-            const descEl = card.querySelector('.financing-card-description');
-            const featuresEl = card.querySelector('.financing-card-features');
-            if (titleEl && data.title) titleEl.textContent = data.title;
-            if (descEl && data.description) descEl.textContent = data.description;
-            if (featuresEl && data.features && Array.isArray(data.features)) {
-                featuresEl.innerHTML = data.features.map(f => `<li>✓ ${f}</li>`).join('');
-            }
+function applyCachedData() {
+    try {
+        const cacheKeys = ['services', 'content', 'testimonios', 'verdun_images', 'financing_images'];
+        cacheKeys.forEach(key => {
+            const raw = localStorage.getItem('fb_cache_' + key);
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            if (key === 'services') applyContentData(null, data, null);
+            else if (key === 'content') applyContentData(data, null, null);
+            else if (key === 'testimonios') applyContentData(null, null, data);
+            else if (key === 'verdun_images') applyImagesData(data);
+            else if (key === 'financing_images') applyFinancingData(data);
         });
-    }
+    } catch {}
+}
 
+function applyImagesData(images) {
+    if (!images || Object.keys(images).length === 0) return;
+    Object.keys(images).forEach((key) => {
+        const img = images[key];
+        if (!img) return;
+        const src = img.url || img.data;
+        if (!src) return;
+        const selector = PAGE_IMAGE_SELECTORS[key];
+        if (selector) {
+            document.querySelectorAll(selector).forEach((el) => { el.src = src; });
+        }
+    });
+}
+
+function applyFinancingData(financing) {
+    if (!financing || Object.keys(financing).length === 0) return;
+    Object.entries(financing).forEach(([type, data]) => {
+        const img = document.querySelector(`img[data-image-type="${type}"]`);
+        if (!img) return;
+        if (data.url) img.src = data.url;
+        else if (data.fallback_base64) img.src = data.fallback_base64;
+        const card = img.closest('.financing-card');
+        if (!card) return;
+        const titleEl = card.querySelector('.financing-card-title');
+        const descEl = card.querySelector('.financing-card-description');
+        const featuresEl = card.querySelector('.financing-card-features');
+        if (titleEl && data.title) titleEl.textContent = data.title;
+        if (descEl && data.description) descEl.textContent = data.description;
+        if (featuresEl && data.features && Array.isArray(data.features)) {
+            featuresEl.innerHTML = data.features.map(f => `<li>✓ ${f}</li>`).join('');
+        }
+    });
+}
+
+function applyContentData(content, services, testimonios) {
     if (content && Object.keys(content).length > 0) {
         const heroTitle = document.querySelector('.hero-title');
         const heroSubtitle = document.querySelector('.hero-subtitle');
@@ -544,9 +565,7 @@ async function loadAdminContent() {
         if (heroTitle) {
             heroTitle.innerHTML = `${content.heroTitle}<br><span class="highlight">${content.heroHighlight}</span>`;
         }
-        if (heroSubtitle) {
-            heroSubtitle.textContent = content.heroSubtitle;
-        }
+        if (heroSubtitle) heroSubtitle.textContent = content.heroSubtitle;
         if (statNumbers[0]) statNumbers[0].textContent = content.statYears;
         if (statNumbers[1]) statNumbers[1].textContent = content.statVehicles;
     }
@@ -582,6 +601,12 @@ async function loadAdminContent() {
             if (roleEl) roleEl.textContent = t.role;
         });
     }
+}
+
+function applyFreshData(images, financing, content, services, testimonios) {
+    applyImagesData(images);
+    applyFinancingData(financing);
+    applyContentData(content, services, testimonios);
 }
 
 if (document.readyState === 'loading') {

@@ -131,6 +131,39 @@ function handleLogout() {
     }
 }
 
+function resizeImage(file, maxW, maxH, quality = 0.8) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            let { width: w, height: h } = img;
+            if (w > maxW) { h = h * maxW / w; w = maxW; }
+            if (h > maxH) { w = w * maxH / h; h = maxH; }
+            const c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            c.getContext('2d').drawImage(img, 0, 0, w, h);
+            c.toBlob((blob) => {
+                resolve({ blob, width: w, height: h, originalName: file.name });
+            }, 'image/webp', quality);
+        };
+        img.src = URL.createObjectURL(file);
+    });
+}
+
+function blobToBase64(blob) {
+    return new Promise((resolve) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.readAsDataURL(blob);
+    });
+}
+
+function validateImageFile(file, maxMB = 5) {
+    if (!file) return 'No se seleccionó archivo';
+    if (!file.type.startsWith('image/')) return 'Solo se permiten imágenes';
+    if (file.size > maxMB * 1024 * 1024) return `Archivo muy grande (máx ${maxMB}MB)`;
+    return null;
+}
+
 function showLoginScreen() {
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('adminPanel').style.display = 'none';
@@ -264,30 +297,28 @@ async function handleFinancingImageUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
     const type = event.target.dataset.financingType;
-    if (file.type !== 'image/png') { alert('❌ Solo PNG'); return; }
-    if (file.size > 500 * 1024) { alert('❌ Máx 500KB'); return; }
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        const base64 = e.target.result;
-        const financing = await loadStoredData('financing_images', {});
-        if (!financing[type]) financing[type] = {};
-        financing[type].fallback_base64 = base64;
-        financing[type].name = file.name;
-        financing[type].size = (file.size / 1024).toFixed(1) + 'KB';
-        financing[type].uploadedAt = new Date().toISOString();
-        await saveStoredData('financing_images', financing);
-        const previewImg = document.getElementById(`preview-${type}`);
-        if (previewImg) { previewImg.src = base64; previewImg.style.display = 'block'; }
-        const ph = document.getElementById(`ph-${type}`);
-        if (ph) ph.style.display = 'none';
-        // Upload to Storage in background
-        FB.uploadFile(`financing/${type}`, file).then(url => {
-            financing[type].url = url;
-            saveStoredData('financing_images', financing);
-        }).catch(() => {});
-        alert('✓ Imagen cargada');
-    };
-    reader.readAsDataURL(file);
+    const err = validateImageFile(file, 2);
+    if (err) { alert('❌ ' + err); event.target.value = ''; return; }
+
+    const { blob } = await resizeImage(file, 1200, 900, 0.85);
+    const base64 = await blobToBase64(blob);
+    const financing = await loadStoredData('financing_images', {});
+    if (!financing[type]) financing[type] = {};
+    financing[type].fallback_base64 = base64;
+    financing[type].name = file.name;
+    financing[type].uploadedAt = new Date().toISOString();
+    await saveStoredData('financing_images', financing);
+    const previewImg = document.getElementById(`preview-${type}`);
+    if (previewImg) { previewImg.src = base64; previewImg.style.display = 'block'; }
+    const ph = document.getElementById(`ph-${type}`);
+    if (ph) ph.style.display = 'none';
+    FB.uploadFile(`financing/${type}`, blob).then(url => {
+        financing[type].url = url;
+        delete financing[type].fallback_base64;
+        saveStoredData('financing_images', financing);
+    }).catch(() => {});
+    alert('✓ Imagen cargada y optimizada');
+    event.target.value = '';
 }
 
 async function loadContent() {
@@ -513,22 +544,6 @@ async function setVehicleOverrides(data) {
     await saveStoredData(VEHICLES_STORAGE_KEY, data);
 }
 
-function readImageAsBase64(file, onSuccess, onError) {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-        onError('Solo se permiten imágenes');
-        return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-        onError('Archivo muy grande (máx 5MB)');
-        return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => onSuccess(e.target.result, file);
-    reader.onerror = () => onError('Error al leer el archivo');
-    reader.readAsDataURL(file);
-}
-
 function initImagesSection() {
     if (imagesUiInitialized) return;
 
@@ -542,20 +557,18 @@ function initImagesSection() {
 
     if (logoUploadBtn && logoInput) {
         logoUploadBtn.addEventListener('click', () => logoInput.click());
-        logoInput.addEventListener('change', (e) => {
+        logoInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            readImageAsBase64(
-                file,
-                async (base64) => {
-                    pendingLogoData = base64;
-                    pendingLogoUrl = null;
-                    updateLogoPreview(base64);
-                    FB.uploadFile('site/logo', file).then(url => {
-                        pendingLogoUrl = url;
-                    }).catch(() => {});
-                },
-                (msg) => alert(msg)
-            );
+            const err = validateImageFile(file, 2);
+            if (err) { alert('❌ ' + err); e.target.value = ''; return; }
+            const { blob } = await resizeImage(file, 400, 200, 0.85);
+            const base64 = await blobToBase64(blob);
+            pendingLogoData = base64;
+            pendingLogoUrl = null;
+            updateLogoPreview(base64);
+            FB.uploadFile('site/logo', blob).then(url => {
+                pendingLogoUrl = url;
+            }).catch(() => {});
             e.target.value = '';
         });
     }
@@ -586,23 +599,20 @@ function initImagesSection() {
             if (!e.target.classList.contains('site-image-input')) return;
             const key = e.target.dataset.key;
             const file = e.target.files[0];
-            readImageAsBase64(
-                file,
-                async (base64) => {
-                    const images = await getSiteImages();
-                    images[key] = { data: base64, timestamp: new Date().toLocaleString('es-AR') };
-                    await setSiteImages(images);
-                    renderSiteImagesGrid();
-                    FB.uploadFile(`site/${key}`, file).then(url => {
-                        images[key] = { url, timestamp: new Date().toLocaleString('es-AR') };
-                        setSiteImages(images);
-                        renderSiteImagesGrid();
-                    }).catch(() => {});
-                    await addChange(`Imagen de sitio "${key}" actualizada`);
-                    alert('✓ Imagen guardada');
-                },
-                (msg) => alert(msg)
-            );
+            const err = validateImageFile(file, 5);
+            if (err) { alert('❌ ' + err); e.target.value = ''; return; }
+            const { blob } = await resizeImage(file, 1920, 1080, 0.85);
+            const base64 = await blobToBase64(blob);
+            const images = await getSiteImages();
+            images[key] = { data: base64, timestamp: new Date().toLocaleString('es-AR') };
+            await setSiteImages(images);
+            renderSiteImagesGrid();
+            FB.uploadFile(`site/${key}`, blob).then(url => {
+                images[key] = { url, timestamp: new Date().toLocaleString('es-AR') };
+                setSiteImages(images);
+                renderSiteImagesGrid();
+            }).catch(() => {});
+            await addChange(`Imagen de sitio "${key}" actualizada`);
             e.target.value = '';
         });
     }
@@ -629,40 +639,38 @@ function initImagesSection() {
             if (!e.target.classList.contains('vehicle-image-input')) return;
             const id = parseInt(e.target.dataset.id, 10);
             const file = e.target.files[0];
-            readImageAsBase64(
-                file,
-                async (base64) => {
-                    const customVehicles = await loadStoredData(CUSTOM_VEHICLES_KEY, []);
-                    const isCustom = customVehicles.some(v => v.id === id);
-                    if (isCustom) {
-                        const updated = customVehicles.map(v => {
-                            if (v.id !== id) return v;
-                            return { ...v, image: base64 };
-                        });
-                        await saveStoredData(CUSTOM_VEHICLES_KEY, updated);
+            const err = validateImageFile(file, 5);
+            if (err) { alert('❌ ' + err); e.target.value = ''; return; }
+            const { blob } = await resizeImage(file, 800, 600, 0.8);
+            const base64 = await blobToBase64(blob);
+            const customVehicles = await loadStoredData(CUSTOM_VEHICLES_KEY, []);
+            const isCustom = customVehicles.some(v => v.id === id);
+            if (isCustom) {
+                const updated = customVehicles.map(v => {
+                    if (v.id !== id) return v;
+                    return { ...v, image: base64 };
+                });
+                await saveStoredData(CUSTOM_VEHICLES_KEY, updated);
+            } else {
+                const overrides = await getVehicleOverrides();
+                if (!overrides[id]) overrides[id] = {};
+                overrides[id].image = base64;
+                await setVehicleOverrides(overrides);
+            }
+            renderVehiclesEditor();
+            FB.uploadFile(`vehicles/${id}`, blob).then(url => {
+                loadStoredData(CUSTOM_VEHICLES_KEY, []).then(cv => {
+                    if (cv.some(v => v.id === id)) {
+                        saveStoredData(CUSTOM_VEHICLES_KEY, cv.map(v => v.id === id ? { ...v, image: url } : v));
                     } else {
-                        const overrides = await getVehicleOverrides();
-                        if (!overrides[id]) overrides[id] = {};
-                        overrides[id].image = base64;
-                        await setVehicleOverrides(overrides);
+                        getVehicleOverrides().then(ov => {
+                            if (ov[id]) { ov[id].image = url; setVehicleOverrides(ov); }
+                        });
                     }
                     renderVehiclesEditor();
-                    FB.uploadFile(`vehicles/${id}`, file).then(url => {
-                        loadStoredData(CUSTOM_VEHICLES_KEY, []).then(cv => {
-                            if (cv.some(v => v.id === id)) {
-                                saveStoredData(CUSTOM_VEHICLES_KEY, cv.map(v => v.id === id ? { ...v, image: url } : v));
-                            } else {
-                                getVehicleOverrides().then(ov => {
-                                    if (ov[id]) { ov[id].image = url; setVehicleOverrides(ov); }
-                                });
-                            }
-                            renderVehiclesEditor();
-                        });
-                    }).catch(() => {});
-                    await addChange(`Foto del vehículo #${id} actualizada`);
-                },
-                (msg) => alert(msg)
-            );
+                });
+            }).catch(() => {});
+            await addChange(`Foto del vehículo #${id} actualizada`);
             e.target.value = '';
         });
     }
