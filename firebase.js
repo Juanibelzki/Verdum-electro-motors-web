@@ -56,7 +56,7 @@ window.FB = {
 
     async uploadFile(storagePath, file) {
         const ref = FB_STORAGE.ref(storagePath);
-        const snapshot = await ref.put(file);
+        const snapshot = await ref.put(file, { cacheControl: 'public, max-age=31536000' });
         return await snapshot.ref.getDownloadURL();
     },
 
@@ -64,7 +64,7 @@ window.FB = {
         const ref = FB_STORAGE.ref(storagePath);
         const res = await fetch(base64Data);
         const blob = await res.blob();
-        const snapshot = await ref.put(blob);
+        const snapshot = await ref.put(blob, { cacheControl: 'public, max-age=31536000' });
         return await snapshot.ref.getDownloadURL();
     }
 };

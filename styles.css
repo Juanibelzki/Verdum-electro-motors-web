@@ -295,6 +295,8 @@ h1, h2, h3, h4, h5, h6 {
     object-fit: contain;
     filter: brightness(1.2) contrast(1.1);
     transition: var(--transition);
+    background: var(--bg-secondary);
+    border-radius: 4px;
 }
 
 .navbar-logo:hover .logo-image {
@@ -494,6 +496,7 @@ h1, h2, h3, h4, h5, h6 {
     object-fit: contain;
     animation: float 6s ease-in-out infinite;
     filter: drop-shadow(0 0 50px rgba(74,127,167,0.3));
+    background: var(--bg-tertiary);
 }
 
 /* ============================================
@@ -620,6 +623,7 @@ h1, h2, h3, h4, h5, h6 {
     height: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
+    background: var(--bg-tertiary);
 }
 
 .service-card-flip:hover .service-image {
@@ -2194,6 +2198,7 @@ h1, h2, h3, h4, h5, h6 {
     object-fit: cover;
     filter: grayscale(100%) brightness(0.95);
     transition: filter 0.5s ease, transform 0.5s ease;
+    background: var(--bg-tertiary);
 }
 
 .financing-card:hover .financing-card-image {
