@@ -3,15 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verdun Automotores - Vehículos 0KM, Usados y Eléctricos en Corrientes</title>
-    <meta name="description" content="Verdun Automotores - 30 años de excelencia en Corrientes. Autos 0KM, usados garantizados, motos eléctricas y financiación propia sin banco. Av. Chacabuco 1725.">
-    <meta name="keywords" content="autos 0km corrientes, autos usados corrientes, concesionaria corrientes, verdun automotores, financiación autos, motos eléctricas, permuta">
-    <meta name="author" content="Verdun Automotores">
-    <meta property="og:title" content="Verdun Automotores - Vehículos Premium en Corrientes">
-    <meta property="og:description" content="Autos 0KM, Usados y Eléctricos. 30 años brindando la mejor experiencia en movilidad.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://verdunautomotores.com">
-    <meta property="og:locale" content="es_AR">
+    <title>Verdun Automotores - Vehículos 0KM, Usados y Eléctricos</title>
     
     <link rel="icon" type="image/png" href="images/favicon.png?v=1">
     <link rel="apple-touch-icon" href="images/favicon.png?v=1">
@@ -20,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- ============================================
@@ -34,7 +26,7 @@
     <nav class="navbar">
         <div class="navbar-container">
             <div class="navbar-logo">
-                <img src="images/logo.jpg" alt="Verdun Logo" class="logo-image" width="40" height="40">
+                <img src="images/logo.jpg" alt="Verdun Logo" class="logo-image">
                 <div class="logo-text-container">
                     <span class="logo-text">VERDUN</span>
                     <span class="logo-subtitle">Automotores</span>
@@ -74,7 +66,7 @@
                     <button class="btn-primary btn-lg" onclick="document.getElementById('servicios').scrollIntoView({ behavior: 'smooth' })">
                         Ver Nuestros Servicios
                     </button>
-                    <button class="btn-secondary btn-lg" onclick="document.getElementById('creditos').scrollIntoView({ behavior: 'smooth' })">
+                    <button class="btn-secondary btn-lg">
                         Ver Financiación
                     </button>
                 </div>
@@ -95,7 +87,7 @@
             </div>
             
             <div class="hero-visual fade-in">
-                <img src="images/hero_visual.png" alt="Vehículo Premium" class="hero-image" width="600" height="400">
+                <img src="images/hero_visual.jpg.webp" alt="Vehículo Premium" class="hero-image" width="600" height="400">
             </div>
         </div>
     </section>
@@ -135,7 +127,7 @@
                 <div class="service-card-flip fade-in" onclick="openStockModal('autos-0km')" style="cursor: pointer;">
                     <div class="service-card-inner">
                         <div class="service-card-front">
-                            <img src="images/service_1.jpg" alt="Autos 0KM" class="service-image" width="400" height="300" loading="lazy">
+                            <img src="images/service_1.png" alt="Autos 0KM" class="service-image">
                             <div class="service-overlay">
                                 <h3 class="service-title-front">Autos 0KM</h3>
                             </div>
@@ -156,7 +148,7 @@
                 <div class="service-card-flip fade-in" onclick="openStockModal('autos-usados')" style="cursor: pointer;">
                     <div class="service-card-inner">
                         <div class="service-card-front">
-                            <img src="images/service_2.jpg" alt="Autos Usados" class="service-image" width="400" height="300" loading="lazy">
+                            <img src="images/service_2.png" alt="Autos Usados" class="service-image">
                             <div class="service-overlay">
                                 <h3 class="service-title-front">Autos Usados</h3>
                             </div>
@@ -177,7 +169,7 @@
                 <div class="service-card-flip fade-in" onclick="openStockModal('motos-electricas')" style="cursor: pointer;">
                     <div class="service-card-inner">
                         <div class="service-card-front">
-                            <img src="images/service_3.jpg" alt="Motos Eléctricas" class="service-image" width="400" height="300" loading="lazy">
+                            <img src="images/service_3.png" alt="Motos Eléctricas" class="service-image">
                             <div class="service-overlay">
                                 <h3 class="service-title-front">Motos Eléctricas</h3>
                             </div>
@@ -198,7 +190,7 @@
                 <div class="service-card-flip fade-in" onclick="openStockModal('patinetas-electricas')" style="cursor: pointer;">
                     <div class="service-card-inner">
                         <div class="service-card-front">
-                            <img src="images/service_4.jpg" alt="Patinetas Eléctricas" class="service-image" width="400" height="300" loading="lazy">
+                            <img src="images/service_4.png" alt="Patacletas Eléctricas" class="service-image">
                             <div class="service-overlay">
                                 <h3 class="service-title-front">Patacletas</h3>
                             </div>
@@ -215,22 +207,43 @@
                     </div>
                 </div>
 
-                <!-- Service 5: Vehículos Especiales -->
-                <div class="service-card-flip fade-in" onclick="openStockModal('vehiculos-especiales')" style="cursor: pointer;">
+                <!-- Service 5: Financiación -->
+                <div class="service-card-flip fade-in">
                     <div class="service-card-inner">
                         <div class="service-card-front">
-                            <img src="images/service_5.jpg" alt="Vehículos Especiales" class="service-image" width="400" height="300" loading="lazy">
+                            <img src="images/service_5.png" alt="Financiación" class="service-image">
                             <div class="service-overlay">
-                                <h3 class="service-title-front">Vehículos Especiales</h3>
+                                <h3 class="service-title-front">Financiación</h3>
                             </div>
                         </div>
                         <div class="service-card-back glass-card">
-                            <h3>Vehículos Especiales</h3>
-                            <p>Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.</p>
+                            <h3>Financiación Propia</h3>
+                            <p>Sin banco. Aprobación en el día con cuotas fijas en pesos.</p>
                             <div class="service-features">
-                                <span class="feature-tag">4x4</span>
-                                <span class="feature-tag">Comerciales</span>
-                                <span class="feature-tag">A medida</span>
+                                <span class="feature-tag">Sin banco</span>
+                                <span class="feature-tag">Rápido</span>
+                                <span class="feature-tag">Flexible</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service 6: Trámites -->
+                <div class="service-card-flip fade-in">
+                    <div class="service-card-inner">
+                        <div class="service-card-front">
+                            <img src="images/service_6.png" alt="Trámites Incluidos" class="service-image">
+                            <div class="service-overlay">
+                                <h3 class="service-title-front">Trámites</h3>
+                            </div>
+                        </div>
+                        <div class="service-card-back glass-card">
+                            <h3>Trámites Incluidos</h3>
+                            <p>Transferencia y documentación completa. Nos ocupamos de todo.</p>
+                            <div class="service-features">
+                                <span class="feature-tag">Transferencia</span>
+                                <span class="feature-tag">Legal</span>
+                                <span class="feature-tag">Completo</span>
                             </div>
                         </div>
                     </div>
@@ -247,9 +260,6 @@
             <button class="modal-close" onclick="closeStockModal()">&times;</button>
             <h2 class="modal-title" id="stockModalTitle">Stock Disponible</h2>
             
-            <div class="stock-filter">
-                <input type="text" id="stockFilter" placeholder="Buscar por marca, modelo..." oninput="filterStock()">
-            </div>
             <div class="stock-vehicles-container" id="stockVehiclesContainer">
                 <!-- Se llenará dinámicamente con JavaScript -->
             </div>
@@ -296,94 +306,58 @@
     <!-- ============================================
          OPCIONES DE CRÉDITO
     ============================================ -->
-    <section id="creditos" class="creditos">
+    <section class="creditos">
         <div class="creditos-container">
             <h2 class="section-title fade-in">Opciones de Financiación</h2>
-            <p class="section-subtitle fade-in">Descubrí todo lo que podemos hacer por vos</p>
+            <p class="section-subtitle fade-in">Elige la que mejor se adapte a ti</p>
             
             <div class="creditos-grid">
                 <!-- Opción 1: Financiación Propia -->
-                <div class="financing-card" data-financing-type="financing_own">
-                    <div class="financing-card-image-wrapper">
-                        <img
-                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'/%3E"
-                            alt="Financiación Propia"
-                            class="financing-card-image"
-                            data-image-type="financing_own"
-                            width="1200" height="900"
-                            loading="lazy"
-                        />
-                        <div class="financing-card-overlay"></div>
-                    </div>
-                    <div class="financing-card-content">
-                        <h3 class="financing-card-title">Financiación Propia</h3>
-                        <p class="financing-card-description">
-                            Sin banco. Aprobación en el día con cuotas fijas en pesos.
-                        </p>
-                        <ul class="financing-card-features">
-                            <li>✓ Aprobación inmediata</li>
-                            <li>✓ Cuotas fijas</li>
-                            <li>✓ Sin comisiones ocultas</li>
-                            <li>✓ Hasta 84 meses</li>
-                        </ul>
-                        <button class="financing-card-btn" onclick="enviarWhatsApp('Hola! Quiero solicitar información sobre Financiación Propia. ¿Podrían contactarme?')">Solicitar</button>
-                    </div>
+                <div class="credito-card glass-card fade-in">
+                    <div class="credito-icon">💰</div>
+                    <h3>Financiación Propia</h3>
+                    <p class="credito-description">
+                        Sin banco. Aprobación en el día con cuotas fijas en pesos.
+                    </p>
+                    <ul class="credito-features">
+                        <li>✓ Aprobación inmediata</li>
+                        <li>✓ Cuotas fijas</li>
+                        <li>✓ Sin comisiones ocultas</li>
+                        <li>✓ Hasta 84 meses</li>
+                    </ul>
+                    <button class="btn-primary btn-small">Solicitar</button>
                 </div>
 
                 <!-- Opción 2: Crédito Bancario -->
-                <div class="financing-card" data-financing-type="financing_bank">
-                    <div class="financing-card-image-wrapper">
-                        <img
-                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'/%3E"
-                            alt="Crédito Bancario"
-                            class="financing-card-image"
-                            data-image-type="financing_bank"
-                            width="1200" height="900"
-                            loading="lazy"
-                        />
-                        <div class="financing-card-overlay"></div>
-                    </div>
-                    <div class="financing-card-content">
-                        <h3 class="financing-card-title">Crédito Bancario</h3>
-                        <p class="financing-card-description">
-                            Mejores tasas del mercado con nuestros bancos aliados.
-                        </p>
-                        <ul class="financing-card-features">
-                            <li>✓ Tasas competitivas</li>
-                            <li>✓ Múltiples opciones</li>
-                            <li>✓ Tramitación rápida</li>
-                            <li>✓ Asesoramiento gratuito</li>
-                        </ul>
-                        <button class="financing-card-btn" onclick="enviarWhatsApp('Hola! Quiero consultar sobre Crédito Bancario. ¿Podrían darme información?')">Consultar</button>
-                    </div>
+                <div class="credito-card glass-card fade-in">
+                    <div class="credito-icon">🏦</div>
+                    <h3>Crédito Bancario</h3>
+                    <p class="credito-description">
+                        Mejores tasas del mercado con nuestros bancos aliados.
+                    </p>
+                    <ul class="credito-features">
+                        <li>✓ Tasas competitivas</li>
+                        <li>✓ Múltiples opciones</li>
+                        <li>✓ Tramitación rápida</li>
+                        <li>✓ Asesoramiento gratuito</li>
+                    </ul>
+                    <button class="btn-primary btn-small">Consultar</button>
                 </div>
 
                 <!-- Opción 3: Permuta -->
-                <div class="financing-card" data-financing-type="financing_permuta">
-                    <div class="financing-card-image-wrapper">
-                        <img
-                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'/%3E"
-                            alt="Permuta"
-                            class="financing-card-image"
-                            data-image-type="financing_permuta"
-                            width="1200" height="900"
-                            loading="lazy"
-                        />
-                        <div class="financing-card-overlay"></div>
-                    </div>
-                    <div class="financing-card-content">
-                        <h3 class="financing-card-title">Permuta</h3>
-                        <p class="financing-card-description">
-                            Tu usado como parte de pago. Tasación justa y transparente.
-                        </p>
-                        <ul class="financing-card-features">
-                            <li>✓ Tasación real</li>
-                            <li>✓ Proceso transparente</li>
-                            <li>✓ Compra de tu usado</li>
-                            <li>✓ Trámites incluidos</li>
-                        </ul>
-                        <button class="financing-card-btn" onclick="enviarWhatsApp('Hola! Quiero tasar mi vehículo para permuta. ¿Podrían contactarme?')">Tasar Vehículo</button>
-                    </div>
+                <div class="credito-card glass-card fade-in">
+                    <div class="credito-icon">🔄</div>
+                    <h3>Permuta</h3>
+                    <p class="credito-description">
+                        Tu usado como parte de pago. Tasación justa y transparente.
+                    </p>
+                    <ul class="credito-features">
+                        <li>✓ Tasación real</li>
+                        <li>✓ Proceso transparente</li>
+                        <li>✓ Compra de tu usado</li>
+                        <li>✓ Trámites incluidos</li>
+                    </ul>
+                    <button class="btn-primary btn-small">Tasar Vehículo</button>
                 </div>
             </div>
         </div>
@@ -488,20 +462,6 @@
                 <a href="https://api.whatsapp.com/send?phone=543795300020" class="contact-link" target="_blank">💬 WhatsApp</a>
                 <a href="https://www.instagram.com/verdun_automotores" class="contact-link" target="_blank">📱 @verdun_automotores</a>
             </div>
-
-            <div class="cta-map fade-in">
-                <iframe 
-                    src="https://www.google.com/maps?q=Av.+Chacabuco+1725+Corrientes+Argentina&output=embed"
-                    width="100%" 
-                    height="300" 
-                    style="border:0; border-radius: 16px;" 
-                    allowfullscreen="" 
-                    loading="lazy" 
-                    referrerpolicy="no-referrer-when-downgrade"
-                    title="Ubicación Verdun Automotores">
-                </iframe>
-                <p class="map-address">Av. Chacabuco 1725, Corrientes</p>
-            </div>
         </div>
     </section>
 
@@ -521,7 +481,7 @@
                 <ul>
                     <li><a href="#inicio">Inicio</a></li>
                     <li><a href="#servicios">Servicios</a></li>
-                    <li><a href="#servicios">Stock</a></li>
+                    <li><a href="#stock">Stock</a></li>
                     <li><a href="#nosotros">Nosotros</a></li>
                 </ul>
             </div>
@@ -529,10 +489,10 @@
             <div class="footer-column">
                 <h4>SERVICIOS</h4>
                 <ul>
-                    <li><a href="javascript:void(0)" onclick="openStockModal('autos-0km')">Autos 0KM</a></li>
-                    <li><a href="javascript:void(0)" onclick="openStockModal('autos-usados')">Autos Usados</a></li>
-                    <li><a href="#creditos">Financiación</a></li>
-                    <li><a href="#contacto">Trámites</a></li>
+                    <li><a href="#">Autos 0KM</a></li>
+                    <li><a href="#">Autos Usados</a></li>
+                    <li><a href="#">Financiación</a></li>
+                    <li><a href="#">Trámites</a></li>
                 </ul>
             </div>
             
@@ -553,7 +513,147 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="script.js?v=9"></script>
+    <!-- ============================================
+         MODAL DE LOGIN
+    ============================================ -->
+    <div id="loginModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+            <h2 class="modal-title">Acceso Editor</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)" class="login-form">
+                <div class="form-group">
+                    <label for="adminPassword">Contraseña:</label>
+                    <input 
+                        type="password" 
+                        id="adminPassword" 
+                        placeholder="Ingresa la contraseña" 
+                        required
+                    >
+                </div>
+                <button type="submit" class="btn-primary btn-sm">Ingresar</button>
+            </form>
+            <p class="modal-hint">Contraseña: <strong>admin123</strong></p>
+        </div>
+    </div>
+
+    <!-- ============================================
+         PANEL DE ADMINISTRACIÓN
+    ============================================ -->
+    <div id="adminPanel" class="admin-panel" style="display: none;">
+        <div class="admin-header">
+            <h2>📸 Editor de Imágenes - Verdun Automotores</h2>
+            <button class="btn-close" onclick="closeAdminPanel()">✕ Cerrar</button>
+        </div>
+        
+        <div class="admin-content">
+            <div class="upload-section">
+                <h3>Cargar Imágenes</h3>
+                <p class="upload-hint">Selecciona archivos PNG para actualizar la galería</p>
+                
+                <div class="upload-grid">
+                    <div class="upload-item">
+                        <label>Logo</label>
+                        <div class="upload-zone" onclick="document.getElementById('uploadLogo').click()">
+                            <span class="upload-icon">🏢</span>
+                            <span>logo.png</span>
+                            <span class="file-size" id="logoSize"></span>
+                        </div>
+                        <input type="file" id="uploadLogo" accept="image/png" style="display: none;" onchange="handleImageUpload(event, 'logo')">
+                        <div class="preview-mini" id="previewLogo"></div>
+                    </div>
+                    
+                    <div class="upload-item">
+                        <label>Hero Visual</label>
+                        <div class="upload-zone" onclick="document.getElementById('uploadHero').click()">
+                            <span class="upload-icon">🚗</span>
+                            <span>hero_visual.png</span>
+                            <span class="file-size" id="heroSize"></span>
+                        </div>
+                        <input type="file" id="uploadHero" accept="image/png" style="display: none;" onchange="handleImageUpload(event, 'hero_visual')">
+                        <div class="preview-mini" id="previewHero"></div>
+                    </div>
+                </div>
+                
+                <h4 style="margin-top: 30px;">Servicios</h4>
+                <div class="upload-grid">
+                    <div class="upload-item">
+                        <label>Servicio 1: Autos 0KM</label>
+                        <div class="upload-zone" onclick="document.getElementById('uploadService1').click()">
+                            <span class="upload-icon">🆕</span>
+                            <span>service_1.png</span>
+                            <span class="file-size" id="service1Size"></span>
+                        </div>
+                        <input type="file" id="uploadService1" accept="image/png" style="display: none;" onchange="handleImageUpload(event, 'service_1')">
+                        <div class="preview-mini" id="previewService1"></div>
+                    </div>
+                    
+                    <div class="upload-item">
+                        <label>Servicio 2: Autos Usados</label>
+                        <div class="upload-zone" onclick="document.getElementById('uploadService2').click()">
+                            <span class="upload-icon">🚙</span>
+                            <span>service_2.png</span>
+                            <span class="file-size" id="service2Size"></span>
+                        </div>
+                        <input type="file" id="uploadService2" accept="image/png" style="display: none;" onchange="handleImageUpload(event, 'service_2')">
+                        <div class="preview-mini" id="previewService2"></div>
+                    </div>
+                    
+                    <div class="upload-item">
+                        <label>Servicio 3: Motos Eléctricas</label>
+                        <div class="upload-zone" onclick="document.getElementById('uploadService3').click()">
+                            <span class="upload-icon">⚡</span>
+                            <span>service_3.png</span>
+                            <span class="file-size" id="service3Size"></span>
+                        </div>
+                        <input type="file" id="uploadService3" accept="image/png" style="display: none;" onchange="handleImageUpload(event, 'service_3')">
+                        <div class="preview-mini" id="previewService3"></div>
+                    </div>
+                    
+                    <div class="upload-item">
+                        <label>Servicio 4: Patacletas Eléctricas</label>
+                        <div class="upload-zone" onclick="document.getElementById('uploadService4').click()">
+                            <span class="upload-icon">🚴</span>
+                            <span>service_4.png</span>
+                            <span class="file-size" id="service4Size"></span>
+                        </div>
+                        <input type="file" id="uploadService4" accept="image/png" style="display: none;" onchange="handleImageUpload(event, 'service_4')">
+                        <div class="preview-mini" id="previewService4"></div>
+                    </div>
+                    
+                    <div class="upload-item">
+                        <label>Servicio 5: Financiación</label>
+                        <div class="upload-zone" onclick="document.getElementById('uploadService5').click()">
+                            <span class="upload-icon">💳</span>
+                            <span>service_5.png</span>
+                            <span class="file-size" id="service5Size"></span>
+                        </div>
+                        <input type="file" id="uploadService5" accept="image/png" style="display: none;" onchange="handleImageUpload(event, 'service_5')">
+                        <div class="preview-mini" id="previewService5"></div>
+                    </div>
+                    
+                    <div class="upload-item">
+                        <label>Servicio 6: Trámites</label>
+                        <div class="upload-zone" onclick="document.getElementById('uploadService6').click()">
+                            <span class="upload-icon">📋</span>
+                            <span>service_6.png</span>
+                            <span class="file-size" id="service6Size"></span>
+                        </div>
+                        <input type="file" id="uploadService6" accept="image/png" style="display: none;" onchange="handleImageUpload(event, 'service_6')">
+                        <div class="preview-mini" id="previewService6"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-actions">
+                <button class="btn-primary" onclick="exportImages()">📥 Descargar JSON</button>
+                <button class="btn-secondary" onclick="clearAllImages()">🗑️ Borrar Todo</button>
+                <button class="btn-secondary" onclick="closeAdminPanel()">Cerrar Panel</button>
+            </div>
+            
+            <div class="admin-status" id="adminStatus"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

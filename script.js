@@ -3,294 +3,242 @@
    ============================================ */
 
 // ============================================
-// DATOS DE INVENTARIO DE VEHÍCULOS
+// GOOGLE SHEETS - INVENTARIO DE VEHÍCULOS
 // ============================================
-const STOCK_STORAGE_KEY = 'verdun_stock';
+const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/16WBDELGRENY08zZiJRnsWm6cP-lB55Q-kGmE0R_RWSk/gviz/tq?tqx=out:csv&gid=663097902';
+const PHOTOS_STORAGE_KEY = 'verdun_vehicle_photos';
 
-const DEFAULT_VEHICLE_INVENTORY = {
-    'autos-0km': {
-        title: 'Autos 0KM',
-        vehicles: [
-            {
-                id: 1,
-                marca: 'Volkswagen',
-                modelo: 'Virtus',
-                año: 2024,
-                precio: 2850000,
-                km: '0 KM',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 2,
-                marca: 'Nissan',
-                modelo: 'Versa',
-                año: 2024,
-                precio: 2450000,
-                km: '0 KM',
-                color: 'Plata',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 3,
-                marca: 'Chevrolet',
-                modelo: 'Onix',
-                año: 2024,
-                precio: 2100000,
-                km: '0 KM',
-                color: 'Negro',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 4,
-                marca: 'Toyota',
-                modelo: 'Corolla',
-                año: 2024,
-                precio: 3150000,
-                km: '0 KM',
-                color: 'Gris',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            }
-        ]
-    },
-    'autos-usados': {
-        title: 'Autos Usados',
-        vehicles: [
-            {
-                id: 5,
-                marca: 'Volkswagen',
-                modelo: 'Gol',
-                año: 2019,
-                precio: 1450000,
-                km: '85000',
-                color: 'Rojo',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 6,
-                marca: 'Ford',
-                modelo: 'EcoSport',
-                año: 2020,
-                precio: 1850000,
-                km: '72500',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 7,
-                marca: 'Peugeot',
-                modelo: '208',
-                año: 2018,
-                precio: 1250000,
-                km: '95000',
-                color: 'Azul',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 8,
-                marca: 'Honda',
-                modelo: 'Civic',
-                año: 2019,
-                precio: 1650000,
-                km: '68000',
-                color: 'Plateado',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 9,
-                marca: 'Renault',
-                modelo: 'Kwid',
-                año: 2020,
-                precio: 950000,
-                km: '45000',
-                color: 'Negro',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            }
-        ]
-    },
-    'motos-electricas': {
-        title: 'Motos Eléctricas',
-        vehicles: [
-            {
-                id: 10,
-                marca: 'Energica',
-                modelo: 'EVA',
-                año: 2024,
-                precio: 450000,
-                km: '0 KM',
-                color: 'Negro',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 11,
-                marca: 'Super Soco',
-                modelo: 'TC Max',
-                año: 2024,
-                precio: 280000,
-                km: '0 KM',
-                color: 'Rojo',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 12,
-                marca: 'Volta',
-                modelo: 'V1',
-                año: 2023,
-                precio: 350000,
-                km: '5000',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            }
-        ]
-    },
-    'patinetas-electricas': {
-        title: 'Patinetas Eléctricas',
-        vehicles: [
-            {
-                id: 13,
-                marca: 'Xiaomi',
-                modelo: 'Mi 3 Pro',
-                año: 2024,
-                precio: 95000,
-                km: '0 KM',
-                color: 'Negro',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 14,
-                marca: 'Ninebot',
-                modelo: 'Max G30',
-                año: 2024,
-                precio: 125000,
-                km: '0 KM',
-                color: 'Gris',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 15,
-                marca: 'Segway',
-                modelo: 'Ninebot Pro',
-                año: 2023,
-                precio: 140000,
-                km: '2000',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 16,
-                marca: 'Hiboy',
-                modelo: 'S2 Pro',
-                año: 2024,
-                precio: 110000,
-                km: '0 KM',
-                color: 'Negro',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            }
-        ]
-    },
-    'vehiculos-especiales': {
-        title: 'Vehículos Especiales',
-        vehicles: [
-            {
-                id: 17,
-                marca: 'Ford',
-                modelo: 'Ranger',
-                año: 2024,
-                precio: 4200000,
-                km: '0 KM',
-                color: 'Gris',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 18,
-                marca: 'Toyota',
-                modelo: 'Hilux',
-                año: 2024,
-                precio: 4800000,
-                km: '0 KM',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 19,
-                marca: 'Fiat',
-                modelo: 'Fiorino',
-                año: 2023,
-                precio: 1800000,
-                km: '15000',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            }
-        ]
+// Marca actual (se actualiza al parsear el CSV)
+let currentBrand = '';
+let vehicleIdCounter = 0;
+
+/**
+ * Parsea una línea CSV respetando comillas
+ */
+function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += char;
+        }
     }
-};
+    result.push(current.trim());
+    return result;
+}
 
-const VEHICLES_STORAGE_KEY = 'verdun_vehicles';
-const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
+/**
+ * Detecta si una fila es encabezado de marca (FORD, TOYOTA, etc.)
+ */
+function isBrandRow(columns) {
+    const brandNames = ['FORD', 'VOLKSWAGEN', 'TOYOTA', 'RENAULT', 'FIAT', 'CAMION', 'NISSAN', 'PEUGEOT', 'BMW', 'DODGE', 'MOTO', 'HONDA', 'CHEVROLET', 'CITROEN', 'SUZUKI', 'HYUNDAI', 'KIA', 'MERCEDES', 'AUDI', 'SUBARU', 'LEXUS', 'MAZDA', 'MITSUBISHI'];
+    const firstCol = columns[0]?.toUpperCase().trim();
+    
+    // Es marca si la primera columna es un nombre de marca conocido
+    // y las demás columnas están vacías o son fechas/notas
+    if (brandNames.includes(firstCol)) {
+        const emptyCols = columns.slice(1).filter(c => c === '' || c.match(/^\d{1,2}\/\d{1,2}/) || c.includes('renove') || c.includes('NP') || c.includes('falta')).length;
+        if (emptyCols >= columns.length - 2) {
+            return true;
+        }
+    }
+    return false;
+}
 
-async function getMergedVehicleInventory() {
-    const overrides = JSON.parse(localStorage.getItem(VEHICLES_STORAGE_KEY)) || {};
-    const inventory = JSON.parse(JSON.stringify(DEFAULT_VEHICLE_INVENTORY));
+/**
+ * Detecta si una fila es encabezado de columnas (MODELO, COLOR, etc.)
+ */
+function isHeaderRow(columns) {
+    return columns[0]?.toUpperCase().includes('MODELO') || columns[0]?.toUpperCase().includes('ACLARACION');
+}
 
-    Object.keys(inventory).forEach((category) => {
-        inventory[category].vehicles = inventory[category].vehicles.map((vehicle) => {
-            const o = overrides[vehicle.id];
-            if (!o) return vehicle;
-            return {
-                ...vehicle,
-                nombre: o.nombre,
-                descripcion: o.descripcion,
-                precio: o.precio !== undefined ? o.precio : vehicle.precio,
-                año: o.anio !== undefined ? o.anio : vehicle.año,
-                km: o.km !== undefined ? o.km : vehicle.km,
-                color: o.color !== undefined ? o.color : vehicle.color,
-                image: o.image || vehicle.image
+/**
+ * Parsea el CSV de Google Sheets y retorna array de vehículos
+ */
+function parseVehicleCSV(csvText) {
+    const lines = csvText.split('\n');
+    const vehicles = [];
+    currentBrand = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        const columns = parseCSVLine(line);
+        
+        // Saltar filas de encabezado y aclaraciones
+        if (isHeaderRow(columns)) continue;
+        if (columns[0]?.includes('ACLARACION')) continue;
+        if (columns[0]?.match(/^\d{2}\/\d{2}\/\d{4}$/)) continue; // Fecha
+        
+        // Detectar marca
+        if (isBrandRow(columns)) {
+            currentBrand = columns[0].trim();
+            continue;
+        }
+        
+        // Filas vacías o con pocos datos
+        if (columns.length < 4) continue;
+        
+        const modelo = columns[0]?.trim();
+        const color = columns[1]?.trim() || '';
+        const yearStr = columns[2]?.trim() || '';
+        const kmStr = columns[3]?.trim() || '';
+        const precioStr = columns[4]?.trim() || '';
+        
+        // Saltar si no hay modelo
+        if (!modelo || modelo === '' || modelo.includes('MODELO')) continue;
+        
+        // Parsear año
+        const year = parseInt(yearStr) || 2024;
+        
+        // Parsear kilómetros
+        let km = kmStr;
+        if (kmStr.includes('0 KM') || kmStr === '0' || kmStr === '') {
+            km = '0 KM';
+        } else {
+            km = kmStr.replace(/\./g, '').replace(/,/g, '') + ' km';
+        }
+        
+        // Parsear precio
+        let precio = 0;
+        let precioStr2 = '';
+        if (precioStr) {
+            if (precioStr.includes('USD')) {
+                // Precio en dólares - lo mostramos pero no convertimos
+                precioStr2 = precioStr;
+                precio = 0;
+            } else {
+                const cleanPrice = precioStr.replace(/[$ ]/g, '').replace(/\./g, '').replace(/,/g, '');
+                precio = parseInt(cleanPrice) || 0;
+            }
+        }
+        
+        vehicleIdCounter++;
+        
+        vehicles.push({
+            id: vehicleIdCounter,
+            marca: currentBrand,
+            modelo: modelo,
+            año: year,
+            precio: precio,
+            precioDisplay: precioStr || precioStr2 || 'Consultar',
+            km: km,
+            color: color,
+            image: `images/${getModelSlug(currentBrand, modelo)}.jpg`
+        });
+    }
+    
+    return vehicles;
+}
+
+/**
+ * Genera un slug para el nombre del archivo de imagen
+ */
+function getModelSlug(marca, modelo) {
+    return `${marca.toLowerCase()}-${modelo.toLowerCase()}`
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
+/**
+ * Carga fotos del admin (localStorage)
+ */
+function loadVehiclePhotos() {
+    try {
+        return JSON.parse(localStorage.getItem(PHOTOS_STORAGE_KEY) || '{}');
+    } catch {
+        return {};
+    }
+}
+
+/**
+ * Guarda foto del admin (localStorage)
+ */
+function saveVehiclePhoto(vehicleId, base64Data) {
+    const photos = loadVehiclePhotos();
+    photos[vehicleId] = base64Data;
+    localStorage.setItem(PHOTOS_STORAGE_KEY, JSON.stringify(photos));
+}
+
+/**
+ * Obtiene la imagen del vehículo (admin photo o placeholder)
+ */
+function getVehicleImage(vehicle, photos) {
+    // Primero buscar foto del admin
+    if (photos[vehicle.id]) {
+        return photos[vehicle.id];
+    }
+    // Luego intentar imagen del repo
+    return vehicle.image;
+}
+
+// ============================================
+// DATOS DE INVENTARIO DE VEHÍCULOS (se cargan desde Google Sheets)
+// ============================================
+let vehicleInventory = {};
+
+/**
+ * Carga el inventario desde Google Sheets
+ */
+async function loadInventoryFromSheets() {
+    try {
+        const response = await fetch(GOOGLE_SHEETS_URL);
+        const csvText = await response.text();
+        const vehicles = parseVehicleCSV(csvText);
+        
+        // Agrupar por marca
+        const byBrand = {};
+        vehicles.forEach(v => {
+            if (!byBrand[v.marca]) {
+                byBrand[v.marca] = [];
+            }
+            byBrand[v.marca].push(v);
+        });
+        
+        // Crear estructura de inventory
+        vehicleInventory = {};
+        Object.keys(byBrand).forEach(brand => {
+            vehicleInventory[brand.toLowerCase()] = {
+                title: brand,
+                vehicles: byBrand[brand]
             };
         });
-    });
-
-    // Agregar vehículos personalizados del admin
-    const customVehicles = JSON.parse(localStorage.getItem(CUSTOM_VEHICLES_KEY)) || [];
-    customVehicles.forEach((cv) => {
-        if (inventory[cv.category]) {
-            inventory[cv.category].vehicles.push({
-                id: cv.id,
-                marca: cv.marca,
-                modelo: cv.modelo,
-                año: cv.anio,
-                precio: cv.precio,
-                km: cv.km,
-                color: cv.color,
-                descripcion: cv.descripcion || '',
-                image: cv.image || `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E`
-            });
-        }
-    });
-
-    return inventory;
+        
+        // Guardar en variable global para uso del admin
+        window._allVehicles = vehicles;
+        
+        console.log(`✅ Cargados ${vehicles.length} vehículos desde Google Sheets`);
+        return vehicles;
+    } catch (error) {
+        console.error('❌ Error cargando vehículos:', error);
+        return [];
+    }
 }
-
-function getVehicleDisplayName(vehicle) {
-    return vehicle.nombre || `${vehicle.marca} ${vehicle.modelo}`;
-}
-
 
 // Número de WhatsApp (reemplazar con número real)
-const WHATSAPP_NUMBER = '543795300020';
+const WHATSAPP_NUMBER = '543765345678'; // Formato: 54 (Argentina) + 9 (celular) + número
 
 // ============================================
 // FUNCIONES DE MODAL DE STOCK
 // ============================================
 
-let currentStockVehicles = [];
-
 /**
  * Abre el modal de stock para la categoría especificada
  */
-async function openStockModal(category) {
+function openStockModal(category) {
     const modal = document.getElementById('stockModal');
-    const merged = await getMergedVehicleInventory();
-    const inventory = merged[category];
+    const inventory = vehicleInventory[category];
     
     if (!inventory) {
         console.error(`Categoría ${category} no encontrada`);
@@ -299,33 +247,13 @@ async function openStockModal(category) {
     
     // Actualizar título
     document.getElementById('stockModalTitle').textContent = inventory.title;
-    currentStockVehicles = inventory.vehicles;
-    
-    // Limpiar filtro
-    const filterInput = document.getElementById('stockFilter');
-    if (filterInput) filterInput.value = '';
     
     // Renderizar vehículos
-    renderVehicles(currentStockVehicles, category);
+    renderVehicles(inventory.vehicles, category);
     
     // Mostrar modal con animación
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden'; // Prevenir scroll
-}
-
-function filterStock() {
-    const query = document.getElementById('stockFilter').value.toLowerCase().trim();
-    if (!query) {
-        renderVehicles(currentStockVehicles);
-        return;
-    }
-    const filtered = currentStockVehicles.filter(v => {
-        const name = getVehicleDisplayName(v).toLowerCase();
-        const marca = (v.marca || '').toLowerCase();
-        const modelo = (v.modelo || '').toLowerCase();
-        return name.includes(query) || marca.includes(query) || modelo.includes(query);
-    });
-    renderVehicles(filtered);
 }
 
 /**
@@ -344,29 +272,25 @@ function renderVehicles(vehicles, category) {
     const container = document.getElementById('stockVehiclesContainer');
     container.innerHTML = '';
     
+    const photos = loadVehiclePhotos();
+    
     vehicles.forEach(vehicle => {
         const vehicleCard = document.createElement('div');
         vehicleCard.className = 'vehicle-card';
-
-        const displayName = getVehicleDisplayName(vehicle);
-        const descripcionHtml = vehicle.descripcion
-            ? `<p class="vehicle-description">${vehicle.descripcion}</p>`
-            : '';
-        const safeName = String(displayName).replace(/'/g, "\\'");
-
+        
+        const imageSrc = getVehicleImage(vehicle, photos);
+        
         vehicleCard.innerHTML = `
             <div class="vehicle-image-wrapper">
                 <img 
-                    src="${vehicle.image}" 
-                    alt="${displayName}" 
+                    src="${imageSrc}" 
+                    alt="${vehicle.marca} ${vehicle.modelo}" 
                     class="vehicle-image"
-                    loading="lazy"
-                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"225\"/%3E'"
+                    onerror="this.src='https://via.placeholder.com/400x225?text=Sin+imagen'"
                 >
             </div>
             <div class="vehicle-info">
-                <h4 class="vehicle-title">${displayName}</h4>
-                ${descripcionHtml}
+                <h4 class="vehicle-title">${vehicle.marca} ${vehicle.modelo}</h4>
                 <div class="vehicle-details">
                     <span class="detail-item">
                         <strong>Año:</strong> ${vehicle.año}
@@ -380,30 +304,22 @@ function renderVehicles(vehicles, category) {
                 </div>
                 <button 
                     class="btn-consultar" 
-                    onclick="consultarWhatsApp('${safeName}', ${vehicle.año})"
+                    onclick="consultarWhatsApp('${vehicle.marca}', '${vehicle.modelo}', ${vehicle.año})"
                 >
                     Consultar por WhatsApp
                 </button>
             </div>
         `;
-
+        
         container.appendChild(vehicleCard);
     });
 }
 
 /**
- * Abre WhatsApp con mensaje predefinido para un vehículo
+ * Abre WhatsApp con mensaje predefinido
  */
-function consultarWhatsApp(vehicleName, año) {
-    const mensaje = `Hola! Me interesa el ${vehicleName} (${año}) que vi en su sitio web. ¿Podrían darme más información?`;
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-}
-
-/**
- * Abre WhatsApp con un mensaje personalizado
- */
-function enviarWhatsApp(mensaje) {
+function consultarWhatsApp(marca, modelo, año) {
+    const mensaje = `Hola! Me interesa el ${marca} ${modelo} ${año} que vi en su sitio web. ¿Podrían darme más información?`;
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 }
@@ -440,91 +356,83 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// CARGAR DATOS EDITADOS DEL ADMIN
+// 0. CARGAR DATOS EDITADOS DEL ADMIN (DESDE LOCALSTORAGE)
 // ============================================
-
-function getAdminData(key, fallback) {
-    try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; }
-}
-
-function loadAdminContent() {
-    const services = getAdminData('services', []);
-    const content = getAdminData('content', {});
-    const testimonios = getAdminData('testimonios', []);
-    const financing = getAdminData('financing_images', {});
-
-    applyFinancingData(financing);
-    applyContentData(content, services, testimonios);
-}
-
-function applyFinancingData(financing) {
-    if (!financing || Object.keys(financing).length === 0) return;
-    Object.entries(financing).forEach(([type, data]) => {
-        const img = document.querySelector(`img[data-image-type="${type}"]`);
-        if (!img) return;
-        if (data.url) img.src = data.url;
-        else if (data.fallback_base64) img.src = data.fallback_base64;
-        const card = img.closest('.financing-card');
-        if (!card) return;
-        const titleEl = card.querySelector('.financing-card-title');
-        const descEl = card.querySelector('.financing-card-description');
-        const featuresEl = card.querySelector('.financing-card-features');
-        if (titleEl && data.title) titleEl.textContent = data.title;
-        if (descEl && data.description) descEl.textContent = data.description;
-        if (featuresEl && data.features && Array.isArray(data.features)) {
-            featuresEl.innerHTML = data.features.map(f => `<li>✓ ${f}</li>`).join('');
+async function loadAdminContent() {
+    // Cargar métricas editadas desde localStorage
+    try {
+        const metrics = JSON.parse(localStorage.getItem('verdun_metrics') || 'null');
+        if (metrics) {
+            const metricsItems = document.querySelectorAll('.metric-item');
+            metrics.forEach((metric, index) => {
+                if (metricsItems[index]) {
+                    metricsItems[index].querySelector('.metric-icon').textContent = metric.icon;
+                    metricsItems[index].querySelector('.metric-text').textContent = metric.text;
+                }
+            });
         }
-    });
-}
-
-function applyContentData(content, services, testimonios) {
-    if (content && Object.keys(content).length > 0) {
-        const heroTitle = document.querySelector('.hero-title');
-        const heroSubtitle = document.querySelector('.hero-subtitle');
-        const statNumbers = document.querySelectorAll('.stat-number');
-        if (heroTitle) {
-            heroTitle.innerHTML = `${content.heroTitle}<br><span class="highlight">${content.heroHighlight}</span>`;
-        }
-        if (heroSubtitle) heroSubtitle.textContent = content.heroSubtitle;
-        if (statNumbers[0]) statNumbers[0].textContent = content.statYears;
-        if (statNumbers[1]) statNumbers[1].textContent = content.statVehicles;
+    } catch (e) {
+        console.log('No hay métricas guardadas');
     }
-
-    if (services && services.length > 0) {
-        const serviceCards = document.querySelectorAll('.service-card-flip');
-        serviceCards.forEach((card, index) => {
-            const service = services[index];
-            if (!service || !card) return;
-            const backCard = card.querySelector('.service-card-back');
-            if (!backCard) return;
-            const p = backCard.querySelector('p');
-            const featuresDiv = backCard.querySelector('.service-features');
-            if (p) p.textContent = service.desc;
-            if (featuresDiv && service.features) {
-                featuresDiv.innerHTML = service.features.map(f =>
-                    `<span class="feature-tag">${f}</span>`
-                ).join('');
+    
+    // Cargar contenido editado desde localStorage
+    try {
+        const content = JSON.parse(localStorage.getItem('verdun_content') || 'null');
+        if (content) {
+            const heroTitle = document.querySelector('.hero-title');
+            const heroSubtitle = document.querySelector('.hero-subtitle');
+            const statNumbers = document.querySelectorAll('.stat-number');
+            
+            if (heroTitle && content.heroTitle) {
+                heroTitle.innerHTML = `${content.heroTitle}<br><span class="highlight">${content.heroHighlight || ''}</span>`;
             }
-        });
+            
+            if (heroSubtitle && content.heroSubtitle) {
+                heroSubtitle.textContent = content.heroSubtitle;
+            }
+            
+            if (statNumbers[0] && content.statYears) {
+                statNumbers[0].textContent = content.statYears;
+            }
+            if (statNumbers[1] && content.statVehicles) {
+                statNumbers[1].textContent = content.statVehicles;
+            }
+        }
+    } catch (e) {
+        console.log('No hay contenido guardado');
     }
-
-    if (testimonios && testimonios.length > 0) {
-        const testimonioCards = document.querySelectorAll('.testimonio-card');
-        testimonioCards.forEach((card, index) => {
-            const t = testimonios[index];
-            if (!t || !card) return;
-            const textEl = card.querySelector('.testimonio-text');
-            const nameEl = card.querySelector('.author-name');
-            const roleEl = card.querySelector('.author-role');
-            if (textEl) textEl.textContent = t.text;
-            if (nameEl) nameEl.textContent = t.author;
-            if (roleEl) roleEl.textContent = t.role;
-        });
+    
+    // Cargar servicios editados desde localStorage
+    try {
+        const services = JSON.parse(localStorage.getItem('verdun_services') || 'null');
+        if (services) {
+            const serviceCards = document.querySelectorAll('.service-card-flip');
+            services.forEach((service, index) => {
+                if (serviceCards[index]) {
+                    const backCard = serviceCards[index].querySelector('.service-card-back');
+                    if (backCard) {
+                        const p = backCard.querySelector('p');
+                        const featuresDiv = backCard.querySelector('.service-features');
+                        
+                        if (p && service.desc) p.textContent = service.desc;
+                        
+                        if (featuresDiv && service.features) {
+                            featuresDiv.innerHTML = service.features.map(f => 
+                                `<span class="feature-tag">${f}</span>`
+                            ).join('');
+                        }
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        console.log('No hay servicios guardados');
     }
 }
 
+// Ejecutar cuando el DOM esté listo
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadAdminContent);
+    document.addEventListener('DOMContentLoaded', () => { loadAdminContent(); });
 } else {
     loadAdminContent();
 }
@@ -731,7 +639,8 @@ function enviarWA(event) {
     textoCompleto += '.';
     
     // Número de WhatsApp de Verdun
-    const urlWhatsApp = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(textoCompleto)}`;
+    const numeroWhatsApp = '5493704724077';
+    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(textoCompleto)}`;
     
     // Abrir WhatsApp
     window.open(urlWhatsApp, '_blank');
@@ -797,7 +706,7 @@ function createFloatingWhatsAppButton() {
     if (document.querySelector('.whatsapp-floating')) return;
     
     const button = document.createElement('a');
-    button.href = `https://wa.me/${WHATSAPP_NUMBER}`;
+    button.href = 'https://wa.me/5493704724077';
     button.target = '_blank';
     button.className = 'whatsapp-floating';
     button.innerHTML = '💬';
@@ -835,7 +744,7 @@ function createFloatingWhatsAppButton() {
 
 // Crear botón flotante después de cargar
 window.addEventListener('load', () => {
-    // createFloatingWhatsAppButton();
+    // createFloatingWhatsAppButton(); // Eliminado
 });
 
 // ============================================
@@ -1031,16 +940,284 @@ document.querySelectorAll('a[target="_blank"]').forEach(link => {
 });
 
 // ============================================
-// 19. WHATSAPP NAVBAR
+// 19. SISTEMA DE LOGIN Y ADMIN
 // ============================================
+
+const ADMIN_PASSWORD = 'admin123';
+const IMAGES_STORAGE_KEY = 'verdun_images';
+
+// Evento del botón login - Con verificación de que existe
 document.addEventListener('DOMContentLoaded', () => {
+    // Login button
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            const modal = document.getElementById('loginModal');
+            const passwordInput = document.getElementById('adminPassword');
+            if (modal && passwordInput) {
+                modal.style.display = 'flex';
+                passwordInput.focus();
+            }
+        });
+    }
+    
+    // WhatsApp button in navbar
     const navWhatsAppBtn = document.getElementById('navWhatsAppBtn');
     if (navWhatsAppBtn) {
         navWhatsAppBtn.addEventListener('click', () => {
-            window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank');
+            window.open('https://wa.me/5493704724077', '_blank');
         });
     }
 });
+
+// Cerrar modal de login
+function closeLoginModal() {
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('loginForm').reset();
+}
+
+// Cerrar panel admin
+function closeAdminPanel() {
+    document.getElementById('adminPanel').style.display = 'none';
+}
+
+// Manejar login
+function handleLogin(event) {
+    event.preventDefault();
+    
+    const password = document.getElementById('adminPassword').value.trim();
+    
+    if (password === ADMIN_PASSWORD) {
+        closeLoginModal();
+        openAdminPanel();
+    } else {
+        alert('❌ Contraseña incorrecta');
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('adminPassword').focus();
+    }
+}
+
+// Abrir panel admin
+function openAdminPanel() {
+    const adminPanel = document.getElementById('adminPanel');
+    if (adminPanel) {
+        adminPanel.style.display = 'flex';
+        loadSavedImages();
+    }
+}
+
+// ============================================
+// MANEJO DE IMÁGENES (LOCALSTORAGE)
+// ============================================
+
+function handleImageUpload(event, imageType) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Validar que sea imagen
+    if (!file.type.startsWith('image/')) {
+        showStatus('❌ Solo se permiten archivos de imagen', 'error');
+        return;
+    }
+    
+    // Validar tamaño (máx 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showStatus('❌ Archivo muy grande (máx 5MB)', 'error');
+        return;
+    }
+    
+    // Redimensionar imagen
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 600;
+            const MAX_HEIGHT = 450;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > MAX_WIDTH) {
+                height = (height * MAX_WIDTH) / width;
+                width = MAX_WIDTH;
+            }
+            if (height > MAX_HEIGHT) {
+                width = (width * MAX_HEIGHT) / height;
+                height = MAX_HEIGHT;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            const base64 = canvas.toDataURL('image/jpeg', 0.6);
+            
+            // Guardar en localStorage
+            let images = JSON.parse(localStorage.getItem('verdun_images') || '{}');
+            images[imageType] = {
+                name: file.name,
+                size: (file.size / 1024).toFixed(2) + ' KB',
+                data: base64,
+                timestamp: new Date().toLocaleString('es-AR')
+            };
+            localStorage.setItem('verdun_images', JSON.stringify(images));
+            
+            // Actualizar UI
+            updateImageUI(imageType, base64, file.size);
+            showStatus(`✅ ${imageType} cargado correctamente`, 'success');
+            
+            // Actualizar en la página
+            updatePageImages();
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function updateImageUI(imageType, base64, size) {
+    // Actualizar tamaño
+    const sizeElement = document.getElementById(imageType + 'Size');
+    if (sizeElement) {
+        sizeElement.textContent = (size / 1024).toFixed(2) + ' KB';
+    }
+    
+    // Mostrar preview
+    const previewElement = document.getElementById('preview' + capitalizeFirstLetter(imageType));
+    if (previewElement) {
+        previewElement.classList.add('active');
+        previewElement.innerHTML = `<img src="${base64}" alt="${imageType}">`;
+    }
+}
+
+function capitalizeFirstLetter(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function showStatus(message, type) {
+    const statusElement = document.getElementById('adminStatus');
+    if (statusElement) {
+        statusElement.textContent = message;
+        statusElement.className = 'admin-status ' + type;
+        
+        setTimeout(() => {
+            statusElement.className = 'admin-status';
+        }, 3000);
+    }
+}
+
+function loadSavedImages() {
+    const images = JSON.parse(localStorage.getItem('verdun_images') || '{}');
+    
+    Object.keys(images).forEach(imageType => {
+        const image = images[imageType];
+        updateImageUI(imageType, image.data, parseFloat(image.size) * 1024);
+    });
+}
+
+function updatePageImages() {
+    const images = JSON.parse(localStorage.getItem('verdun_images') || '{}');
+    
+    // Actualizar todas las imágenes en la página
+    Object.keys(images).forEach(imageType => {
+        const base64 = images[imageType].data;
+        
+        // Buscar todos los img con src de images/
+        document.querySelectorAll(`img[src*="images/${imageType}.png"]`).forEach(img => {
+            img.src = base64;
+        });
+        document.querySelectorAll(`img[src*="images/${imageType}.jpg"]`).forEach(img => {
+            img.src = base64;
+        });
+    });
+}
+
+function exportImages() {
+    const images = JSON.parse(localStorage.getItem('verdun_images') || '{}');
+    
+    if (Object.keys(images).length === 0) {
+        showStatus('❌ No hay imágenes para exportar', 'error');
+        return;
+    }
+    
+    // Crear objeto exportable
+    const exportData = {};
+    Object.keys(images).forEach(imageType => {
+        exportData[imageType] = {
+            name: images[imageType].name,
+            size: images[imageType].size,
+            timestamp: images[imageType].timestamp
+        };
+    });
+    
+    // Descargar JSON
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'verdun_images_info.json';
+    link.click();
+    
+    showStatus('✅ Información de imágenes exportada', 'success');
+}
+
+function clearAllImages() {
+    if (confirm('⚠️ ¿Estás seguro? Se borrarán TODAS las imágenes cargadas.')) {
+        localStorage.removeItem('verdun_images');
+        
+        // Limpiar UI
+        document.querySelectorAll('.preview-mini').forEach(el => {
+            el.classList.remove('active');
+            el.innerHTML = '';
+        });
+        
+        document.querySelectorAll('.file-size').forEach(el => {
+            el.textContent = '';
+        });
+        
+        showStatus('✅ Todas las imágenes fueron eliminadas', 'success');
+    }
+}
+
+// ============================================
+// CARGAR IMÁGENES AL CARGAR LA PÁGINA
+// ============================================
+
+window.addEventListener('load', () => {
+    updatePageImages();
+    loadInventoryFromSheets();
+});
+
+// ============================================
+// CERRAR MODAL AL PRESIONAR ESC
+// ============================================
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const loginModal = document.getElementById('loginModal');
+        const adminPanel = document.getElementById('adminPanel');
+        if (loginModal) loginModal.style.display = 'none';
+        if (adminPanel) adminPanel.style.display = 'none';
+    }
+});
+
+// ============================================
+// CERRAR MODAL AL HACER CLICK FUERA
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) {
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                closeLoginModal();
+            }
+        });
+    }
+});
+
+console.log('✅ Sistema de admin cargado correctamente');
 
 // ============================================
 // FIN DEL SCRIPT
