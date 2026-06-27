@@ -349,7 +349,6 @@ function renderVehicles(vehicles, category) {
         vehicleCard.className = 'vehicle-card';
 
         const displayName = getVehicleDisplayName(vehicle);
-        const priceFormatted = formatPrice(vehicle.precio);
         const descripcionHtml = vehicle.descripcion
             ? `<p class="vehicle-description">${vehicle.descripcion}</p>`
             : '';
@@ -379,7 +378,6 @@ function renderVehicles(vehicles, category) {
                         <strong>Color:</strong> ${vehicle.color}
                     </span>
                 </div>
-                <div class="vehicle-price">${priceFormatted}</div>
                 <button 
                     class="btn-consultar" 
                     onclick="consultarWhatsApp('${safeName}', ${vehicle.año})"
