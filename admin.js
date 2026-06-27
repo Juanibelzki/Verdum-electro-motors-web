@@ -632,7 +632,7 @@ function initImagesSection() {
             const file = e.target.files[0];
             const err = validateImageFile(file, 5);
             if (err) { alert('❌ ' + err); e.target.value = ''; return; }
-            const result = await resizeImage(file, 800, 600, 0.8);
+            const result = await resizeImage(file, 600, 450, 0.6);
             const base64 = await blobToBase64(result.blob);
             const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
             const isCustom = customVehicles.some(v => v.id === id);
