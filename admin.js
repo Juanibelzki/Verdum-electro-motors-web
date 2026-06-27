@@ -204,7 +204,7 @@ async function loadAllData() {
 }
 
 async function loadMetrics() {
-    const metrics = await loadStoredData('metrics', [
+    const metrics = loadStoredData('metrics', [
         { icon: '🚗', text: '0KM y Usados' },
         { icon: '💳', text: 'Financiación sin banco' },
         { icon: '⚡', text: 'Motos y Bicicletas Eléctricas' },
@@ -233,13 +233,12 @@ async function loadServices() {
         { desc: 'Movilidad urbana sostenible y económica. Perfecta para desplazamientos.', features: ['Sostenible', 'Práctica', 'Urbana'] },
         { desc: 'Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.', features: ['4x4', 'Comerciales', 'A medida'] }
     ];
-    const services = await loadStoredData('services', defaults);
+    const services = loadStoredData('services', defaults);
     if (services.length !== 5) {
         services.length = 5;
         defaults.forEach((d, i) => { if (!services[i]) services[i] = d; });
         dataCache.services = services;
         try { localStorage.setItem('services', JSON.stringify(services)); } catch {}
-        FB.set('services', services);
     }
 
     services.forEach((service, index) => {
@@ -261,7 +260,7 @@ async function loadFinancingOptions() {
         financing_bank: { title: 'Crédito Bancario', description: 'Mejores tasas del mercado con nuestros bancos aliados.', features: ['Tasas competitivas', 'Múltiples opciones', 'Tramitación rápida', 'Asesoramiento gratuito'] },
         financing_permuta: { title: 'Permuta', description: 'Tu usado como parte de pago. Tasación justa y transparente.', features: ['Tasación real', 'Proceso transparente', 'Compra de tu usado', 'Trámites incluidos'] }
     };
-    const financing = await loadStoredData('financing_images', defaults);
+    const financing = loadStoredData('financing_images', defaults);
     ['financing_own', 'financing_bank', 'financing_permuta'].forEach(type => {
         const data = financing[type] || {};
         const titleEl = document.getElementById(`${type}-title`);
@@ -286,9 +285,9 @@ async function updateFinancingOption(type) {
     const featuresStr = document.getElementById(`${type}-features`).value.trim();
     if (!title || !description) { alert('Completá título y descripción'); return; }
     const features = featuresStr.split(',').map(f => f.trim()).filter(Boolean);
-    const financing = await loadStoredData('financing_images', {});
+    const financing = loadStoredData('financing_images', {});
     financing[type] = { ...(financing[type] || {}), title, description, features, updatedAt: new Date().toISOString() };
-    await saveStoredData('financing_images', financing);
+    saveStoredData('financing_images', financing);
     await addChange(`Opción de financiación "${type}" actualizada`);
     alert('✓ Guardado');
 }
@@ -300,29 +299,24 @@ async function handleFinancingImageUpload(event) {
     const err = validateImageFile(file, 2);
     if (err) { alert('❌ ' + err); event.target.value = ''; return; }
 
-    const { blob } = await resizeImage(file, 1200, 900, 0.85);
-    const base64 = await blobToBase64(blob);
-    const financing = await loadStoredData('financing_images', {});
+    const result = await resizeImage(file, 1200, 900, 0.85);
+    const base64 = await blobToBase64(result.blob);
+    const financing = loadStoredData('financing_images', {});
     if (!financing[type]) financing[type] = {};
     financing[type].fallback_base64 = base64;
     financing[type].name = file.name;
     financing[type].uploadedAt = new Date().toISOString();
-    await saveStoredData('financing_images', financing);
+    saveStoredData('financing_images', financing);
     const previewImg = document.getElementById(`preview-${type}`);
     if (previewImg) { previewImg.src = base64; previewImg.style.display = 'block'; }
     const ph = document.getElementById(`ph-${type}`);
     if (ph) ph.style.display = 'none';
-    FB.uploadFile(`financing/${type}`, blob).then(url => {
-        financing[type].url = url;
-        delete financing[type].fallback_base64;
-        saveStoredData('financing_images', financing);
-    }).catch(() => {});
     alert('✓ Imagen cargada y optimizada');
     event.target.value = '';
 }
 
 async function loadContent() {
-    const content = await loadStoredData('content', {
+    const content = loadStoredData('content', {
         heroTitle: 'Vehículos Premium',
         heroHighlight: 'Para tu Estilo',
         heroSubtitle: 'Autos 0KM, Usados garantizados y Motos Eléctricas. 30 años brindando la mejor experiencia en movilidad.',
@@ -338,7 +332,7 @@ async function loadContent() {
 }
 
 async function loadChangeStats() {
-    const stats = await loadStoredData('editStats', { count: 0, lastEdit: null });
+    const stats = loadStoredData('editStats', { count: 0, lastEdit: null });
     document.getElementById('editCount').textContent = stats.count;
 
     if (stats.lastEdit) {
@@ -361,11 +355,11 @@ async function updateMetric(index) {
     document.getElementById(`metricIcon${index}`).textContent = icon;
     document.getElementById(`metricText${index}`).textContent = text;
 
-    const metrics = await loadStoredData('metrics', []);
+    const metrics = loadStoredData('metrics', []);
     if (!metrics[index]) metrics[index] = {};
     metrics[index].icon = icon;
     metrics[index].text = text;
-    await saveStoredData('metrics', metrics);
+    saveStoredData('metrics', metrics);
 
     await addChange(`Métrica ${index + 1} actualizada: "${text}"`);
     alert('✓ Métrica guardada correctamente');
@@ -381,11 +375,11 @@ async function updateService(index) {
     }
 
     const features = featuresStr.split(',').map((f) => f.trim());
-    const services = await loadStoredData('services', []);
+    const services = loadStoredData('services', []);
     if (!services[index]) services[index] = {};
     services[index].desc = desc;
     services[index].features = features;
-    await saveStoredData('services', services);
+    saveStoredData('services', services);
 
     await addChange(`Servicio ${index + 1} actualizado`);
     alert('✓ Servicio guardado correctamente');
@@ -405,13 +399,13 @@ async function updateContent() {
         return;
     }
 
-    await saveStoredData('content', content);
+    saveStoredData('content', content);
     await addChange('Contenido principal actualizado');
     alert('✓ Contenido guardado correctamente');
 }
 
 async function loadTestimonios() {
-    const testimonios = await loadStoredData('testimonios', [
+    const testimonios = loadStoredData('testimonios', [
         { text: 'Excelente atención y vehículos de primera calidad. Compré mi Volkswagen con Verdun y no me arrepiento. Recomiendo a todos mis amigos.', author: 'Carlos M.', role: 'Cliente satisfecho' },
         { text: 'La financiación sin banco fue súper rápida. En una tarde resolvimos todo y me llevé el auto. Transparencia total.', author: 'María L.', role: 'Compradora 0KM' },
         { text: 'Traté con muchas concesionarias. Verdun se destaca por profesionalismo y honestidad. El mejor lugar para comprar en Corrientes.', author: 'Juan P.', role: 'Cliente recurrente' }
@@ -438,19 +432,19 @@ async function updateTestimonio(index) {
         return;
     }
 
-    const testimonios = await loadStoredData('testimonios', []);
+    const testimonios = loadStoredData('testimonios', []);
     if (!testimonios[index]) testimonios[index] = {};
     testimonios[index].text = text;
     testimonios[index].author = author;
     testimonios[index].role = role;
-    await saveStoredData('testimonios', testimonios);
+    saveStoredData('testimonios', testimonios);
 
     await addChange(`Testimonio ${index + 1} actualizado`);
     alert('✓ Testimonio guardado correctamente');
 }
 
 async function addChange(message) {
-    const changes = await loadStoredData('changes', []);
+    const changes = loadStoredData('changes', []);
     changes.unshift({
         message,
         timestamp: new Date().toLocaleString('es-AR')
@@ -458,18 +452,18 @@ async function addChange(message) {
 
     if (changes.length > 20) changes.pop();
 
-    await saveStoredData('changes', changes);
+    saveStoredData('changes', changes);
 
-    const stats = await loadStoredData('editStats', { count: 0, lastEdit: null });
+    const stats = loadStoredData('editStats', { count: 0, lastEdit: null });
     stats.count += 1;
     stats.lastEdit = new Date().toISOString();
-    await saveStoredData('editStats', stats);
+    saveStoredData('editStats', stats);
 
     await loadChangeStats();
 }
 
 async function loadChangesList() {
-    const changes = await loadStoredData('changes', []);
+    const changes = loadStoredData('changes', []);
     const list = document.getElementById('changesList');
 
     if (changes.length === 0) {
@@ -495,29 +489,30 @@ async function loadChangesList() {
 async function clearChangesLog() {
     localStorage.removeItem('changes');
     const stats = { count: 0, lastEdit: null };
-    await saveStoredData('editStats', stats);
+    saveStoredData('editStats', stats);
     await loadChangeStats();
     alert('✓ Historial limpiado');
 }
 
-async function loadStoredData(key, defaultValue) {
+function loadStoredData(key, defaultValue) {
     if (dataCache[key] !== undefined) return dataCache[key];
-    const data = await FB.get(key, defaultValue);
-    dataCache[key] = data;
     try {
-        const json = JSON.stringify(data);
-        if (json.length < 1_000_000) localStorage.setItem(key, json);
+        const stored = localStorage.getItem(key);
+        if (stored) {
+            const data = JSON.parse(stored);
+            dataCache[key] = data;
+            return data;
+        }
     } catch {}
-    return data;
+    return defaultValue;
 }
 
-async function saveStoredData(key, value) {
+function saveStoredData(key, value) {
     dataCache[key] = value;
     try {
         const json = JSON.stringify(value);
         if (json.length < 1_000_000) localStorage.setItem(key, json);
     } catch {}
-    FB.set(key, value);
 }
 
 function escapeHtml(str) {
@@ -528,20 +523,20 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;');
 }
 
-async function getSiteImages() {
+function getSiteImages() {
     return loadStoredData(IMAGES_STORAGE_KEY, {});
 }
 
-async function setSiteImages(images) {
-    await saveStoredData(IMAGES_STORAGE_KEY, images);
+function setSiteImages(images) {
+    saveStoredData(IMAGES_STORAGE_KEY, images);
 }
 
-async function getVehicleOverrides() {
+function getVehicleOverrides() {
     return loadStoredData(VEHICLES_STORAGE_KEY, {});
 }
 
-async function setVehicleOverrides(data) {
-    await saveStoredData(VEHICLES_STORAGE_KEY, data);
+function setVehicleOverrides(data) {
+    saveStoredData(VEHICLES_STORAGE_KEY, data);
 }
 
 function initImagesSection() {
@@ -561,14 +556,11 @@ function initImagesSection() {
             const file = e.target.files[0];
             const err = validateImageFile(file, 2);
             if (err) { alert('❌ ' + err); e.target.value = ''; return; }
-            const { blob } = await resizeImage(file, 400, 200, 0.85);
-            const base64 = await blobToBase64(blob);
+            const result = await resizeImage(file, 400, 200, 0.85);
+            const base64 = await blobToBase64(result.blob);
             pendingLogoData = base64;
             pendingLogoUrl = null;
             updateLogoPreview(base64);
-            FB.uploadFile('site/logo', blob).then(url => {
-                pendingLogoUrl = url;
-            }).catch(() => {});
             e.target.value = '';
         });
     }
@@ -601,18 +593,13 @@ function initImagesSection() {
             const file = e.target.files[0];
             const err = validateImageFile(file, 5);
             if (err) { alert('❌ ' + err); e.target.value = ''; return; }
-            const { blob } = await resizeImage(file, 1920, 1080, 0.85);
-            const base64 = await blobToBase64(blob);
-            const images = await getSiteImages();
+            const result = await resizeImage(file, 1920, 1080, 0.85);
+            const base64 = await blobToBase64(result.blob);
+            const images = getSiteImages();
             images[key] = { data: base64, timestamp: new Date().toLocaleString('es-AR') };
-            await setSiteImages(images);
+            setSiteImages(images);
             renderSiteImagesGrid();
-            FB.uploadFile(`site/${key}`, blob).then(url => {
-                images[key] = { url, timestamp: new Date().toLocaleString('es-AR') };
-                setSiteImages(images);
-                renderSiteImagesGrid();
-            }).catch(() => {});
-            await addChange(`Imagen de sitio "${key}" actualizada`);
+            addChange(`Imagen de sitio "${key}" actualizada`);
             e.target.value = '';
         });
     }
@@ -641,36 +628,24 @@ function initImagesSection() {
             const file = e.target.files[0];
             const err = validateImageFile(file, 5);
             if (err) { alert('❌ ' + err); e.target.value = ''; return; }
-            const { blob } = await resizeImage(file, 800, 600, 0.8);
-            const base64 = await blobToBase64(blob);
-            const customVehicles = await loadStoredData(CUSTOM_VEHICLES_KEY, []);
+            const result = await resizeImage(file, 800, 600, 0.8);
+            const base64 = await blobToBase64(result.blob);
+            const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
             const isCustom = customVehicles.some(v => v.id === id);
             if (isCustom) {
                 const updated = customVehicles.map(v => {
                     if (v.id !== id) return v;
                     return { ...v, image: base64 };
                 });
-                await saveStoredData(CUSTOM_VEHICLES_KEY, updated);
+                saveStoredData(CUSTOM_VEHICLES_KEY, updated);
             } else {
-                const overrides = await getVehicleOverrides();
+                const overrides = getVehicleOverrides();
                 if (!overrides[id]) overrides[id] = {};
                 overrides[id].image = base64;
-                await setVehicleOverrides(overrides);
+                setVehicleOverrides(overrides);
             }
             renderVehiclesEditor();
-            FB.uploadFile(`vehicles/${id}`, blob).then(url => {
-                loadStoredData(CUSTOM_VEHICLES_KEY, []).then(cv => {
-                    if (cv.some(v => v.id === id)) {
-                        saveStoredData(CUSTOM_VEHICLES_KEY, cv.map(v => v.id === id ? { ...v, image: url } : v));
-                    } else {
-                        getVehicleOverrides().then(ov => {
-                            if (ov[id]) { ov[id].image = url; setVehicleOverrides(ov); }
-                        });
-                    }
-                    renderVehiclesEditor();
-                });
-            }).catch(() => {});
-            await addChange(`Foto del vehículo #${id} actualizada`);
+            addChange(`Foto del vehículo #${id} actualizada`);
             e.target.value = '';
         });
     }
@@ -776,7 +751,7 @@ async function renderVehiclesEditor() {
     if (!container) return;
 
     const overrides = await getVehicleOverrides();
-    const customVehicles = await loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
     let nextCustomId = 100;
 
     let html = '';
@@ -883,7 +858,7 @@ async function saveVehicle(id) {
     }
 
     // Custom vehicle?
-    const customVehicles = await loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
     const isCustom = customVehicles.some(v => v.id === id);
 
     if (isCustom) {
@@ -902,7 +877,7 @@ async function saveVehicle(id) {
                 descripcion: descripcion
             };
         });
-        await saveStoredData(CUSTOM_VEHICLES_KEY, updated);
+        saveStoredData(CUSTOM_VEHICLES_KEY, updated);
     } else {
         const overrides = await getVehicleOverrides();
         if (!overrides[id]) overrides[id] = {};
@@ -942,7 +917,7 @@ async function saveNewVehicle() {
         return;
     }
 
-    const customVehicles = await loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
     const maxId = customVehicles.reduce((max, v) => Math.max(max, v.id), 100);
     const newId = maxId + 1;
 
@@ -967,7 +942,7 @@ async function saveNewVehicle() {
         descripcion: descripcion
     });
 
-    await saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+    saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
     closeAddVehicleForm();
     await renderVehiclesEditor();
     await addChange(`Vehículo agregado: ${marca} ${modelo} (#${newId})`);
@@ -977,10 +952,10 @@ async function saveNewVehicle() {
 async function deleteCustomVehicle(id) {
     if (!confirm('¿Eliminar este vehículo personalizado?')) return;
 
-    let customVehicles = await loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
     const removed = customVehicles.find(v => v.id === id);
     customVehicles = customVehicles.filter(v => v.id !== id);
-    await saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+    saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
     await renderVehiclesEditor();
     if (removed) {
         await addChange(`Vehículo eliminado: ${removed.marca} ${removed.modelo} (#${id})`);
@@ -992,53 +967,4 @@ async function loadImagesSection() {
     await loadLogoPreview();
     await renderSiteImagesGrid();
     await renderVehiclesEditor();
-    migrateToStorage();
-}
-
-async function migrateToStorage() {
-    const images = await getSiteImages();
-    const tasks = [];
-    for (const key of Object.keys(images)) {
-        const img = images[key];
-        if (img && img.data && !img.url) {
-            tasks.push(
-                FB.uploadBase64(`site/${key}`, img.data).then(url => {
-                    images[key] = { url, timestamp: img.timestamp || new Date().toLocaleString('es-AR') };
-                }).catch(() => {})
-            );
-        }
-    }
-    if (tasks.length) {
-        await Promise.allSettled(tasks);
-        await setSiteImages(images);
-        renderSiteImagesGrid();
-    }
-    const overrides = await getVehicleOverrides();
-    const ovTasks = [];
-    for (const id of Object.keys(overrides)) {
-        const o = overrides[id];
-        if (o && o.image && o.image.startsWith('data:')) {
-            ovTasks.push(
-                FB.uploadBase64(`vehicles/${id}`, o.image).then(url => { o.image = url; }).catch(() => {})
-            );
-        }
-    }
-    if (ovTasks.length) {
-        await Promise.allSettled(ovTasks);
-        await setVehicleOverrides(overrides);
-    }
-    const customVehicles = await loadStoredData(CUSTOM_VEHICLES_KEY, []);
-    const cvTasks = [];
-    for (const cv of customVehicles) {
-        if (cv.image && cv.image.startsWith('data:')) {
-            cvTasks.push(
-                FB.uploadBase64(`vehicles/custom/${cv.id}`, cv.image).then(url => { cv.image = url; }).catch(() => {})
-            );
-        }
-    }
-    if (cvTasks.length) {
-        await Promise.allSettled(cvTasks);
-        await saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
-    }
-    if (ovTasks.length || cvTasks.length) renderVehiclesEditor();
 }

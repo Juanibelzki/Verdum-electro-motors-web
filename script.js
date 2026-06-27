@@ -225,22 +225,11 @@ const DEFAULT_VEHICLE_INVENTORY = {
     }
 };
 
-const IMAGES_STORAGE_KEY = 'verdun_images';
 const VEHICLES_STORAGE_KEY = 'verdun_vehicles';
 const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
 
-const PAGE_IMAGE_SELECTORS = {
-    logo: '.logo-image',
-    hero_visual: '.hero-image',
-    service_1: 'img[data-src*="service_1"]',
-    service_2: 'img[data-src*="service_2"]',
-    service_3: 'img[data-src*="service_3"]',
-    service_4: 'img[data-src*="service_4"]',
-    service_5: 'img[data-src*="service_5"]'
-};
-
 async function getMergedVehicleInventory() {
-    const overrides = await FB.get(VEHICLES_STORAGE_KEY, {});
+    const overrides = JSON.parse(localStorage.getItem(VEHICLES_STORAGE_KEY)) || {};
     const inventory = JSON.parse(JSON.stringify(DEFAULT_VEHICLE_INVENTORY));
 
     Object.keys(inventory).forEach((category) => {
@@ -261,7 +250,7 @@ async function getMergedVehicleInventory() {
     });
 
     // Agregar vehículos personalizados del admin
-    const customVehicles = await FB.get(CUSTOM_VEHICLES_KEY, []);
+    const customVehicles = JSON.parse(localStorage.getItem(CUSTOM_VEHICLES_KEY)) || [];
     customVehicles.forEach((cv) => {
         if (inventory[cv.category]) {
             inventory[cv.category].vehicles.push({
@@ -456,48 +445,18 @@ document.addEventListener('DOMContentLoaded', () => {
 // CARGAR DATOS EDITADOS DEL ADMIN
 // ============================================
 
+function getAdminData(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; }
+}
+
 function loadAdminContent() {
-    applyCachedData();
+    const services = getAdminData('services', []);
+    const content = getAdminData('content', {});
+    const testimonios = getAdminData('testimonios', []);
+    const financing = getAdminData('financing_images', {});
 
-    Promise.all([
-        FB.get('services', []),
-        FB.get('content', {}),
-        FB.get('testimonios', []),
-        FB.get('verdun_images', {}),
-        FB.get('financing_images', {})
-    ]).then(([services, content, testimonios, images, financing]) => {
-        applyFreshData(images, financing, content, services, testimonios);
-    }).catch(() => {});
-}
-
-function applyCachedData() {
-    try {
-        const cacheKeys = ['services', 'content', 'testimonios', 'verdun_images', 'financing_images'];
-        cacheKeys.forEach(key => {
-            const raw = localStorage.getItem('fb_cache_' + key);
-            if (!raw) return;
-            const data = JSON.parse(raw);
-            if (key === 'services') applyContentData(null, data, null);
-            else if (key === 'content') applyContentData(data, null, null);
-            else if (key === 'testimonios') applyContentData(null, null, data);
-            else if (key === 'verdun_images') applyImagesData(data);
-            else if (key === 'financing_images') applyFinancingData(data);
-        });
-    } catch {}
-}
-
-function applyImagesData(images) {
-    if (!images || Object.keys(images).length === 0) return;
-    Object.keys(images).forEach((key) => {
-        const img = images[key];
-        if (!img) return;
-        const src = img.url || img.data;
-        if (!src) return;
-        const selector = PAGE_IMAGE_SELECTORS[key];
-        if (selector) {
-            document.querySelectorAll(selector).forEach((el) => { el.src = src; });
-        }
-    });
+    applyFinancingData(financing);
+    applyContentData(content, services, testimonios);
 }
 
 function applyFinancingData(financing) {
@@ -564,12 +523,6 @@ function applyContentData(content, services, testimonios) {
             if (roleEl) roleEl.textContent = t.role;
         });
     }
-}
-
-function applyFreshData(images, financing, content, services, testimonios) {
-    applyImagesData(images);
-    applyFinancingData(financing);
-    applyContentData(content, services, testimonios);
 }
 
 if (document.readyState === 'loading') {
