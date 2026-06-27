@@ -511,7 +511,11 @@ function saveStoredData(key, value) {
     dataCache[key] = value;
     try {
         const json = JSON.stringify(value);
-        if (json.length < 1_000_000) localStorage.setItem(key, json);
+        if (json.length < 10_000_000) {
+            localStorage.setItem(key, json);
+        } else {
+            console.error(`Storage limit exceeded for "${key}": ${(json.length / 1_000_000).toFixed(1)}MB`);
+        }
     } catch {}
 }
 
