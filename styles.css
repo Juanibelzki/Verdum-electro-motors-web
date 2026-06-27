@@ -862,6 +862,42 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
 }
 
+.maps-link {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.maps-link:hover .nosotros-image {
+    filter: brightness(1.1);
+    box-shadow: 0 0 0 3px var(--primary-500);
+}
+
+.maps-badge {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.maps-link:hover .maps-badge {
+    opacity: 1;
+}
+
 .nosotros-image {
     width: 100%;
     height: auto;
