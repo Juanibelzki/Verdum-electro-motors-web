@@ -747,6 +747,14 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 20px 50px rgba(59,130,246,0.15);
 }
 
+.empty-stock {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-tertiary);
+    font-size: 1.1rem;
+    grid-column: 1 / -1;
+}
+
 .vehicle-badge {
     position: absolute;
     top: 16px;

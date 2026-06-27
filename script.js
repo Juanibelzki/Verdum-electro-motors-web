@@ -3,266 +3,104 @@
    ============================================ */
 
 // ============================================
-// DATOS DE INVENTARIO DE VEHÍCULOS
+// SISTEMA DE STOCK POR CARPETAS (JSON EN REPO)
 // ============================================
-const STOCK_STORAGE_KEY = 'verdun_stock';
 
-const DEFAULT_VEHICLE_INVENTORY = {
-    'autos-0km': {
-        title: 'Autos 0KM',
-        vehicles: [
-            {
-                id: 1,
-                marca: 'Volkswagen',
-                modelo: 'Virtus',
-                año: 2024,
-                precio: 2850000,
-                km: '0 KM',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 2,
-                marca: 'Nissan',
-                modelo: 'Versa',
-                año: 2024,
-                precio: 2450000,
-                km: '0 KM',
-                color: 'Plata',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 3,
-                marca: 'Chevrolet',
-                modelo: 'Onix',
-                año: 2024,
-                precio: 2100000,
-                km: '0 KM',
-                color: 'Negro',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 4,
-                marca: 'Toyota',
-                modelo: 'Corolla',
-                año: 2024,
-                precio: 3150000,
-                km: '0 KM',
-                color: 'Gris',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            }
-        ]
-    },
-    'autos-usados': {
-        title: 'Autos Usados',
-        vehicles: [
-            {
-                id: 5,
-                marca: 'Volkswagen',
-                modelo: 'Gol',
-                año: 2019,
-                precio: 1450000,
-                km: '85000',
-                color: 'Rojo',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 6,
-                marca: 'Ford',
-                modelo: 'EcoSport',
-                año: 2020,
-                precio: 1850000,
-                km: '72500',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 7,
-                marca: 'Peugeot',
-                modelo: '208',
-                año: 2018,
-                precio: 1250000,
-                km: '95000',
-                color: 'Azul',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 8,
-                marca: 'Honda',
-                modelo: 'Civic',
-                año: 2019,
-                precio: 1650000,
-                km: '68000',
-                color: 'Plateado',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 9,
-                marca: 'Renault',
-                modelo: 'Kwid',
-                año: 2020,
-                precio: 950000,
-                km: '45000',
-                color: 'Negro',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            }
-        ]
-    },
-    'motos-electricas': {
-        title: 'Motos Eléctricas',
-        vehicles: [
-            {
-                id: 10,
-                marca: 'Energica',
-                modelo: 'EVA',
-                año: 2024,
-                precio: 450000,
-                km: '0 KM',
-                color: 'Negro',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 11,
-                marca: 'Super Soco',
-                modelo: 'TC Max',
-                año: 2024,
-                precio: 280000,
-                km: '0 KM',
-                color: 'Rojo',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 12,
-                marca: 'Volta',
-                modelo: 'V1',
-                año: 2023,
-                precio: 350000,
-                km: '5000',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            }
-        ]
-    },
-    'patinetas-electricas': {
-        title: 'Patinetas Eléctricas',
-        vehicles: [
-            {
-                id: 13,
-                marca: 'Xiaomi',
-                modelo: 'Mi 3 Pro',
-                año: 2024,
-                precio: 95000,
-                km: '0 KM',
-                color: 'Negro',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 14,
-                marca: 'Ninebot',
-                modelo: 'Max G30',
-                año: 2024,
-                precio: 125000,
-                km: '0 KM',
-                color: 'Gris',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 15,
-                marca: 'Segway',
-                modelo: 'Ninebot Pro',
-                año: 2023,
-                precio: 140000,
-                km: '2000',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 16,
-                marca: 'Hiboy',
-                modelo: 'S2 Pro',
-                año: 2024,
-                precio: 110000,
-                km: '0 KM',
-                color: 'Negro',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            }
-        ]
-    },
-    'vehiculos-especiales': {
-        title: 'Vehículos Especiales',
-        vehicles: [
-            {
-                id: 17,
-                marca: 'Ford',
-                modelo: 'Ranger',
-                año: 2024,
-                precio: 4200000,
-                km: '0 KM',
-                color: 'Gris',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 18,
-                marca: 'Toyota',
-                modelo: 'Hilux',
-                año: 2024,
-                precio: 4800000,
-                km: '0 KM',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            },
-            {
-                id: 19,
-                marca: 'Fiat',
-                modelo: 'Fiorino',
-                año: 2023,
-                precio: 1800000,
-                km: '15000',
-                color: 'Blanco',
-                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
-            }
-        ]
-    }
+const CATEGORY_FOLDERS = {
+    'autos-0km': '0km',
+    'autos-usados': 'usados',
+    'motos-electricas': 'motos',
+    'patinetas-electricas': 'patacletas',
+    'vehiculos-especiales': 'especiales'
 };
+
+const CATEGORY_TITLES = {
+    'autos-0km': 'Autos 0KM',
+    'autos-usados': 'Autos Usados',
+    'motos-electricas': 'Motos Eléctricas',
+    'patinetas-electricas': 'Patinetas Eléctricas',
+    'vehiculos-especiales': 'Vehículos Especiales'
+};
+
+let stockCache = null;
+
+async function loadStockFromJSON() {
+    if (stockCache) return stockCache;
+
+    const inventory = {};
+    let idCounter = 0;
+
+    for (const catKey of Object.keys(CATEGORY_FOLDERS)) {
+        const folder = CATEGORY_FOLDERS[catKey];
+        let slugs = [];
+        try {
+            const resp = await fetch(`images/stock/${folder}/index.json`);
+            slugs = await resp.json();
+        } catch {}
+
+        const vehicles = [];
+
+        for (const slug of slugs) {
+            try {
+                const resp = await fetch(`images/stock/${folder}/${slug}/datos.json`);
+                const data = await resp.json();
+                idCounter++;
+
+                const marca = data.nombre.split(' ')[0] || slug.split('-')[0];
+                const firstPhoto = data.fotos && data.fotos.length > 0
+                    ? `images/stock/${folder}/${slug}/${data.fotos[0]}`
+                    : `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E`;
+
+                vehicles.push({
+                    id: idCounter,
+                    marca: marca,
+                    modelo: data.nombre,
+                    nombre: data.nombre,
+                    año: data.año,
+                    km: data.km,
+                    color: data.color,
+                    precio: data.precio || 'Consultar',
+                    descripcion: data.descripcion || '',
+                    image: firstPhoto,
+                    fotos: data.fotos || [],
+                    slug: slug,
+                    folder: folder,
+                    whatsappMsg: data.whatsapp || `Hola! Me interesa el ${data.nombre} que vi en su sitio web.`
+                });
+            } catch {}
+        }
+
+        inventory[catKey] = { title: CATEGORY_TITLES[catKey], vehicles: vehicles };
+    }
+
+    stockCache = inventory;
+    return inventory;
+}
 
 const VEHICLES_STORAGE_KEY = 'verdun_vehicles';
 const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
 
 async function getMergedVehicleInventory() {
-    const overrides = JSON.parse(localStorage.getItem(VEHICLES_STORAGE_KEY)) || {};
-    const inventory = JSON.parse(JSON.stringify(DEFAULT_VEHICLE_INVENTORY));
+    const inventory = await loadStockFromJSON();
 
-    Object.keys(inventory).forEach((category) => {
-        inventory[category].vehicles = inventory[category].vehicles.map((vehicle) => {
-            const o = overrides[vehicle.id];
-            if (!o) return vehicle;
-            return {
-                ...vehicle,
-                nombre: o.nombre,
-                descripcion: o.descripcion,
-                precio: o.precio !== undefined ? o.precio : vehicle.precio,
-                año: o.anio !== undefined ? o.anio : vehicle.año,
-                km: o.km !== undefined ? o.km : vehicle.km,
-                color: o.color !== undefined ? o.color : vehicle.color,
-                image: o.image || vehicle.image
-            };
+    const overrides = JSON.parse(localStorage.getItem(VEHICLES_STORAGE_KEY)) || {};
+    Object.keys(inventory).forEach(catKey => {
+        inventory[catKey].vehicles = inventory[catKey].vehicles.map(v => {
+            const o = overrides[v.id];
+            if (!o) return v;
+            return { ...v, nombre: o.nombre, descripcion: o.descripcion, precio: o.precio !== undefined ? o.precio : v.precio, año: o.anio !== undefined ? o.anio : v.año, km: o.km !== undefined ? o.km : v.km, color: o.color !== undefined ? o.color : v.color, image: o.image || v.image };
         });
     });
 
-    // Agregar vehículos personalizados del admin
     const customVehicles = JSON.parse(localStorage.getItem(CUSTOM_VEHICLES_KEY)) || [];
-    customVehicles.forEach((cv) => {
+    customVehicles.forEach(cv => {
         if (inventory[cv.category]) {
             inventory[cv.category].vehicles.push({
-                id: cv.id,
-                marca: cv.marca,
-                modelo: cv.modelo,
-                año: cv.anio,
-                precio: cv.precio,
-                km: cv.km,
-                color: cv.color,
+                id: cv.id, marca: cv.marca, modelo: cv.modelo, nombre: cv.nombre || `${cv.marca} ${cv.modelo}`,
+                año: cv.anio, precio: cv.precio, km: cv.km, color: cv.color,
                 descripcion: cv.descripcion || '',
-                image: cv.image || `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E`
+                image: cv.image || `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E`,
+                fotos: [], slug: '', folder: '', whatsappMsg: `Hola! Me interesa el ${cv.marca} ${cv.modelo} que vi en su sitio web.`
             });
         }
     });
@@ -274,9 +112,18 @@ function getVehicleDisplayName(vehicle) {
     return vehicle.nombre || `${vehicle.marca} ${vehicle.modelo}`;
 }
 
-
-// Número de WhatsApp (reemplazar con número real)
 const WHATSAPP_NUMBER = '543795300020';
+
+function consultarWhatsApp(vehicleName, año, customMsg) {
+    const mensaje = customMsg || `Hola! Me interesa el ${vehicleName}${año ? ' (' + año + ')' : ''} que vi en su sitio web. ¿Podrían darme más información?`;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+}
+
+function enviarWhatsApp(mensaje) {
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+}
 
 // ============================================
 // FUNCIONES DE MODAL DE STOCK
@@ -321,9 +168,8 @@ function filterStock() {
     }
     const filtered = currentStockVehicles.filter(v => {
         const name = getVehicleDisplayName(v).toLowerCase();
-        const marca = (v.marca || '').toLowerCase();
-        const modelo = (v.modelo || '').toLowerCase();
-        return name.includes(query) || marca.includes(query) || modelo.includes(query);
+        const desc = (v.descripcion || '').toLowerCase();
+        return name.includes(query) || desc.includes(query);
     });
     renderVehicles(filtered);
 }
@@ -343,7 +189,12 @@ function closeStockModal() {
 function renderVehicles(vehicles, category) {
     const container = document.getElementById('stockVehiclesContainer');
     container.innerHTML = '';
-    
+
+    if (!vehicles || vehicles.length === 0) {
+        container.innerHTML = '<p class="empty-stock">No hay vehículos disponibles en esta categoría</p>';
+        return;
+    }
+
     vehicles.forEach(vehicle => {
         const vehicleCard = document.createElement('div');
         vehicleCard.className = 'vehicle-card';
@@ -353,11 +204,15 @@ function renderVehicles(vehicles, category) {
             ? `<p class="vehicle-description">${vehicle.descripcion}</p>`
             : '';
         const safeName = String(displayName).replace(/'/g, "\\'");
+        const imageSrc = vehicle.image;
+        const whatsappMsg = vehicle.whatsappMsg
+            ? String(vehicle.whatsappMsg).replace(/'/g, "\\'")
+            : '';
 
         vehicleCard.innerHTML = `
             <div class="vehicle-image-wrapper">
                 <img 
-                    src="${vehicle.image}" 
+                    src="${imageSrc}" 
                     alt="${displayName}" 
                     class="vehicle-image"
                     loading="lazy"
@@ -380,7 +235,7 @@ function renderVehicles(vehicles, category) {
                 </div>
                 <button 
                     class="btn-consultar" 
-                    onclick="consultarWhatsApp('${safeName}', ${vehicle.año})"
+                    onclick="consultarWhatsApp('${safeName}', ${vehicle.año || 0}, '${whatsappMsg}')"
                 >
                     Consultar por WhatsApp
                 </button>
@@ -391,22 +246,6 @@ function renderVehicles(vehicles, category) {
     });
 }
 
-/**
- * Abre WhatsApp con mensaje predefinido para un vehículo
- */
-function consultarWhatsApp(vehicleName, año) {
-    const mensaje = `Hola! Me interesa el ${vehicleName} (${año}) que vi en su sitio web. ¿Podrían darme más información?`;
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-}
-
-/**
- * Abre WhatsApp con un mensaje personalizado
- */
-function enviarWhatsApp(mensaje) {
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-}
 
 /**
  * Formatea el precio en pesos argentinos
