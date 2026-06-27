@@ -783,7 +783,7 @@ async function renderVehiclesEditor() {
                     <div class="vehicle-edit-fields">
                         <label>Nombre</label>
                         <input type="text" class="vehicle-nombre" data-id="${v.id}" value="${escapeHtml(nombre)}">
-                        <label>Precio (ARS)</label>
+                        <label>Precio</label>
                         <input type="number" class="vehicle-precio" data-id="${v.id}" value="${precio}" min="0">
                         <label>Año</label>
                         <input type="number" class="vehicle-anio" data-id="${v.id}" value="${anio}" min="1990" max="2030">
@@ -820,7 +820,7 @@ async function renderVehiclesEditor() {
                     <div class="vehicle-edit-fields">
                         <label>Nombre</label>
                         <input type="text" class="vehicle-nombre" data-id="${cv.id}" value="${escapeHtml(cv.marca + ' ' + cv.modelo)}">
-                        <label>Precio (ARS)</label>
+                        <label>Precio</label>
                         <input type="number" class="vehicle-precio" data-id="${cv.id}" value="${cv.precio}" min="0">
                         <label>Año</label>
                         <input type="number" class="vehicle-anio" data-id="${cv.id}" value="${cv.anio || 2024}" min="1990" max="2030">
