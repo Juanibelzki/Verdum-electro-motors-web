@@ -617,18 +617,34 @@ document.querySelectorAll('.service-card-flip').forEach(card => {
 // 5. CONTADOR ANIMADO
 // ============================================
 function animateCounter(element, target, duration = 2000) {
-    const step = target / (duration / 16);
-    let current = 0;
-    
-    const timer = setInterval(() => {
-        current += step;
-        if (current >= target) {
-            element.textContent = target;
-            clearInterval(timer);
+    const isPercent = target.toString().includes('%');
+    const hasPlus = !isPercent && target.toString().includes('+');
+    const cleanTarget = parseInt(target.toString().replace(/\D/g, ''));
+    if (isNaN(cleanTarget) || cleanTarget === 0) return;
+    const suffix = isPercent ? '%' : hasPlus ? '+' : '';
+
+    const startTime = performance.now();
+
+    function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+    }
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easedProgress = easeOutCubic(progress);
+        const current = Math.round(easedProgress * cleanTarget);
+
+        element.textContent = current + suffix;
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
         } else {
-            element.textContent = Math.round(current);
+            element.textContent = cleanTarget + suffix;
         }
-    }, 16);
+    }
+
+    requestAnimationFrame(update);
 }
 
 // Ejecutar contadores cuando sean visibles
@@ -636,9 +652,8 @@ const counterObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting && !entry.target.dataset.counted) {
             entry.target.dataset.counted = 'true';
-            const target = parseInt(entry.target.textContent);
-            const cleanTarget = target.toString().replace(/\D/g, '');
-            animateCounter(entry.target, parseInt(cleanTarget));
+            const text = entry.target.textContent;
+            animateCounter(entry.target, text);
             counterObserver.unobserve(entry.target);
         }
     });
