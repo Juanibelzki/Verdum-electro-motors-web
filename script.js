@@ -19,7 +19,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 2850000,
                 km: '0 KM',
                 color: 'Blanco',
-                image: 'https://placehold.co/400x225?text=VW+Virtus'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 2,
@@ -29,7 +29,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 2450000,
                 km: '0 KM',
                 color: 'Plata',
-                image: 'https://placehold.co/400x225?text=Nissan+Versa'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 3,
@@ -39,7 +39,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 2100000,
                 km: '0 KM',
                 color: 'Negro',
-                image: 'https://placehold.co/400x225?text=Chevrolet+Onix'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 4,
@@ -49,7 +49,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 3150000,
                 km: '0 KM',
                 color: 'Gris',
-                image: 'https://placehold.co/400x225?text=Toyota+Corolla'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             }
         ]
     },
@@ -64,7 +64,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 1450000,
                 km: '85000',
                 color: 'Rojo',
-                image: 'https://placehold.co/400x225?text=VW+Gol'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 6,
@@ -74,7 +74,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 1850000,
                 km: '72500',
                 color: 'Blanco',
-                image: 'https://placehold.co/400x225?text=Ford+EcoSport'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 7,
@@ -84,7 +84,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 1250000,
                 km: '95000',
                 color: 'Azul',
-                image: 'https://placehold.co/400x225?text=Peugeot+208'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 8,
@@ -94,7 +94,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 1650000,
                 km: '68000',
                 color: 'Plateado',
-                image: 'https://placehold.co/400x225?text=Honda+Civic'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 9,
@@ -104,7 +104,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 950000,
                 km: '45000',
                 color: 'Negro',
-                image: 'https://placehold.co/400x225?text=Renault+Kwid'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             }
         ]
     },
@@ -119,7 +119,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 450000,
                 km: '0 KM',
                 color: 'Negro',
-                image: 'https://placehold.co/400x225?text=Energica+EVA'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 11,
@@ -129,7 +129,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 280000,
                 km: '0 KM',
                 color: 'Rojo',
-                image: 'https://placehold.co/400x225?text=Super+Soco'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 12,
@@ -139,7 +139,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 350000,
                 km: '5000',
                 color: 'Blanco',
-                image: 'https://placehold.co/400x225?text=Volta+V1'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             }
         ]
     },
@@ -154,7 +154,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 95000,
                 km: '0 KM',
                 color: 'Negro',
-                image: 'https://placehold.co/400x225?text=Xiaomi+Mi+3'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 14,
@@ -164,7 +164,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 125000,
                 km: '0 KM',
                 color: 'Gris',
-                image: 'https://placehold.co/400x225?text=Ninebot+Max'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 15,
@@ -174,7 +174,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 140000,
                 km: '2000',
                 color: 'Blanco',
-                image: 'https://placehold.co/400x225?text=Segway+Pro'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 16,
@@ -184,7 +184,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 110000,
                 km: '0 KM',
                 color: 'Negro',
-                image: 'https://placehold.co/400x225?text=Hiboy+S2'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             }
         ]
     },
@@ -199,7 +199,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 4200000,
                 km: '0 KM',
                 color: 'Gris',
-                image: 'https://placehold.co/400x225?text=Ford+Ranger'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 18,
@@ -209,7 +209,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 4800000,
                 km: '0 KM',
                 color: 'Blanco',
-                image: 'https://placehold.co/400x225?text=Toyota+Hilux'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             },
             {
                 id: 19,
@@ -219,7 +219,7 @@ const DEFAULT_VEHICLE_INVENTORY = {
                 precio: 1800000,
                 km: '15000',
                 color: 'Blanco',
-                image: 'https://placehold.co/400x225?text=Fiat+Fiorino'
+                image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E'
             }
         ]
     }
@@ -273,7 +273,7 @@ async function getMergedVehicleInventory() {
                 km: cv.km,
                 color: cv.color,
                 descripcion: cv.descripcion || '',
-                image: cv.image || `https://placehold.co/400x225?text=${encodeURIComponent(cv.marca + ' ' + cv.modelo)}`
+                image: cv.image || `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E`
             });
         }
     });
@@ -373,7 +373,7 @@ function renderVehicles(vehicles, category) {
                     alt="${displayName}" 
                     class="vehicle-image"
                     loading="lazy"
-                    onerror="this.src='https://placehold.co/400x225/1a1a2e/E09145?text=Sin+imagen'"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"225\"/%3E'"
                 >
             </div>
             <div class="vehicle-info">
