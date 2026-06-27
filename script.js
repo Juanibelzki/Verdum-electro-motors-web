@@ -822,7 +822,7 @@ function createFloatingWhatsAppButton() {
 
 // Crear botón flotante después de cargar
 window.addEventListener('load', () => {
-    createFloatingWhatsAppButton();
+    // createFloatingWhatsAppButton();
 });
 
 // ============================================
