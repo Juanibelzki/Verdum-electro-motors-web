@@ -10,9 +10,9 @@ const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
 /* ============================================
    SUPABASE - CLIENTE ADMIN
    ============================================ */
-const SUPABASE_URL = 'https://ymiakfjhgndqhdtoubkr.supabaseClient.co';
+const SUPABASE_URL = 'https://ymiakfjhgndqhdtoubkr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltaWFrZmpoZ25kcWhkdG91YmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwMjkyNTIsImV4cCI6MjEwMDYwNTI1Mn0.Q0opccAEYWgkuyV1unwnpNu0OiWbio3E1pAURi8GPaI';
-const supabaseClientClient = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const CATEGORY_SLUG_TO_ID = {
     'autos-0km': 1,
@@ -713,14 +713,14 @@ async function loadLogoPreview() {
 
 async function uploadVehicleImageToSupabase(adminId, base64Data) {
     try {
-        const idMap = loadStoredData('supabaseClient_vehicle_map', {});
-        const supabaseClientVehicleId = idMap[adminId];
-        if (!supabaseClientVehicleId) return;
+        const idMap = loadStoredData('supabase_vehicle_map', {});
+        const supabaseVehicleId = idMap[adminId];
+        if (!supabaseVehicleId) return;
 
         const blob = await (await fetch(base64Data)).blob();
         const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
         const fileName = `${Date.now()}-${adminId}.${ext}`;
-        const storagePath = `vehicles/${supabaseClientVehicleId}/${fileName}`;
+        const storagePath = `vehicles/${supabaseVehicleId}/${fileName}`;
 
         const { error: upErr } = await supabaseClient.storage
             .from('stock-photos')
@@ -730,7 +730,7 @@ async function uploadVehicleImageToSupabase(adminId, base64Data) {
         const { data: { publicUrl } } = supabaseClient.storage.from('stock-photos').getPublicUrl(storagePath);
 
         await supabaseClient.from('photos').insert({
-            vehicle_id: supabaseClientVehicleId,
+            vehicle_id: supabaseVehicleId,
             url: publicUrl,
             url_thumb: publicUrl,
             posicion: 0
@@ -950,7 +950,7 @@ async function saveVehicle(id) {
 
 
     // Upsert en Supabase
-    let supabaseClientVehicleId = null;
+    let supabaseVehicleId = null;
     try {
         const { data: existing } = await supabaseClient
             .from('vehicles')
@@ -981,7 +981,7 @@ async function saveVehicle(id) {
             result = await supabaseClient.from('vehicles').insert([payload]).select().single();
         }
         if (result.error) throw result.error;
-        supabaseClientVehicleId = result.data.id;
+        supabaseVehicleId = result.data.id;
 
         // Subir imagen si existe
         const imgEl = card.querySelector('.vehicle-preview-img');
@@ -989,15 +989,15 @@ async function saveVehicle(id) {
             const blob = await (await fetch(imgEl.src)).blob();
             const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
             const fileName = `${Date.now()}-${id}.${ext}`;
-            const storagePath = `vehicles/${supabaseClientVehicleId}/${fileName}`;
+            const storagePath = `vehicles/${supabaseVehicleId}/${fileName}`;
 
             const { error: upErr } = await supabaseClient.storage
                 .from('stock-photos')
                 .upload(storagePath, blob, { upsert: true, contentType: blob.type });
             if (!upErr) {
-                const { data: { publicUrl } } = supabaseClient.storage.from('stock-photos').getPublicUrl(storagePath);
+        const { data: { publicUrl } } = supabaseClient.storage.from('stock-photos').getPublicUrl(storagePath);
                 await supabaseClient.from('photos').insert({
-                    vehicle_id: supabaseClientVehicleId,
+                    vehicle_id: supabaseVehicleId,
                     url: publicUrl,
                     url_thumb: publicUrl,
                     posicion: 0
@@ -1005,10 +1005,10 @@ async function saveVehicle(id) {
             }
         }
 
-        // Almacenar el mapping admin_id -> supabaseClient_id
-        const idMap = loadStoredData('supabaseClient_vehicle_map', {});
-        idMap[id] = supabaseClientVehicleId;
-        saveStoredData('supabaseClient_vehicle_map', idMap);
+        // Almacenar el mapping admin_id -> supabase_id
+        const idMap = loadStoredData('supabase_vehicle_map', {});
+        idMap[id] = supabaseVehicleId;
+        saveStoredData('supabase_vehicle_map', idMap);
 
     } catch (sbErr) {
         console.warn('Supabase save failed, falling back to localStorage:', sbErr.message);
@@ -1107,9 +1107,9 @@ async function saveNewVehicle() {
         const { data, error } = await supabaseClient.from('vehicles').insert([payload]).select().single();
         if (error) throw error;
 
-        const idMap = loadStoredData('supabaseClient_vehicle_map', {});
+        const idMap = loadStoredData('supabase_vehicle_map', {});
         idMap[newId] = data.id;
-        saveStoredData('supabaseClient_vehicle_map', idMap);
+        saveStoredData('supabase_vehicle_map', idMap);
     } catch (sbErr) {
         console.warn('Supabase insert failed:', sbErr.message);
     }
@@ -1140,15 +1140,15 @@ async function deleteCustomVehicle(id) {
 
     // --- SUPABASE ---
     try {
-        const idMap = loadStoredData('supabaseClient_vehicle_map', {});
-        const supabaseClientId = idMap[id];
-        if (supabaseClientId) {
+        const idMap = loadStoredData('supabase_vehicle_map', {});
+        const supabaseId = idMap[id];
+        if (supabaseId) {
             // Borrar fotos asociadas
-            await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseClientId);
+            await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
             // Borrar vehículo
-            await supabaseClient.from('vehicles').delete().eq('id', supabaseClientId);
+            await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
             delete idMap[id];
-            saveStoredData('supabaseClient_vehicle_map', idMap);
+            saveStoredData('supabase_vehicle_map', idMap);
         }
     } catch (sbErr) {
         console.warn('Supabase delete failed:', sbErr.message);

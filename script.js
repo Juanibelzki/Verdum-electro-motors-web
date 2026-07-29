@@ -6,10 +6,10 @@
 // SUPABASE - CONEXIÓN Y CONSULTAS
 // ============================================
 
-const SUPABASE_URL = 'https://ymiakfjhgndqhdtoubkr.supabaseClient.co';
+const SUPABASE_URL = 'https://ymiakfjhgndqhdtoubkr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltaWFrZmpoZ25kcWhkdG91YmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwMjkyNTIsImV4cCI6MjEwMDYwNTI1Mn0.Q0opccAEYWgkuyV1unwnpNu0OiWbio3E1pAURi8GPaI';
 
-const supabaseClient = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const CATEGORY_MAPPING = {
     'autos-0km': '0km',
