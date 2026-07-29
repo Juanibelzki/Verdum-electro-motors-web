@@ -3,10 +3,15 @@
    ============================================ */
 
 // ============================================
-// SISTEMA DE STOCK POR CARPETAS (JSON EN REPO)
+// SUPABASE - CONEXIÓN Y CONSULTAS
 // ============================================
 
-const CATEGORY_FOLDERS = {
+const SUPABASE_URL = 'https://ymiakfjhgndqhdtoubkr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltaWFrZmpoZ25kcWhkdG91YmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwMjkyNTIsImV4cCI6MjEwMDYwNTI1Mn0.Q0opccAEYWgkuyV1unwnpNu0OiWbio3E1pAURi8GPaI';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const CATEGORY_MAPPING = {
     'autos-0km': '0km',
     'autos-usados': 'usados',
     'motos-electricas': 'motos',
@@ -14,63 +19,63 @@ const CATEGORY_FOLDERS = {
     'vehiculos-especiales': 'especiales'
 };
 
-const CATEGORY_TITLES = {
-    'autos-0km': 'Autos 0KM',
-    'autos-usados': 'Autos Usados',
-    'motos-electricas': 'Motos Eléctricas',
-    'patinetas-electricas': 'Patinetas Eléctricas',
-    'vehiculos-especiales': 'Vehículos Especiales'
-};
+const HTML_KEY_FROM_SLUG = Object.fromEntries(
+    Object.entries(CATEGORY_MAPPING).map(([k, v]) => [v, k])
+);
 
 let stockCache = null;
 
-async function loadStockFromJSON() {
+async function loadStockFromSupabase() {
     if (stockCache) return stockCache;
+
+    const { data: categories } = await supabase
+        .from('categories')
+        .select('*')
+        .order('posicion');
 
     const inventory = {};
     let idCounter = 0;
 
-    for (const catKey of Object.keys(CATEGORY_FOLDERS)) {
-        const folder = CATEGORY_FOLDERS[catKey];
-        let slugs = [];
-        try {
-            const resp = await fetch(`images/stock/${folder}/index.json`);
-            slugs = await resp.json();
-        } catch {}
+    for (const cat of categories || []) {
+        const { data: vehicles } = await supabase
+            .from('vehicles')
+            .select(`
+                id, slug, nombre, marca, modelo, año, km, color,
+                precio, precio_numero, descripcion, whatsapp_msg,
+                photos(url, url_thumb, posicion)
+            `)
+            .eq('category_id', cat.id)
+            .eq('activo', true)
+            .order('created_at', { ascending: false })
+            .limit(100);
 
-        const vehicles = [];
+        const mapped = (vehicles || []).map(v => {
+            idCounter++;
+            const sorted = (v.photos || []).sort((a, b) => a.posicion - b.posicion);
+            const firstPhoto = sorted[0];
+            const photoUrl = firstPhoto?.url || `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E`;
 
-        for (const slug of slugs) {
-            try {
-                const resp = await fetch(`images/stock/${folder}/${slug}/datos.json`);
-                const data = await resp.json();
-                idCounter++;
+            return {
+                id: idCounter,
+                uuid: v.id,
+                marca: v.marca,
+                modelo: v.modelo,
+                nombre: v.nombre,
+                año: v.año,
+                km: v.km,
+                color: v.color,
+                precio: v.precio || 'Consultar',
+                descripcion: v.descripcion || '',
+                image: photoUrl,
+                fotos: v.photos || [],
+                slug: v.slug,
+                folder: cat.slug,
+                whatsappMsg: v.whatsapp_msg || `Hola! Me interesa el ${v.nombre} que vi en su sitio web.`
+            };
+        });
 
-                const marca = data.nombre.split(' ')[0] || slug.split('-')[0];
-                const firstPhoto = data.fotos && data.fotos.length > 0
-                    ? `images/stock/${folder}/${slug}/${data.fotos[0]}`
-                    : `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E`;
-
-                vehicles.push({
-                    id: idCounter,
-                    marca: marca,
-                    modelo: data.nombre,
-                    nombre: data.nombre,
-                    año: data.año,
-                    km: data.km,
-                    color: data.color,
-                    precio: data.precio || 'Consultar',
-                    descripcion: data.descripcion || '',
-                    image: firstPhoto,
-                    fotos: data.fotos || [],
-                    slug: slug,
-                    folder: folder,
-                    whatsappMsg: data.whatsapp || `Hola! Me interesa el ${data.nombre} que vi en su sitio web.`
-                });
-            } catch {}
-        }
-
-        inventory[catKey] = { title: CATEGORY_TITLES[catKey], vehicles: vehicles };
+        const htmlKey = HTML_KEY_FROM_SLUG[cat.slug] || cat.slug;
+        inventory[htmlKey] = { title: cat.nombre, vehicles: mapped };
     }
 
     stockCache = inventory;
@@ -81,7 +86,7 @@ const VEHICLES_STORAGE_KEY = 'verdun_vehicles';
 const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
 
 async function getMergedVehicleInventory() {
-    const inventory = await loadStockFromJSON();
+    const inventory = await loadStockFromSupabase();
 
     const overrides = JSON.parse(localStorage.getItem(VEHICLES_STORAGE_KEY)) || {};
     Object.keys(inventory).forEach(catKey => {
