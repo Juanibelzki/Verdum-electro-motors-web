@@ -7,6 +7,29 @@ const IMAGES_STORAGE_KEY = 'verdun_images';
 const VEHICLES_STORAGE_KEY = 'verdun_vehicles';
 const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
 
+/* ============================================
+   SUPABASE - CLIENTE ADMIN
+   ============================================ */
+const SUPABASE_URL = 'https://ymiakfjhgndqhdtoubkr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltaWFrZmpoZ25kcWhkdG91YmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwMjkyNTIsImV4cCI6MjEwMDYwNTI1Mn0.Q0opccAEYWgkuyV1unwnpNu0OiWbio3E1pAURi8GPaI';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const CATEGORY_SLUG_TO_ID = {
+    'autos-0km': 1,
+    'autos-usados': 2,
+    'motos-electricas': 3,
+    'patinetas-electricas': 4,
+    'vehiculos-especiales': 5
+};
+
+const CATEGORY_TEXT_TO_SLUG = {
+    'Autos 0KM': 'autos-0km',
+    'Autos Usados': 'autos-usados',
+    'Motos Eléctricas': 'motos-electricas',
+    'Patinetas Eléctricas': 'patinetas-electricas',
+    'Vehículos Especiales': 'vehiculos-especiales'
+};
+
 let pendingLogoData = null;
 let pendingLogoUrl = null;
 let imagesUiInitialized = false;
@@ -649,6 +672,10 @@ function initImagesSection() {
                 setVehicleOverrides(overrides);
             }
             renderVehiclesEditor();
+
+            // Subir a Supabase Storage si tenemos el mapping
+            uploadVehicleImageToSupabase(id, base64);
+
             addChange(`Foto del vehículo #${id} actualizada`);
             e.target.value = '';
         });
@@ -681,6 +708,35 @@ async function loadLogoPreview() {
         updateLogoPreview(src);
         pendingLogoData = logo.data || null;
         pendingLogoUrl = logo.url || null;
+    }
+}
+
+async function uploadVehicleImageToSupabase(adminId, base64Data) {
+    try {
+        const idMap = loadStoredData('supabase_vehicle_map', {});
+        const supabaseVehicleId = idMap[adminId];
+        if (!supabaseVehicleId) return;
+
+        const blob = await (await fetch(base64Data)).blob();
+        const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+        const fileName = `${Date.now()}-${adminId}.${ext}`;
+        const storagePath = `vehicles/${supabaseVehicleId}/${fileName}`;
+
+        const { error: upErr } = await supabase.storage
+            .from('stock-photos')
+            .upload(storagePath, blob, { upsert: true, contentType: blob.type });
+        if (upErr) throw upErr;
+
+        const { data: { publicUrl } } = supabase.storage.from('stock-photos').getPublicUrl(storagePath);
+
+        await supabase.from('photos').insert({
+            vehicle_id: supabaseVehicleId,
+            url: publicUrl,
+            url_thumb: publicUrl,
+            posicion: 0
+        });
+    } catch (err) {
+        console.warn('Supabase image upload failed:', err.message);
     }
 }
 
@@ -865,10 +921,103 @@ async function saveVehicle(id) {
     const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
     const isCustom = customVehicles.some(v => v.id === id);
 
+    // --- SUPABASE: guardar vehículo ---
+    let categorySlug = 'autos-usados';
+    let marca = 'Generica';
+    let modelo = nombre;
+    let whatsapp_msg = `Hola! Quiero consultar por el ${nombre}`;
+
+    if (isCustom) {
+        const cv = customVehicles.find(v => v.id === id);
+        if (cv) {
+            categorySlug = cv.category;
+            marca = cv.marca;
+            modelo = cv.modelo;
+        }
+    } else {
+        const dv = DEFAULT_VEHICLES.find(v => v.id === id);
+        if (dv) {
+            categorySlug = CATEGORY_TEXT_TO_SLUG[dv.category] || 'autos-usados';
+            const parts = nombre.split(' ');
+            marca = parts[0] || dv.marca;
+            modelo = parts.slice(1).join(' ') || dv.modelo;
+        }
+    }
+
+    const catId = CATEGORY_SLUG_TO_ID[categorySlug] || 2;
+    const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    const precioNum = parseFloat(precio);
+
+
+    // Upsert en Supabase
+    let supabaseVehicleId = null;
+    try {
+        const { data: existing } = await supabase
+            .from('vehicles')
+            .select('id')
+            .eq('slug', slug)
+            .maybeSingle();
+
+        const payload = {
+            category_id: catId,
+            slug,
+            nombre,
+            marca,
+            modelo,
+            año: anio,
+            km,
+            color,
+            precio: `$${precio.toLocaleString('es-AR')}`,
+            precio_numero: precioNum,
+            descripcion,
+            whatsapp_msg,
+            activo: true
+        };
+
+        let result;
+        if (existing) {
+            result = await supabase.from('vehicles').update(payload).eq('id', existing.id).select().single();
+        } else {
+            result = await supabase.from('vehicles').insert([payload]).select().single();
+        }
+        if (result.error) throw result.error;
+        supabaseVehicleId = result.data.id;
+
+        // Subir imagen si existe
+        const imgEl = card.querySelector('.vehicle-preview-img');
+        if (imgEl && imgEl.src && imgEl.src.startsWith('data:')) {
+            const blob = await (await fetch(imgEl.src)).blob();
+            const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+            const fileName = `${Date.now()}-${id}.${ext}`;
+            const storagePath = `vehicles/${supabaseVehicleId}/${fileName}`;
+
+            const { error: upErr } = await supabase.storage
+                .from('stock-photos')
+                .upload(storagePath, blob, { upsert: true, contentType: blob.type });
+            if (!upErr) {
+                const { data: { publicUrl } } = supabase.storage.from('stock-photos').getPublicUrl(storagePath);
+                await supabase.from('photos').insert({
+                    vehicle_id: supabaseVehicleId,
+                    url: publicUrl,
+                    url_thumb: publicUrl,
+                    posicion: 0
+                });
+            }
+        }
+
+        // Almacenar el mapping admin_id -> supabase_id
+        const idMap = loadStoredData('supabase_vehicle_map', {});
+        idMap[id] = supabaseVehicleId;
+        saveStoredData('supabase_vehicle_map', idMap);
+
+    } catch (sbErr) {
+        console.warn('Supabase save failed, falling back to localStorage:', sbErr.message);
+    }
+
+    // --- localStorage fallback ---
     if (isCustom) {
         const updated = customVehicles.map(v => {
             if (v.id !== id) return v;
-            // Parse name back to marca + modelo
             const parts = nombre.split(' ');
             return {
                 ...v,
@@ -933,6 +1082,39 @@ async function saveNewVehicle() {
         'vehiculos-especiales': 'Vehículos Especiales'
     };
 
+    const nombre = `${marca} ${modelo}`;
+    const catId = CATEGORY_SLUG_TO_ID[category] || 2;
+    const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
+    // --- SUPABASE ---
+    try {
+        const payload = {
+            category_id: catId,
+            slug,
+            nombre,
+            marca,
+            modelo,
+            año: anio,
+            km: km || '0 KM',
+            color: color || '—',
+            precio: `$${precio.toLocaleString('es-AR')}`,
+            precio_numero: precio,
+            descripcion,
+            whatsapp_msg: `Hola! Quiero consultar por el ${nombre}`,
+            activo: true
+        };
+
+        const { data, error } = await supabase.from('vehicles').insert([payload]).select().single();
+        if (error) throw error;
+
+        const idMap = loadStoredData('supabase_vehicle_map', {});
+        idMap[newId] = data.id;
+        saveStoredData('supabase_vehicle_map', idMap);
+    } catch (sbErr) {
+        console.warn('Supabase insert failed:', sbErr.message);
+    }
+
+    // --- localStorage fallback ---
     customVehicles.push({
         id: newId,
         category: category,
@@ -956,6 +1138,23 @@ async function saveNewVehicle() {
 async function deleteCustomVehicle(id) {
     if (!confirm('¿Eliminar este vehículo personalizado?')) return;
 
+    // --- SUPABASE ---
+    try {
+        const idMap = loadStoredData('supabase_vehicle_map', {});
+        const supabaseId = idMap[id];
+        if (supabaseId) {
+            // Borrar fotos asociadas
+            await supabase.from('photos').delete().eq('vehicle_id', supabaseId);
+            // Borrar vehículo
+            await supabase.from('vehicles').delete().eq('id', supabaseId);
+            delete idMap[id];
+            saveStoredData('supabase_vehicle_map', idMap);
+        }
+    } catch (sbErr) {
+        console.warn('Supabase delete failed:', sbErr.message);
+    }
+
+    // --- localStorage ---
     let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
     const removed = customVehicles.find(v => v.id === id);
     customVehicles = customVehicles.filter(v => v.id !== id);
