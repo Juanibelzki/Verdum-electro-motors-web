@@ -14,14 +14,6 @@ const SUPABASE_URL = 'https://ymiakfjhgndqhdtoubkr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltaWFrZmpoZ25kcWhkdG91YmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwMjkyNTIsImV4cCI6MjEwMDYwNTI1Mn0.Q0opccAEYWgkuyV1unwnpNu0OiWbio3E1pAURi8GPaI';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const CATEGORY_SLUG_TO_ID = {
-    'autos-0km': 1,
-    'autos-usados': 2,
-    'motos-electricas': 3,
-    'patinetas-electricas': 4,
-    'vehiculos-especiales': 5
-};
-
 const CATEGORY_TEXT_TO_SLUG = {
     'Autos 0KM': 'autos-0km',
     'Autos Usados': 'autos-usados',
@@ -29,6 +21,35 @@ const CATEGORY_TEXT_TO_SLUG = {
     'Patinetas Eléctricas': 'patinetas-electricas',
     'Vehículos Especiales': 'vehiculos-especiales'
 };
+
+let categoryIdCache = null;
+
+const CATEGORY_ADMIN_TO_DB = {
+    'autos-0km': '0km',
+    'autos-usados': 'usados',
+    'motos-electricas': 'motos',
+    'patinetas-electricas': 'patacletas',
+    'vehiculos-especiales': 'especiales'
+};
+
+async function getCategoryIdMap() {
+    if (categoryIdCache) return categoryIdCache;
+    try {
+        const { data } = await supabaseClient.from('categories').select('id, slug');
+        const map = {};
+        (data || []).forEach(cat => { map[cat.slug] = cat.id; });
+        categoryIdCache = map;
+        return map;
+    } catch {
+        return {};
+    }
+}
+
+async function resolveCategoryId(slug) {
+    const map = await getCategoryIdMap();
+    const dbSlug = CATEGORY_ADMIN_TO_DB[slug] || slug;
+    return map[dbSlug] || null;
+}
 
 let pendingLogoData = null;
 let pendingLogoUrl = null;
@@ -944,7 +965,7 @@ async function saveVehicle(id) {
         }
     }
 
-    const catId = CATEGORY_SLUG_TO_ID[categorySlug] || 2;
+    const catId = await resolveCategoryId(categorySlug);
     const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
     const precioNum = parseFloat(precio);
 
@@ -1083,7 +1104,7 @@ async function saveNewVehicle() {
     };
 
     const nombre = `${marca} ${modelo}`;
-    const catId = CATEGORY_SLUG_TO_ID[category] || 2;
+    const catId = await resolveCategoryId(category);
     const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
     // --- SUPABASE ---
