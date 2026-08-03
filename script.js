@@ -82,35 +82,8 @@ async function loadStockFromSupabase() {
     return inventory;
 }
 
-const VEHICLES_STORAGE_KEY = 'verdun_vehicles';
-const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
-
 async function getMergedVehicleInventory() {
-    const inventory = await loadStockFromSupabase();
-
-    const overrides = JSON.parse(localStorage.getItem(VEHICLES_STORAGE_KEY)) || {};
-    Object.keys(inventory).forEach(catKey => {
-        inventory[catKey].vehicles = inventory[catKey].vehicles.map(v => {
-            const o = overrides[v.id];
-            if (!o) return v;
-            return { ...v, nombre: o.nombre, descripcion: o.descripcion, precio: o.precio !== undefined ? o.precio : v.precio, año: o.anio !== undefined ? o.anio : v.año, km: o.km !== undefined ? o.km : v.km, color: o.color !== undefined ? o.color : v.color, image: o.image || v.image };
-        });
-    });
-
-    const customVehicles = JSON.parse(localStorage.getItem(CUSTOM_VEHICLES_KEY)) || [];
-    customVehicles.forEach(cv => {
-        if (inventory[cv.category]) {
-            inventory[cv.category].vehicles.push({
-                id: cv.id, marca: cv.marca, modelo: cv.modelo, nombre: cv.nombre || `${cv.marca} ${cv.modelo}`,
-                año: cv.anio, precio: cv.precio, km: cv.km, color: cv.color,
-                descripcion: cv.descripcion || '',
-                image: cv.image || `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E`,
-                fotos: [], slug: '', folder: '', whatsappMsg: `Hola! Me interesa el ${cv.marca} ${cv.modelo} que vi en su sitio web.`
-            });
-        }
-    });
-
-    return inventory;
+    return await loadStockFromSupabase();
 }
 
 function getVehicleDisplayName(vehicle) {
