@@ -264,14 +264,68 @@ function getAdminData(key, fallback) {
     try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; }
 }
 
-function loadAdminContent() {
-    const services = getAdminData('services', []);
-    const content = getAdminData('content', {});
-    const testimonios = getAdminData('testimonios', []);
-    const financing = getAdminData('financing_images', {});
+async function sbGetAdminContent(key) {
+    try {
+        const { data } = await supabaseClient
+            .from('admin_content')
+            .select('data')
+            .eq('key', key)
+            .maybeSingle();
+        if (data && data.data !== null && data.data !== undefined) {
+            try { localStorage.setItem(key, JSON.stringify(data.data)); } catch {}
+            return data.data;
+        }
+    } catch {
+        // offline: usar fallback local
+    }
+    return null;
+}
 
-    applyFinancingData(financing);
-    applyContentData(content, services, testimonios);
+async function loadAdminContent() {
+    const [services, content, testimonios, financing, images] = await Promise.all([
+        sbGetAdminContent('services'),
+        sbGetAdminContent('content'),
+        sbGetAdminContent('testimonios'),
+        sbGetAdminContent('financing_images'),
+        sbGetAdminContent('site_images')
+    ]);
+
+    applyFinancingData(financing || getAdminData('financing_images', {}));
+    applyContentData(content || getAdminData('content', {}), services || getAdminData('services', []), testimonios || getAdminData('testimonios', []));
+    applySiteImages(images || getAdminData('verdun_images', {}));
+}
+
+function applySiteImages(images) {
+    if (!images || Object.keys(images).length === 0) return;
+
+    const logo = document.querySelector('.logo-image');
+    if (logo) {
+        const logoData = images.logo;
+        if (logoData && (logoData.url || logoData.data)) {
+            logo.src = logoData.url || logoData.data;
+        }
+    }
+
+    const heroImg = document.querySelector('.hero-image');
+    const heroData = images.hero_visual;
+    if (heroImg && heroData && (heroData.url || heroData.data)) {
+        heroImg.src = heroData.url || heroData.data;
+    }
+
+    const serviceImages = document.querySelectorAll('.service-card-front .service-image');
+    serviceImages.forEach((img, index) => {
+        const key = `service_${index + 1}`;
+        const slot = images[key];
+        if (img && slot && (slot.url || slot.data)) {
+            img.src = slot.url || slot.data;
+        }
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadAdminContent);
+} else {
+    loadAdminContent();
 }
 
 function applyFinancingData(financing) {

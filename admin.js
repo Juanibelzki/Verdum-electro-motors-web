@@ -56,6 +56,42 @@ let pendingLogoUrl = null;
 let imagesUiInitialized = false;
 const dataCache = {};
 
+const contentCache = {};
+
+async function sbGetContent(key) {
+    if (contentCache[key] !== undefined) return contentCache[key];
+    try {
+        const { data } = await supabaseClient
+            .from('admin_content')
+            .select('data')
+            .eq('key', key)
+            .maybeSingle();
+        contentCache[key] = data && data.data !== null && data.data !== undefined ? data.data : null;
+        return contentCache[key];
+    } catch {
+        return null;
+    }
+}
+
+async function sbSaveContent(key, data) {
+    contentCache[key] = data;
+    const { error } = await supabaseClient
+        .from('admin_content')
+        .upsert({ key, data, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (error) throw error;
+}
+
+async function sbUploadImage(folder, filename, blob, contentType) {
+    const { error } = await supabaseClient.storage
+        .from('stock-photos')
+        .upload(`${folder}/${filename}`, blob, { upsert: true, contentType });
+    if (error) throw error;
+    const { data: { publicUrl } } = supabaseClient.storage
+        .from('stock-photos')
+        .getPublicUrl(`${folder}/${filename}`);
+    return publicUrl;
+}
+
 const SITE_IMAGE_SLOTS = [
     { key: 'hero_visual', label: 'Hero Visual', fileHint: 'hero_visual.png' },
     { key: 'service_1', label: 'Servicio 1 — Autos 0KM', fileHint: 'service_1.png' },
@@ -248,7 +284,7 @@ async function loadAllData() {
 }
 
 async function loadMetrics() {
-    const metrics = loadStoredData('metrics', [
+    const metrics = await sbGetContent('metrics') || loadStoredData('metrics', [
         { icon: '🚗', text: '0KM y Usados' },
         { icon: '💳', text: 'Financiación sin banco' },
         { icon: '⚡', text: 'Motos y Bicicletas Eléctricas' },
@@ -277,11 +313,12 @@ async function loadServices() {
         { desc: 'Movilidad urbana sostenible y económica. Perfecta para desplazamientos.', features: ['Sostenible', 'Práctica', 'Urbana'] },
         { desc: 'Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.', features: ['4x4', 'Comerciales', 'A medida'] }
     ];
-    const services = loadStoredData('services', defaults);
+    const services = await sbGetContent('services') || loadStoredData('services', defaults);
     if (services.length !== 5) {
         services.length = 5;
         defaults.forEach((d, i) => { if (!services[i]) services[i] = d; });
         dataCache.services = services;
+        try { await sbSaveContent('services', services); } catch {}
         try { localStorage.setItem('services', JSON.stringify(services)); } catch {}
     }
 
@@ -304,7 +341,7 @@ async function loadFinancingOptions() {
         financing_bank: { title: 'Crédito Bancario', description: 'Mejores tasas del mercado con nuestros bancos aliados.', features: ['Tasas competitivas', 'Múltiples opciones', 'Tramitación rápida', 'Asesoramiento gratuito'] },
         financing_permuta: { title: 'Permuta', description: 'Tu usado como parte de pago. Tasación justa y transparente.', features: ['Tasación real', 'Proceso transparente', 'Compra de tu usado', 'Trámites incluidos'] }
     };
-    const financing = loadStoredData('financing_images', defaults);
+    const financing = await sbGetContent('financing_images') || loadStoredData('financing_images', defaults);
     ['financing_own', 'financing_bank', 'financing_permuta'].forEach(type => {
         const data = financing[type] || {};
         const titleEl = document.getElementById(`${type}-title`);
@@ -329,9 +366,10 @@ async function updateFinancingOption(type) {
     const featuresStr = document.getElementById(`${type}-features`).value.trim();
     if (!title || !description) { alert('Completá título y descripción'); return; }
     const features = featuresStr.split(',').map(f => f.trim()).filter(Boolean);
-    const financing = loadStoredData('financing_images', {});
+    const financing = await sbGetContent('financing_images') || {};
     financing[type] = { ...(financing[type] || {}), title, description, features, updatedAt: new Date().toISOString() };
-    saveStoredData('financing_images', financing);
+    await sbSaveContent('financing_images', financing);
+    try { localStorage.setItem('financing_images', JSON.stringify(financing)); } catch {}
     await addChange(`Opción de financiación "${type}" actualizada`);
     alert('✓ Guardado');
 }
@@ -345,12 +383,20 @@ async function handleFinancingImageUpload(event) {
 
     const result = await resizeImage(file, 1200, 900, 0.85);
     const base64 = await blobToBase64(result.blob);
-    const financing = loadStoredData('financing_images', {});
+    let url = null;
+    try {
+        url = await sbUploadImage('financing', `${type}.webp`, result.blob, 'image/webp');
+    } catch (e) {
+        console.warn('No se pudo subir la imagen de financiación a Supabase:', e);
+    }
+    const financing = await sbGetContent('financing_images') || {};
     if (!financing[type]) financing[type] = {};
+    if (url) financing[type].url = url;
     financing[type].fallback_base64 = base64;
     financing[type].name = file.name;
     financing[type].uploadedAt = new Date().toISOString();
-    saveStoredData('financing_images', financing);
+    await sbSaveContent('financing_images', financing);
+    try { localStorage.setItem('financing_images', JSON.stringify(financing)); } catch {}
     const previewImg = document.getElementById(`preview-${type}`);
     if (previewImg) { previewImg.src = base64; previewImg.style.display = 'block'; }
     const ph = document.getElementById(`ph-${type}`);
@@ -360,7 +406,7 @@ async function handleFinancingImageUpload(event) {
 }
 
 async function loadContent() {
-    const content = loadStoredData('content', {
+    const content = await sbGetContent('content') || loadStoredData('content', {
         heroTitle: 'Vehículos Premium',
         heroHighlight: 'Para tu Estilo',
         heroSubtitle: 'Autos 0KM, Usados garantizados y Motos Eléctricas. 30 años brindando la mejor experiencia en movilidad.',
@@ -399,11 +445,12 @@ async function updateMetric(index) {
     document.getElementById(`metricIcon${index}`).textContent = icon;
     document.getElementById(`metricText${index}`).textContent = text;
 
-    const metrics = loadStoredData('metrics', []);
+    const metrics = await sbGetContent('metrics') || [];
     if (!metrics[index]) metrics[index] = {};
     metrics[index].icon = icon;
     metrics[index].text = text;
-    saveStoredData('metrics', metrics);
+    await sbSaveContent('metrics', metrics);
+    try { saveStoredData('metrics', metrics); } catch {}
 
     await addChange(`Métrica ${index + 1} actualizada: "${text}"`);
     alert('✓ Métrica guardada correctamente');
@@ -419,11 +466,12 @@ async function updateService(index) {
     }
 
     const features = featuresStr.split(',').map((f) => f.trim());
-    const services = loadStoredData('services', []);
+    const services = await sbGetContent('services') || [];
     if (!services[index]) services[index] = {};
     services[index].desc = desc;
     services[index].features = features;
-    saveStoredData('services', services);
+    await sbSaveContent('services', services);
+    try { saveStoredData('services', services); } catch {}
 
     await addChange(`Servicio ${index + 1} actualizado`);
     alert('✓ Servicio guardado correctamente');
@@ -443,13 +491,14 @@ async function updateContent() {
         return;
     }
 
-    saveStoredData('content', content);
+    await sbSaveContent('content', content);
+    try { saveStoredData('content', content); } catch {}
     await addChange('Contenido principal actualizado');
     alert('✓ Contenido guardado correctamente');
 }
 
 async function loadTestimonios() {
-    const testimonios = loadStoredData('testimonios', [
+    const testimonios = await sbGetContent('testimonios') || loadStoredData('testimonios', [
         { text: 'Excelente atención y vehículos de primera calidad. Compré mi Volkswagen con Verdun y no me arrepiento. Recomiendo a todos mis amigos.', author: 'Carlos M.', role: 'Cliente satisfecho' },
         { text: 'La financiación sin banco fue súper rápida. En una tarde resolvimos todo y me llevé el auto. Transparencia total.', author: 'María L.', role: 'Compradora 0KM' },
         { text: 'Traté con muchas concesionarias. Verdun se destaca por profesionalismo y honestidad. El mejor lugar para comprar en Corrientes.', author: 'Juan P.', role: 'Cliente recurrente' }
@@ -476,12 +525,13 @@ async function updateTestimonio(index) {
         return;
     }
 
-    const testimonios = loadStoredData('testimonios', []);
+    const testimonios = await sbGetContent('testimonios') || [];
     if (!testimonios[index]) testimonios[index] = {};
     testimonios[index].text = text;
     testimonios[index].author = author;
     testimonios[index].role = role;
-    saveStoredData('testimonios', testimonios);
+    await sbSaveContent('testimonios', testimonios);
+    try { saveStoredData('testimonios', testimonios); } catch {}
 
     await addChange(`Testimonio ${index + 1} actualizado`);
     alert('✓ Testimonio guardado correctamente');
@@ -571,12 +621,13 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;');
 }
 
-function getSiteImages() {
-    return loadStoredData(IMAGES_STORAGE_KEY, {});
+async function getSiteImages() {
+    return await sbGetContent('site_images') || loadStoredData(IMAGES_STORAGE_KEY, {});
 }
 
-function setSiteImages(images) {
-    saveStoredData(IMAGES_STORAGE_KEY, images);
+async function setSiteImages(images) {
+    await sbSaveContent('site_images', images);
+    try { saveStoredData(IMAGES_STORAGE_KEY, images); } catch {}
 }
 
 function getVehicleOverrides() {
@@ -608,6 +659,11 @@ function initImagesSection() {
             const base64 = await blobToBase64(result.blob);
             pendingLogoData = base64;
             pendingLogoUrl = null;
+            try {
+                pendingLogoUrl = await sbUploadImage('site', 'logo.webp', result.blob, 'image/webp');
+            } catch (err) {
+                console.warn('No se pudo subir el logo a Supabase:', err);
+            }
             updateLogoPreview(base64);
             e.target.value = '';
         });
@@ -643,11 +699,17 @@ function initImagesSection() {
             if (err) { alert('❌ ' + err); e.target.value = ''; return; }
             const result = await resizeImage(file, 1920, 1080, 0.85);
             const base64 = await blobToBase64(result.blob);
-            const images = getSiteImages();
-            images[key] = { data: base64, timestamp: new Date().toLocaleString('es-AR') };
-            setSiteImages(images);
-            renderSiteImagesGrid();
-            addChange(`Imagen de sitio "${key}" actualizada`);
+            let url = null;
+            try {
+                url = await sbUploadImage('site', `${key}.webp`, result.blob, 'image/webp');
+            } catch (e) {
+                console.warn('No se pudo subir la imagen a Supabase:', e);
+            }
+            const images = await getSiteImages();
+            images[key] = { url: url || null, data: base64, timestamp: new Date().toLocaleString('es-AR') };
+            await setSiteImages(images);
+            await renderSiteImagesGrid();
+            await addChange(`Imagen de sitio "${key}" actualizada`);
             e.target.value = '';
         });
     }
