@@ -907,7 +907,6 @@ async function renderVehiclesEditor() {
         if (deletedDefaults.includes(v.id)) return;
         const o = overrides[v.id] || {};
         const nombre = o.nombre !== undefined ? o.nombre : getVehicleDefaultName(v);
-        const precio = o.precio !== undefined ? o.precio : v.precio;
         const anio = o.anio !== undefined ? o.anio : (v.anio || 2024);
         const km = o.km !== undefined ? o.km : (v.km || '0 KM');
         const color = o.color !== undefined ? o.color : (v.color || '—');
@@ -930,8 +929,6 @@ async function renderVehiclesEditor() {
                     <div class="vehicle-edit-fields">
                         <label>Nombre</label>
                         <input type="text" class="vehicle-nombre" data-id="${v.id}" value="${escapeHtml(nombre)}">
-                        <label>Precio</label>
-                        <input type="number" class="vehicle-precio" data-id="${v.id}" value="${precio}" min="0">
                         <label>Año</label>
                         <input type="number" class="vehicle-anio" data-id="${v.id}" value="${anio}" min="1990" max="2030">
                         <label>KM</label>
@@ -968,8 +965,6 @@ async function renderVehiclesEditor() {
                     <div class="vehicle-edit-fields">
                         <label>Nombre</label>
                         <input type="text" class="vehicle-nombre" data-id="${cv.id}" value="${escapeHtml(cv.marca + ' ' + cv.modelo)}">
-                        <label>Precio</label>
-                        <input type="number" class="vehicle-precio" data-id="${cv.id}" value="${cv.precio}" min="0">
                         <label>Año</label>
                         <input type="number" class="vehicle-anio" data-id="${cv.id}" value="${cv.anio || 2024}" min="1990" max="2030">
                         <label>KM</label>
@@ -994,14 +989,13 @@ async function saveVehicle(id) {
     if (!card) return;
 
     const nombre = card.querySelector('.vehicle-nombre').value.trim();
-    const precio = parseInt(card.querySelector('.vehicle-precio').value, 10);
     const anio = parseInt(card.querySelector('.vehicle-anio').value, 10);
     const km = card.querySelector('.vehicle-km').value.trim();
     const color = card.querySelector('.vehicle-color').value.trim();
     const descripcion = card.querySelector('.vehicle-descripcion').value.trim();
 
-    if (!nombre || isNaN(precio)) {
-        alert('Completá nombre y precio');
+    if (!nombre || isNaN(anio)) {
+        alert('Completá nombre y año');
         return;
     }
 
@@ -1034,7 +1028,6 @@ async function saveVehicle(id) {
 
     const catId = await resolveCategoryId(categorySlug);
     const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    const precioNum = parseFloat(precio);
 
 
     // Upsert en Supabase
@@ -1055,8 +1048,6 @@ async function saveVehicle(id) {
             año: anio,
             km,
             color,
-            precio: `$${precio.toLocaleString('es-AR')}`,
-            precio_numero: precioNum,
             descripcion,
             whatsapp_msg,
             activo: true
@@ -1111,7 +1102,6 @@ async function saveVehicle(id) {
                 ...v,
                 marca: parts[0] || v.marca,
                 modelo: parts.slice(1).join(' ') || v.modelo,
-                precio: precio,
                 anio: anio,
                 km: km,
                 color: color,
@@ -1123,7 +1113,6 @@ async function saveVehicle(id) {
         const overrides = await getVehicleOverrides();
         if (!overrides[id]) overrides[id] = {};
         overrides[id].nombre = nombre;
-        overrides[id].precio = precio;
         overrides[id].anio = anio;
         overrides[id].km = km;
         overrides[id].color = color;
@@ -1148,13 +1137,12 @@ async function saveNewVehicle() {
     const marca = document.getElementById('newVehicleMarca').value.trim();
     const modelo = document.getElementById('newVehicleModelo').value.trim();
     const anio = parseInt(document.getElementById('newVehicleAnio').value, 10);
-    const precio = parseInt(document.getElementById('newVehiclePrecio').value, 10);
     const km = document.getElementById('newVehicleKm').value.trim();
     const color = document.getElementById('newVehicleColor').value.trim();
     const descripcion = document.getElementById('newVehicleDesc').value.trim();
 
-    if (!marca || !modelo || isNaN(precio)) {
-        alert('Completá marca, modelo y precio');
+    if (!marca || !modelo || isNaN(anio)) {
+        alert('Completá marca, modelo y año');
         return;
     }
 
@@ -1185,8 +1173,6 @@ async function saveNewVehicle() {
             año: anio,
             km: km || '0 KM',
             color: color || '—',
-            precio: `$${precio.toLocaleString('es-AR')}`,
-            precio_numero: precio,
             descripcion,
             whatsapp_msg: `Hola! Quiero consultar por el ${nombre}`,
             activo: true
@@ -1210,7 +1196,6 @@ async function saveNewVehicle() {
         marca: marca,
         modelo: modelo,
         anio: anio,
-        precio: precio,
         km: km || '0 KM',
         color: color || '—',
         descripcion: descripcion

@@ -178,10 +178,6 @@ function renderVehicles(vehicles, category) {
         vehicleCard.className = 'vehicle-card';
 
         const displayName = getVehicleDisplayName(vehicle);
-        const precio = vehicle.precio || 'Consultar';
-        const precioHtml = precio && precio !== 'Consultar'
-            ? `<p class="vehicle-price">${precio}</p>`
-            : '';
         const descripcionEl = vehicle.descripcion
             ? `<p class="vehicle-description">${vehicle.descripcion}</p>`
             : '';
@@ -203,7 +199,6 @@ function renderVehicles(vehicles, category) {
             </div>
             <div class="vehicle-info">
                 <h4 class="vehicle-title">${displayName}</h4>
-                ${precioHtml}
                 ${descripcionEl}
                 <div class="vehicle-details">
                     <span class="detail-item">
