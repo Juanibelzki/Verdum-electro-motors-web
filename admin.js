@@ -6,6 +6,7 @@ const ADMIN_PASSWORD = 'verdun2024';
 const IMAGES_STORAGE_KEY = 'verdun_images';
 const VEHICLES_STORAGE_KEY = 'verdun_vehicles';
 const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
+const DELETED_DEFAULT_VEHICLES_KEY = 'verdun_deleted_default_vehicles';
 
 /* ============================================
    SUPABASE - CLIENTE ADMIN
@@ -183,6 +184,7 @@ function bindGlobalActions() {
     window.closeAddVehicleForm = closeAddVehicleForm;
     window.saveNewVehicle = saveNewVehicle;
     window.deleteCustomVehicle = deleteCustomVehicle;
+    window.deleteVehicle = deleteVehicle;
 }
 
 async function handleLogin(e) {
@@ -728,7 +730,7 @@ function initImagesSection() {
                 saveVehicle(parseInt(saveBtn.dataset.id, 10));
             }
             if (deleteBtn) {
-                deleteCustomVehicle(parseInt(deleteBtn.dataset.id, 10));
+                deleteVehicle(parseInt(deleteBtn.dataset.id, 10));
             }
         });
 
@@ -895,12 +897,14 @@ async function renderVehiclesEditor() {
 
     const overrides = await getVehicleOverrides();
     const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const deletedDefaults = loadStoredData(DELETED_DEFAULT_VEHICLES_KEY, []);
     let nextCustomId = 100;
 
     let html = '';
 
     // Vehículos por defecto
     DEFAULT_VEHICLES.forEach((v) => {
+        if (deletedDefaults.includes(v.id)) return;
         const o = overrides[v.id] || {};
         const nombre = o.nombre !== undefined ? o.nombre : getVehicleDefaultName(v);
         const precio = o.precio !== undefined ? o.precio : v.precio;
@@ -937,6 +941,7 @@ async function renderVehiclesEditor() {
                         <label>Descripción</label>
                         <textarea class="vehicle-descripcion" data-id="${v.id}" rows="2">${escapeHtml(descripcion)}</textarea>
                         <button type="button" class="btn-update vehicle-save-btn" data-id="${v.id}">✓ Guardar vehículo</button>
+                        <button type="button" class="btn-reset vehicle-delete-btn" data-id="${v.id}" style="margin-top:8px">🗑️ Eliminar</button>
                     </div>
                 </div>
             </div>
@@ -1246,6 +1251,61 @@ async function deleteCustomVehicle(id) {
     if (removed) {
         await addChange(`Vehículo eliminado: ${removed.marca} ${removed.modelo} (#${id})`);
     }
+    alert('✓ Vehículo eliminado');
+}
+
+async function deleteVehicle(id) {
+    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const isCustom = customVehicles.some(v => v.id === id);
+    if (isCustom) return deleteCustomVehicle(id);
+
+    const dv = DEFAULT_VEHICLES.find(v => v.id === id);
+    if (!dv) return;
+    if (!confirm(`¿Eliminar "${dv.marca} ${dv.modelo}" del stock?\n\nPodés volver a agregarlo desde "➕ Agregar Vehículo".`)) return;
+
+    // --- SUPABASE: borrar el vehículo por defecto si fue guardado ---
+    const idMap = loadStoredData('supabase_vehicle_map', {});
+    const supabaseId = idMap[id];
+    if (supabaseId) {
+        try {
+            await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
+            await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
+        } catch (sbErr) {
+            console.warn('Supabase delete failed:', sbErr.message);
+        }
+    } else {
+        // Intentar por slug (por si se guardó sin mapping)
+        try {
+            const slug = `${dv.marca}-${dv.modelo}-${dv.anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+            const { data: existing } = await supabaseClient.from('vehicles').select('id').eq('slug', slug).maybeSingle();
+            if (existing) {
+                await supabaseClient.from('photos').delete().eq('vehicle_id', existing.id);
+                await supabaseClient.from('vehicles').delete().eq('id', existing.id);
+            }
+        } catch (sbErr) {
+            console.warn('Supabase slug delete failed:', sbErr.message);
+        }
+    }
+
+    // --- localStorage: marcar como eliminado ---
+    const deletedDefaults = loadStoredData(DELETED_DEFAULT_VEHICLES_KEY, []);
+    if (!deletedDefaults.includes(id)) {
+        deletedDefaults.push(id);
+        saveStoredData(DELETED_DEFAULT_VEHICLES_KEY, deletedDefaults);
+    }
+
+    if (idMap[id]) {
+        delete idMap[id];
+        saveStoredData('supabase_vehicle_map', idMap);
+    }
+    const overrides = await getVehicleOverrides();
+    if (overrides[id]) {
+        delete overrides[id];
+        await setVehicleOverrides(overrides);
+    }
+
+    await renderVehiclesEditor();
+    await addChange(`Vehículo eliminado del stock: ${dv.marca} ${dv.modelo}`);
     alert('✓ Vehículo eliminado');
 }
 

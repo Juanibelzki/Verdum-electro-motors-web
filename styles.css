@@ -2057,6 +2057,18 @@ h1, h2, h3, h4, h5, h6 {
     margin: 12px 0;
 }
 
+/* Descripción del vehículo */
+.vehicle-description {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 /* Botón de consulta */
 .btn-consultar {
     background: linear-gradient(135deg, #4A7FA7 0%, #1A3D63 100%);
