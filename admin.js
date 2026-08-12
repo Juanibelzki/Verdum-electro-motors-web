@@ -640,6 +640,95 @@ function setVehicleOverrides(data) {
     saveStoredData(VEHICLES_STORAGE_KEY, data);
 }
 
+const VEHICLE_CATEGORY_NAMES = {
+    'autos-0km': 'Autos 0KM',
+    'autos-usados': 'Autos Usados',
+    'motos-electricas': 'Motos Eléctricas',
+    'patinetas-electricas': 'Patinetas Eléctricas',
+    'vehiculos-especiales': 'Vehículos Especiales'
+};
+
+async function syncVehiclesFromSupabase() {
+    let overrides = loadStoredData(VEHICLES_STORAGE_KEY, {});
+    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    let idMap = loadStoredData('supabase_vehicle_map', {});
+
+    // Mapa category_id (uuid) -> slug admin
+    const catMap = await getCategoryIdMap();
+    const idToSlugMap = {};
+    for (const slug in catMap) idToSlugMap[catMap[slug]] = slug;
+
+    let rows = [];
+    try {
+        const { data } = await supabaseClient
+            .from('vehicles')
+            .select('id, slug, nombre, marca, modelo, año, km, color, descripcion, category_id, photos(url, url_thumb, posicion)')
+            .eq('activo', true);
+        rows = data || [];
+    } catch (sbErr) {
+        console.warn('Sync from Supabase failed:', sbErr.message);
+        return;
+    }
+    if (!rows.length) return;
+
+    const knownSupabaseIds = new Set(Object.values(idMap));
+    const takenLocalIds = new Set(customVehicles.map(v => v.id));
+    let maxId = customVehicles.reduce((mx, v) => Math.max(mx, v.id), 100);
+
+    for (const row of rows) {
+        const isDefaultMatch = DEFAULT_VEHICLES.some(
+            dv => String(dv.marca).toLowerCase() === String(row.marca).toLowerCase()
+                && String(dv.modelo).toLowerCase() === String(row.modelo).toLowerCase()
+        );
+
+        if (isDefaultMatch) {
+            const dv = DEFAULT_VEHICLES.find(
+                d => String(d.marca).toLowerCase() === String(row.marca).toLowerCase()
+                    && String(d.modelo).toLowerCase() === String(row.modelo).toLowerCase()
+            );
+            const o = overrides[dv.id] || {};
+            o.nombre = row.nombre || o.nombre;
+            o.anio = row.año || o.anio;
+            o.km = row.km || o.km;
+            o.color = row.color || o.color;
+            o.descripcion = row.descripcion || o.descripcion;
+            const photos = (row.photos || []).slice().sort((a, b) => a.posicion - b.posicion);
+            if (photos[0] && photos[0].url) o.image = photos[0].url;
+            overrides[dv.id] = o;
+            idMap[dv.id] = row.id;
+            continue;
+        }
+
+        if (knownSupabaseIds.has(row.id)) continue;
+
+        maxId++;
+        while (takenLocalIds.has(maxId)) maxId++;
+
+        const photos = (row.photos || []).slice().sort((a, b) => a.posicion - b.posicion);
+        const catSlug = idToSlugMap[row.category_id] || 'autos-usados';
+        customVehicles.push({
+            id: maxId,
+            uuid: row.id,
+            slug: row.slug,
+            category: catSlug,
+            categoryText: VEHICLE_CATEGORY_NAMES[catSlug] || catSlug,
+            marca: row.marca || '',
+            modelo: row.modelo || '',
+            anio: row.año || 2024,
+            km: row.km || '0 KM',
+            color: row.color || '—',
+            descripcion: row.descripcion || '',
+            image: photos[0] ? photos[0].url : ''
+        });
+        idMap[maxId] = row.id;
+        takenLocalIds.add(maxId);
+    }
+
+    saveStoredData(VEHICLES_STORAGE_KEY, overrides);
+    saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+    saveStoredData('supabase_vehicle_map', idMap);
+}
+
 function initImagesSection() {
     if (imagesUiInitialized) return;
 
@@ -894,6 +983,8 @@ function getVehicleDefaultName(v) {
 async function renderVehiclesEditor() {
     const container = document.getElementById('vehiclesEditor');
     if (!container) return;
+
+    await syncVehiclesFromSupabase();
 
     const overrides = await getVehicleOverrides();
     const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
