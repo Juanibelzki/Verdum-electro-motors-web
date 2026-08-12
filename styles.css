@@ -737,8 +737,9 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid rgba(59,130,246,0.1);
     border-radius: 16px;
     overflow: hidden;
-    transition: var(--transition);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .vehicle-card:hover {
