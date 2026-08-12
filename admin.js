@@ -18,8 +18,6 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 const CATEGORY_TEXT_TO_SLUG = {
     'Autos 0KM': 'autos-0km',
     'Autos Usados': 'autos-usados',
-    'Motos Eléctricas': 'motos-electricas',
-    'Patinetas Eléctricas': 'patinetas-electricas',
     'Vehículos Especiales': 'vehiculos-especiales'
 };
 
@@ -28,8 +26,6 @@ let categoryIdCache = null;
 const CATEGORY_ADMIN_TO_DB = {
     'autos-0km': '0km',
     'autos-usados': 'usados',
-    'motos-electricas': 'motos',
-    'patinetas-electricas': 'patacletas',
     'vehiculos-especiales': 'especiales'
 };
 
