@@ -482,13 +482,10 @@ section#inicio,
 
     /* Capas de Fondo:
        1. Sombra lineal a la izquierda para garantizar legibilidad del texto blanco.
-       2. Imagen del logo metálico 3D visible a la derecha.
-       3. Respaldo metálico (activo mientras images/hero-bg.jpg no esté disponible). */
+       2. Imagen del logo metálico 3D visible a la derecha. */
     background-image:
-        linear-gradient(90deg, #0A0C0E 0%, rgba(10, 12, 14, 0.85) 35%, rgba(10, 12, 14, 0.2) 70%, rgba(10, 12, 14, 0.4) 100%),
-        url('images/hero-bg.jpg'),
-        radial-gradient(ellipse at 80% 40%, rgba(184, 51, 99, 0.4) 0%, rgba(140, 29, 69, 0.2) 35%, transparent 65%),
-        linear-gradient(160deg, #14181C 0%, #0A0C0E 55%, #11151A 100%);
+        linear-gradient(90deg, #0A0C0E 0%, rgba(10, 12, 14, 0.85) 35%, rgba(10, 12, 14, 0.25) 70%, rgba(10, 12, 14, 0.45) 100%),
+        url('images/hero-bg.png');
     background-position: center right;
     background-size: cover;
     background-repeat: no-repeat;
