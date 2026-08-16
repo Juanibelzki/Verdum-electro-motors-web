@@ -364,9 +364,9 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600 !important;
 }
 
-/* Enlaces de Navegación (Inicio, Servicios, Nosotros, Contacto) */
+/* Enlaces de Navegación (Inicio, Servicios, Nosotros, Contacto) en Verde Corporativo */
 .navbar .nav-link {
-    color: #1E2226 !important;
+    color: #10C863 !important;
     font-size: 0.95rem !important;
     font-weight: 600 !important;
     text-decoration: none !important;
@@ -375,11 +375,11 @@ h1, h2, h3, h4, h5, h6 {
     transition: all 0.2s ease-in-out !important;
 }
 
-/* Estado Hover y Activo en Verde */
+/* Estado Hover y Activo */
 .navbar .nav-link:hover,
 .navbar .nav-link.active {
-    color: #10C863 !important;
-    background: rgba(16, 200, 99, 0.08) !important;
+    color: #0EB357 !important;
+    background: rgba(16, 200, 99, 0.12) !important;
 }
 
 /* Botón WhatsApp */
