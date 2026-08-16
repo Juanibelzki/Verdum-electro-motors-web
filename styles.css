@@ -275,21 +275,23 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-secondary {
-    background-color: rgba(10, 12, 14, 0.5);
-    color: var(--brand-magenta-text);
-    border: 1.5px solid var(--brand-magenta-border);
-    font-weight: 600;
+    background: rgba(216, 58, 112, 0.12) !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid #D83A70 !important;
+    border-radius: 12px !important;
+    padding: 0.9rem 1.8rem !important;
+    font-weight: 600 !important;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    padding: 0.9rem 1.8rem;
-    border-radius: 12px;
-    cursor: pointer;
+    transition: all 0.25s ease !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    transition: var(--transition);
+    cursor: pointer;
 }
 
 .btn-secondary:hover {
-    background-color: rgba(216, 58, 112, 0.12);
+    background: #D83A70 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 16px rgba(216, 58, 112, 0.45);
     transform: translateY(-2px);
 }
 
@@ -467,21 +469,29 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================================
    HERO SECTION
 ============================================ */
-.hero {
-    min-height: 100vh;
+/* Contenedor Principal del Hero */
+.hero,
+section#inicio,
+#hero {
+    position: relative;
+    min-height: 85vh;
     display: flex;
     align-items: center;
     padding: 56px 40px 80px;
-    background-color: var(--hero-bg-deep);
+    background-color: #0A0C0E;
+
+    /* Capas de Fondo:
+       1. Sombra lineal a la izquierda para garantizar legibilidad del texto blanco.
+       2. Imagen del logo metálico 3D visible a la derecha.
+       3. Respaldo metálico (activo mientras images/hero-bg.jpg no esté disponible). */
     background-image:
-        radial-gradient(circle at 20% 50%, rgba(10, 12, 14, 0.92) 0%, rgba(10, 12, 14, 0.65) 50%, rgba(10, 12, 14, 0.2) 100%),
-        url('images/hero_bg_badge.jpg'),
-        radial-gradient(ellipse at 78% 42%, rgba(184, 51, 99, 0.45) 0%, rgba(140, 29, 69, 0.22) 32%, transparent 62%),
+        linear-gradient(90deg, #0A0C0E 0%, rgba(10, 12, 14, 0.85) 35%, rgba(10, 12, 14, 0.2) 70%, rgba(10, 12, 14, 0.4) 100%),
+        url('images/hero-bg.jpg'),
+        radial-gradient(ellipse at 80% 40%, rgba(184, 51, 99, 0.4) 0%, rgba(140, 29, 69, 0.2) 35%, transparent 65%),
         linear-gradient(160deg, #14181C 0%, #0A0C0E 55%, #11151A 100%);
-    background-repeat: no-repeat;
     background-position: center right;
     background-size: cover;
-    position: relative;
+    background-repeat: no-repeat;
     overflow: hidden;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -498,6 +508,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hero-content {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -589,10 +601,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hero-visual {
+    position: relative;
+    z-index: 2;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative;
     height: 500px;
     background: transparent !important;
     background-color: transparent !important;
@@ -619,8 +632,8 @@ h1, h2, h3, h4, h5, h6 {
     background-color: transparent !important;
     box-shadow: none !important;
     position: relative;
-    z-index: 1;
-    filter: drop-shadow(0 18px 30px rgba(0,0,0,0.5));
+    z-index: 2;
+    filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.7));
     -webkit-box-reflect: below 14px linear-gradient(transparent 72%, rgba(255,255,255,0.07));
 }
 
