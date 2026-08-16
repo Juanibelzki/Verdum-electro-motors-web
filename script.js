@@ -764,14 +764,18 @@ function setupMobileMenu() {
             navLinks.style.cssText = `
                 display: flex !important;
                 position: absolute;
-                top: 100%;
+                top: calc(100% + 10px);
                 left: 0;
                 right: 0;
-                background: rgba(0,0,0,0.95);
+                background: rgba(255,255,255,0.95);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
                 flex-direction: column;
                 padding: 20px 40px;
                 gap: 20px;
-                border-bottom: 1px solid rgba(201,168,76,0.1);
+                border-radius: 24px;
+                box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+                border: 1px solid rgba(255,255,255,0.6);
             `;
         }
     });
