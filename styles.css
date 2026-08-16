@@ -278,26 +278,31 @@ h1, h2, h3, h4, h5, h6 {
 .hero .btn-outline,
 .hero a[href*="financiacion"],
 .hero a[href*="#creditos"] {
-    background: rgba(224, 86, 136, 0.15) !important;
+    background: rgba(216, 58, 112, 0.12) !important;
     color: #FFFFFF !important;
-    border: 1.5px solid #E05688 !important;
+    border: 1.5px solid #D83A70 !important;
     border-radius: 12px !important;
-    padding: 0.85rem 1.6rem !important;
+    padding: 0.85rem 1.8rem !important;
     font-weight: 600 !important;
+    font-size: 0.95rem !important;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 0 12px rgba(216, 58, 112, 0.2) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    transition: all 0.25s ease !important;
+    transition: all 0.25s ease-in-out !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     cursor: pointer;
 }
 
 .btn-secondary:hover,
 .hero .btn-outline:hover,
 .hero a[href*="financiacion"]:hover {
-    background: #E05688 !important;
+    background: #D83A70 !important;
     color: #FFFFFF !important;
-    box-shadow: 0 0 18px rgba(224, 86, 136, 0.5) !important;
+    box-shadow: 0 0 20px rgba(216, 58, 112, 0.6) !important;
     transform: translateY(-2px);
 }
 
@@ -477,30 +482,42 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================================
    HERO SECTION
 ============================================ */
-/* Contenedor Principal del Hero */
+/* Contenedor Principal del Hero — Fondo Full-Bleed con Fundido Progresivo.
+   Gradiente suave: 0-32% negro sólido para los textos; 32-68% transición gradual;
+   68%+ imagen visible sin bordes rectos ni cortes cuadrados. */
 .hero,
 section#inicio,
 #hero {
     position: relative;
-    min-height: 85vh;
+    min-height: 90vh;
+    width: 100%;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
     padding: 56px 40px 80px;
-    background-color: #0A0C0E;
+    background-color: #0A0C0E !important;
 
-    /* Gradiente calibrado: oscurece el lado izquierdo (texto) y deja libre el derecho (emblema).
-       La imagen se resuelve como .jpg si existe; si no, .png; si falta, acento metálico.
-       auto 100% = sin recorte vertical (la imagen completa, anclada arriba, detrás de la camioneta y el navbar). */
     background-image:
-        linear-gradient(90deg, #0A0C0E 0%, rgba(10, 12, 14, 0.85) 30%, rgba(10, 12, 14, 0.15) 65%, rgba(10, 12, 14, 0.3) 100%),
+        linear-gradient(
+            to right,
+            #0A0C0E 0%,
+            #0A0C0E 32%,
+            rgba(10, 12, 14, 0.8) 48%,
+            rgba(10, 12, 14, 0.2) 68%,
+            rgba(10, 12, 14, 0.0) 100%
+        ),
         url('images/hero-bg.jpg'),
-        url('images/hero-bg.png'),
-        radial-gradient(ellipse at 80% 40%, rgba(184, 51, 99, 0.4) 0%, rgba(140, 29, 69, 0.2) 35%, transparent 65%);
-    background-position: right top;
-    background-size: auto 100%;
-    background-repeat: no-repeat;
+        url('images/hero-bg.png');
+    background-position: right center !important;
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
     overflow: hidden;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Evita imágenes duplicadas con cortes cuadrados (la camioneta queda excluida por su alt) */
+.hero-visual > img:not([alt*="Vehículo"]):not([alt*="Toyota"]):not([alt*="Hilux"]):not([alt*="auto"]) {
+    display: none !important;
 }
 
 .hero-container {
@@ -609,7 +626,7 @@ section#inicio,
 
 .hero-visual {
     position: relative;
-    z-index: 2;
+    z-index: 3;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -639,8 +656,8 @@ section#inicio,
     background-color: transparent !important;
     box-shadow: none !important;
     position: relative;
-    z-index: 2;
-    filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.85)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+    z-index: 3;
+    filter: drop-shadow(0 25px 30px rgba(0, 0, 0, 0.95));
     transform: translateZ(0);
     -webkit-box-reflect: below 14px linear-gradient(transparent 72%, rgba(255,255,255,0.07));
 }
@@ -649,21 +666,22 @@ section#inicio,
 .hero-image-container img,
 .hero img[alt*="Vehículo"] {
     position: relative;
-    z-index: 2;
-    filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.85)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+    z-index: 3;
+    filter: drop-shadow(0 25px 30px rgba(0, 0, 0, 0.95));
     transform: translateZ(0);
 }
 
 /* ============================================
-   MÉTRICAS STRIP
+   MÉTRICAS STRIP — Barra de Beneficios Glassmorphism
 ============================================ */
 .metrics-strip {
-    background: linear-gradient(90deg, rgba(18,20,23,0.55), rgba(18,20,23,0.95), rgba(18,20,23,0.55));
-    backdrop-filter: var(--glass-blur);
-    border-top: 1px solid rgba(255,255,255,0.08);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    padding: 48px;
-    margin: -80px 0 0;
+    background: rgba(18, 20, 24, 0.75) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 40px !important;
+    margin: -80px auto 0 !important;
     position: relative;
     z-index: 10;
 }
@@ -709,10 +727,10 @@ section#inicio,
 }
 
 .metric-text {
-    color: var(--text-primary);
-    font-weight: 500;
+    color: #E5E7EB;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.03em;
     font-size: 0.85rem;
 }
 
