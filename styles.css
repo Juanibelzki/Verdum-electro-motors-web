@@ -351,13 +351,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar .nav-link {
-    color: #121417 !important;
+    color: #10C863 !important;
     font-weight: 600;
 }
 
 .navbar .nav-link:hover,
 .navbar .nav-link.active {
-    color: #10C863 !important;
+    color: #0b9e4f !important;
 }
 
 .navbar .logo-text {
