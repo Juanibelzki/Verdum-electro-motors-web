@@ -341,13 +341,31 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 1140px;
     width: calc(100% - 2rem);
     padding: 0.75rem 1.8rem;
-    background: linear-gradient(135deg, rgba(184, 51, 99, 0.92) 0%, rgba(140, 29, 69, 0.95) 100%) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 9999px;
-    box-shadow: 0 16px 40px rgba(140, 29, 69, 0.45), 0 0 20px rgba(224, 86, 136, 0.2);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15), 0 0 20px rgba(0, 0, 0, 0.05);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.navbar .nav-link {
+    color: #121417 !important;
+    font-weight: 600;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: #10C863 !important;
+}
+
+.navbar .logo-text {
+    color: #121417 !important;
+}
+
+.navbar .logo-subtext {
+    color: #6B7280 !important;
 }
     background: var(--brand-magenta-nav) !important;
     backdrop-filter: blur(12px) !important;
