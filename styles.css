@@ -331,41 +331,79 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================================
    NAVBAR STICKY
 ============================================ */
-.navbar {
-    position: fixed;
-    top: 1.8rem;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    margin: 0 auto;
-    max-width: 1140px;
-    width: calc(100% - 2rem);
-    padding: 0.75rem 1.8rem;
-    background: rgba(255, 255, 255, 0.92) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 9999px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15), 0 0 20px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+/* Contenedor Cápsula Flotante */
+nav,
+.navbar,
+.floating-nav,
+header > div {
+    background: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+    border-radius: 9999px !important;
 }
 
+/* Identidad de Marca / Logo */
+.nav-brand,
+.navbar-brand,
+nav .brand-name,
+nav strong,
+.navbar .logo-text {
+    color: #111315 !important; /* Negro de alto impacto */
+    font-weight: 800 !important;
+    letter-spacing: 0.05em;
+}
+
+/* Subtítulo bajo el logo ("AUTOMOTORES") */
+nav .brand-subtitle,
+nav small,
+nav span:last-child,
+.navbar .logo-subtext {
+    color: #5A626A !important;
+    font-weight: 600 !important;
+}
+
+/* Enlaces de Navegación (Inicio, Servicios, Nosotros, Contacto) */
+nav a:not(.btn-whatsapp):not([href*="whatsapp"]),
+.navbar a:not(.btn-whatsapp):not([href*="whatsapp"]),
+.nav-links a,
 .navbar .nav-link {
-    color: #10C863 !important;
-    font-weight: 600;
+    color: #1E2226 !important; /* Gris oscuro para legibilidad total */
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    padding: 0.4rem 0.8rem !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease-in-out !important;
 }
 
+/* Estado Hover y Activo en Verde */
+nav a:not(.btn-whatsapp):not([href*="whatsapp"]):hover,
+.nav-links a:hover,
+.nav-links a.active,
 .navbar .nav-link:hover,
 .navbar .nav-link.active {
-    color: #0b9e4f !important;
+    color: #10C863 !important; /* Verde corporativo */
+    background: rgba(16, 200, 99, 0.08) !important;
 }
 
-.navbar .logo-text {
-    color: #121417 !important;
+/* Botón WhatsApp */
+nav .btn-whatsapp,
+nav a[href*="whatsapp"],
+.navbar .btn-whatsapp {
+    background-color: #10C863 !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 4px 14px rgba(16, 200, 99, 0.35) !important;
+    border: none !important;
 }
 
-.navbar .logo-subtext {
-    color: #6B7280 !important;
+nav .btn-whatsapp:hover,
+nav a[href*="whatsapp"]:hover {
+    background-color: #0EB357 !important;
+    transform: translateY(-1px);
 }
     background: var(--brand-magenta-nav) !important;
     backdrop-filter: blur(12px) !important;
