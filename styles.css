@@ -631,18 +631,19 @@ section#inicio,
     margin-top: 0.4rem;
 }
 
-/* Contenedor del Vehículo en Hero */
+/* Columna / Contenedor Visual Derecho */
 .hero-visual,
 .hero-image-container {
-    position: relative;
-    z-index: 3;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    width: 100%;
-    height: auto;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    position: relative !important;
+    z-index: 3 !important;
+    width: 100% !important;
+    height: 100% !important;
     max-width: none !important;
-    margin-top: 1rem;
+    padding: 0 !important;
+    margin: 0 !important;
     background: transparent !important;
     background-color: transparent !important;
     background-image: none !important;
@@ -657,15 +658,16 @@ section#inicio,
     display: none !important;
 }
 
-/* Escala y Presencia del Vehículo */
+/* Imagen del Vehículo: Máxima Presencia y Asentamiento */
 .hero-image,
 .hero-visual img,
 .hero-image-container img,
 .hero img[alt*="Vehículo"] {
+    display: block !important;
     width: 100% !important;
-    max-width: clamp(480px, 46vw, 720px) !important;
+    max-width: clamp(560px, 50vw, 820px) !important;
     height: auto !important;
-    object-fit: contain;
+    object-fit: contain !important;
     animation: float 4s ease-in-out infinite;
     background: transparent !important;
     background-color: transparent !important;
@@ -673,13 +675,14 @@ section#inicio,
     box-shadow: none !important;
     border: none !important;
     mix-blend-mode: normal !important;
-
-    /* Posicionamiento y Sombra de apoyo multicapa (Grounding Shadow) */
-    transform: translateY(20px) scale(1.05);
+    
+    margin-bottom: -10px !important;
+    transform: translateY(10px) !important;
     transform-origin: bottom center;
+
     filter: 
         drop-shadow(0 30px 35px rgba(0, 0, 0, 0.95))
-        drop-shadow(0 10px 15px rgba(0, 0, 0, 0.8)) !important;
+        drop-shadow(0 10px 15px rgba(0, 0, 0, 0.85)) !important;
 
     position: relative;
     z-index: 3;
