@@ -274,24 +274,30 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.9rem;
 }
 
-.btn-secondary {
-    background: rgba(216, 58, 112, 0.12) !important;
+.btn-secondary,
+.hero .btn-outline,
+.hero a[href*="financiacion"],
+.hero a[href*="#creditos"] {
+    background: rgba(224, 86, 136, 0.15) !important;
     color: #FFFFFF !important;
-    border: 1.5px solid #D83A70 !important;
+    border: 1.5px solid #E05688 !important;
     border-radius: 12px !important;
-    padding: 0.9rem 1.8rem !important;
+    padding: 0.85rem 1.6rem !important;
     font-weight: 600 !important;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    transition: all 0.25s ease !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    transition: all 0.25s ease !important;
     cursor: pointer;
 }
 
-.btn-secondary:hover {
-    background: #D83A70 !important;
+.btn-secondary:hover,
+.hero .btn-outline:hover,
+.hero a[href*="financiacion"]:hover {
+    background: #E05688 !important;
     color: #FFFFFF !important;
-    box-shadow: 0 0 16px rgba(216, 58, 112, 0.45);
+    box-shadow: 0 0 18px rgba(224, 86, 136, 0.5) !important;
     transform: translateY(-2px);
 }
 
@@ -480,13 +486,14 @@ section#inicio,
     padding: 56px 40px 80px;
     background-color: #0A0C0E;
 
-    /* Capas de Fondo:
-       1. Sombra lineal a la izquierda para garantizar legibilidad del texto blanco.
-       2. Imagen del logo metálico 3D visible a la derecha. */
+    /* Gradiente calibrado: oscurece el lado izquierdo (texto) y deja libre el derecho (emblema).
+       La imagen se resuelve como .jpg si existe; si no, .png; si falta, acento metálico. */
     background-image:
-        linear-gradient(90deg, #0A0C0E 0%, rgba(10, 12, 14, 0.85) 35%, rgba(10, 12, 14, 0.25) 70%, rgba(10, 12, 14, 0.45) 100%),
-        url('images/hero-bg.png');
-    background-position: center right;
+        linear-gradient(90deg, #0A0C0E 0%, rgba(10, 12, 14, 0.85) 30%, rgba(10, 12, 14, 0.15) 65%, rgba(10, 12, 14, 0.3) 100%),
+        url('images/hero-bg.jpg'),
+        url('images/hero-bg.png'),
+        radial-gradient(ellipse at 80% 40%, rgba(184, 51, 99, 0.4) 0%, rgba(140, 29, 69, 0.2) 35%, transparent 65%);
+    background-position: right center;
     background-size: cover;
     background-repeat: no-repeat;
     overflow: hidden;
@@ -630,8 +637,18 @@ section#inicio,
     box-shadow: none !important;
     position: relative;
     z-index: 2;
-    filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.7));
+    filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.85)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+    transform: translateZ(0);
     -webkit-box-reflect: below 14px linear-gradient(transparent 72%, rgba(255,255,255,0.07));
+}
+
+.hero-visual img,
+.hero-image-container img,
+.hero img[alt*="Vehículo"] {
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.85)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+    transform: translateZ(0);
 }
 
 /* ============================================
