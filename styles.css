@@ -640,21 +640,16 @@ section#inicio,
     height: 500px;
     background: transparent !important;
     background-color: transparent !important;
+    background-image: none !important;
     box-shadow: none !important;
-    /* Sin máscara para dejar respirar la nueva imagen PNG transparente de la Amarok */
-    mask-image: none !important;
-    -webkit-mask-image: none !important;
+    border: none !important;
 }
 
-.hero-visual::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 35%;
-    background: var(--hero-floor-gradient);
-    pointer-events: none;
+.hero-visual::before,
+.hero-visual::after,
+.hero-image-container::before,
+.hero-image-container::after {
+    display: none !important;
 }
 
 .hero-image {
@@ -664,8 +659,11 @@ section#inicio,
     animation: float 4s ease-in-out infinite;
     background: transparent !important;
     background-color: transparent !important;
-    mix-blend-mode: normal;
-    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.9));
+    background-image: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    mix-blend-mode: normal !important;
+    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.9)) !important;
     position: relative;
     z-index: 3;
     transform: translateZ(0);
@@ -679,8 +677,11 @@ section#inicio,
     z-index: 3;
     background: transparent !important;
     background-color: transparent !important;
-    mix-blend-mode: normal;
-    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.9));
+    background-image: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    mix-blend-mode: normal !important;
+    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.9)) !important;
     transform: translateZ(0);
 }
 
