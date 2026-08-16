@@ -631,13 +631,18 @@ section#inicio,
     margin-top: 0.4rem;
 }
 
-.hero-visual {
+/* Contenedor del Vehículo en Hero */
+.hero-visual,
+.hero-image-container {
     position: relative;
     z-index: 3;
     display: flex;
+    align-items: flex-end;
     justify-content: center;
-    align-items: center;
-    height: 500px;
+    width: 100%;
+    height: auto;
+    max-width: none !important;
+    margin-top: 1rem;
     background: transparent !important;
     background-color: transparent !important;
     background-image: none !important;
@@ -652,9 +657,14 @@ section#inicio,
     display: none !important;
 }
 
-.hero-image {
-    width: 100%;
-    height: 100%;
+/* Escala y Presencia del Vehículo */
+.hero-image,
+.hero-visual img,
+.hero-image-container img,
+.hero img[alt*="Vehículo"] {
+    width: 100% !important;
+    max-width: clamp(480px, 46vw, 720px) !important;
+    height: auto !important;
     object-fit: contain;
     animation: float 4s ease-in-out infinite;
     background: transparent !important;
@@ -663,26 +673,35 @@ section#inicio,
     box-shadow: none !important;
     border: none !important;
     mix-blend-mode: normal !important;
-    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.9)) !important;
+
+    /* Posicionamiento y Sombra de apoyo multicapa (Grounding Shadow) */
+    transform: translateY(20px) scale(1.05);
+    transform-origin: bottom center;
+    filter: 
+        drop-shadow(0 30px 35px rgba(0, 0, 0, 0.95))
+        drop-shadow(0 10px 15px rgba(0, 0, 0, 0.8)) !important;
+
     position: relative;
     z-index: 3;
-    transform: translateZ(0);
     -webkit-box-reflect: below 14px linear-gradient(transparent 70%, rgba(255,255,255,0.08));
+    transition: transform 0.3s ease-out;
 }
 
-.hero-visual img,
-.hero-image-container img,
-.hero img[alt*="Vehículo"] {
-    position: relative;
-    z-index: 3;
-    background: transparent !important;
-    background-color: transparent !important;
-    background-image: none !important;
-    box-shadow: none !important;
-    border: none !important;
-    mix-blend-mode: normal !important;
-    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.9)) !important;
-    transform: translateZ(0);
+/* Ajuste Responsivo (Evitar desbordamiento en Mobile) */
+@media (max-width: 992px) {
+    .hero-visual,
+    .hero-image-container {
+        margin-top: 2rem;
+        justify-content: center;
+        height: auto;
+    }
+
+    .hero-image,
+    .hero-visual img,
+    .hero-image-container img {
+        max-width: 90vw !important;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* ============================================
