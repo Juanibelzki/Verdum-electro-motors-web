@@ -588,8 +588,20 @@ h1, h2, h3, h4, h5, h6 {
 ============================================ */
 .servicios {
     padding: 120px 40px;
-    background-color: var(--bg-primary);
+    background: linear-gradient(135deg, var(--brand-slate-dark) 0%, var(--brand-black) 100%);
+    border-top: 1px solid rgba(111,167,69,0.3);
     position: relative;
+}
+
+.servicios .section-title {
+    background: linear-gradient(135deg, #FFFFFF 0%, rgba(255,255,255,0.65) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.servicios .section-subtitle {
+    color: rgba(255,255,255,0.7);
 }
 
 .servicios-container {
@@ -658,7 +670,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .service-card-front {
-    background: linear-gradient(135deg, var(--surface-base) 0%, var(--brand-slate-dark) 100%);
+    background: linear-gradient(135deg, var(--brand-slate-dark) 0%, var(--brand-black) 100%);
     display: flex;
     align-items: flex-end;
 }
@@ -668,7 +680,7 @@ h1, h2, h3, h4, h5, h6 {
     height: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
-    background: var(--surface-base);
+    background: var(--brand-slate-dark);
 }
 
 .service-card-flip:hover .service-image {
@@ -697,19 +709,19 @@ h1, h2, h3, h4, h5, h6 {
     flex-direction: column;
     justify-content: center;
     gap: 16px;
-    background: linear-gradient(135deg, rgba(111,167,69,0.07) 0%, rgba(111,167,69,0.03) 50%, rgba(111,167,69,0.07) 100%);
+    background: linear-gradient(135deg, rgba(30,34,38,0.92) 0%, rgba(17,19,21,0.96) 100%);
     backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid var(--surface-border);
+    border: 1px solid rgba(255,255,255,0.1);
     padding: 32px;
 }
 
 .service-card-back h3 {
-    color: var(--brand-green);
+    color: var(--brand-green-accent);
     font-size: 20px;
 }
 
 .service-card-back p {
-    color: var(--brand-slate-muted);
+    color: rgba(255,255,255,0.75);
     font-size: 14px;
     line-height: 1.6;
 }
@@ -722,13 +734,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .feature-tag {
-    background-color: var(--brand-magenta-soft);
-    color: var(--brand-magenta);
+    background-color: rgba(143,29,78,0.35);
+    color: #F9EBF1;
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 500;
-    border: 1px solid rgba(143,29,78,0.2);
+    border: 1px solid rgba(143,29,78,0.6);
 }
 
 /* ============================================
@@ -1043,7 +1055,29 @@ h1, h2, h3, h4, h5, h6 {
 ============================================ */
 .testimonios {
     padding: 120px 40px;
-    background-color: var(--bg-primary);
+    background: linear-gradient(135deg, var(--brand-slate-dark) 0%, var(--brand-black) 100%);
+    border-top: 1px solid rgba(111,167,69,0.3);
+}
+
+.testimonios .section-title {
+    background: linear-gradient(135deg, #FFFFFF 0%, rgba(255,255,255,0.65) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.testimonios .section-subtitle {
+    color: rgba(255,255,255,0.7);
+}
+
+.testimonios .glass-card {
+    background: linear-gradient(135deg, rgba(30,34,38,0.9) 0%, rgba(17,19,21,0.95) 100%);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: var(--shadow-md);
+}
+
+.testimonios .glass-card:hover {
+    border-color: rgba(111,167,69,0.4);
 }
 
 .testimonios-container {
@@ -1065,13 +1099,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .testimonio-stars {
-    color: var(--brand-green);
+    color: var(--brand-green-accent);
     font-size: 1.2rem;
     letter-spacing: 2px;
 }
 
 .testimonio-text {
-    color: var(--brand-slate-muted);
+    color: rgba(255,255,255,0.85);
     font-size: 15px;
     line-height: 1.8;
     font-style: italic;
@@ -1085,13 +1119,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .author-name {
-    color: var(--brand-slate-dark);
+    color: #FFFFFF;
     font-weight: 600;
     font-size: 14px;
 }
 
 .author-role {
-    color: var(--brand-magenta);
+    color: var(--brand-magenta-soft);
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
