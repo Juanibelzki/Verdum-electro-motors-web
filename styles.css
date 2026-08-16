@@ -36,6 +36,12 @@
     --brand-magenta-soft: rgba(224, 86, 136, 0.15);
     --brand-magenta-hover:#E05688;
 
+    /* Navbar Capsule Magenta ('Para tu Estilo') */
+    --nav-magenta-solid:  #E05688;
+    --nav-magenta-glass:  rgba(224, 86, 136, 0.82);
+    --nav-magenta-border: 1px solid rgba(255, 255, 255, 0.28);
+    --nav-magenta-shadow: 0 10px 30px -5px rgba(224, 86, 136, 0.35);
+
     /* Compatibilidad: tokens previos re-mapeados a Dark */
     --brand-black:        var(--bg-app);
     --brand-slate-dark:   var(--bg-surface);
@@ -305,17 +311,17 @@ h1, h2, h3, h4, h5, h6 {
     width: calc(100% - 2rem);
     padding: 0.6rem 1.5rem;
     transition: all 0.3s ease;
-    background: var(--glass-nav-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: var(--glass-border);
-    border-radius: 9999px;
-    box-shadow: var(--glass-shadow);
+    background: var(--nav-magenta-glass) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: var(--nav-magenta-border) !important;
+    border-radius: 9999px !important;
+    box-shadow: var(--nav-magenta-shadow) !important;
 }
 
 .navbar.scrolled {
     padding: 0.6rem 1.5rem;
-    box-shadow: var(--glass-shadow);
+    box-shadow: var(--nav-magenta-shadow);
 }
 
 .navbar-container {
@@ -339,9 +345,9 @@ h1, h2, h3, h4, h5, h6 {
     width: 40px;
     height: 40px;
     object-fit: contain;
-    filter: brightness(1.2) contrast(1.1);
+    filter: brightness(1) contrast(1);
     transition: var(--transition);
-    background: var(--bg-secondary);
+    background: transparent;
     border-radius: 4px;
 }
 
@@ -360,15 +366,14 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 1.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--brand-green-accent), var(--brand-green));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #FFFFFF !important;
+    background: none;
+    -webkit-text-fill-color: #FFFFFF;
 }
 
 .logo-subtitle {
     font-size: 0.7rem;
-    color: var(--text-muted);
+    color: rgba(255,255,255,0.85);
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -381,15 +386,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-links a {
-    color: var(--text-primary);
+    color: #FFFFFF !important;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600 !important;
     position: relative;
-    transition: color 0.3s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .nav-links a:hover {
-    color: var(--brand-green);
+    opacity: 0.85;
+    color: #FFFFFF !important;
 }
 
 .nav-links a::after {
@@ -399,7 +405,7 @@ h1, h2, h3, h4, h5, h6 {
     left: 0;
     width: 0;
     height: 2px;
-    background: var(--brand-green-accent);
+    background: rgba(255,255,255,0.6);
     transition: width 0.3s ease;
 }
 
@@ -409,6 +415,19 @@ h1, h2, h3, h4, h5, h6 {
 
 .nav-cta {
     margin-left: 40px;
+}
+
+.navbar .btn-primary.nav-cta {
+    background-color: #25D366 !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
+}
+
+.navbar .btn-primary.nav-cta:hover {
+    background-color: #1EBE5D !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
 }
 
 .hamburger {
@@ -421,7 +440,7 @@ h1, h2, h3, h4, h5, h6 {
 .hamburger span {
     width: 25px;
     height: 3px;
-    background-color: var(--brand-green-accent);
+    background-color: #FFFFFF;
     border-radius: 2px;
     transition: all 0.3s ease;
 }
