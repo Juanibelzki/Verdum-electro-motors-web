@@ -522,20 +522,23 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1.3rem;
     font-weight: 800;
     line-height: 1;
-    color: #111315;
+    color: #FFFFFF !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .stat:nth-child(1) .stat-number { background: var(--badge-grad-green); }
 .stat:nth-child(2) .stat-number { background: var(--badge-grad-rose); }
 .stat:nth-child(3) .stat-number { background: var(--badge-grad-wine); }
 
+.stat-number span,
 .stat-plus {
+    color: #FFFFFF !important;
     font-size: 0.9rem;
 }
 
 .stat-label {
     font-size: 0.75rem;
-    color: var(--color-text-body);
+    color: #9CA3AF !important;
     text-transform: uppercase;
     font-weight: 600;
     letter-spacing: 0.05em;
