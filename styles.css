@@ -665,10 +665,10 @@ section#inicio,
 .hero img[alt*="Vehículo"] {
     display: block !important;
     width: 100% !important;
-    max-width: clamp(560px, 50vw, 820px) !important;
+    max-width: clamp(620px, 58vw, 920px) !important;
     height: auto !important;
     object-fit: contain !important;
-    animation: float 4s ease-in-out infinite;
+    animation: float 4s ease-in-out infinite !important;
     background: transparent !important;
     background-color: transparent !important;
     background-image: none !important;
@@ -676,8 +676,7 @@ section#inicio,
     border: none !important;
     mix-blend-mode: normal !important;
     
-    margin-bottom: -10px !important;
-    transform: translateY(10px) !important;
+    margin-bottom: -15px !important;
     transform-origin: bottom center;
 
     filter: 
