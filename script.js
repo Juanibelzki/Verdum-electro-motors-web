@@ -767,15 +767,15 @@ function setupMobileMenu() {
                 top: calc(100% + 10px);
                 left: 0;
                 right: 0;
-                background: rgba(224,86,136,0.95);
+                background: rgba(255, 255, 255, 0.95);
                 backdrop-filter: blur(16px);
                 -webkit-backdrop-filter: blur(16px);
                 flex-direction: column;
-                padding: 20px 40px;
-                gap: 20px;
+                padding: 24px;
+                gap: 16px;
                 border-radius: 24px;
-                box-shadow: 0 12px 32px rgba(0,0,0,0.5);
-                border: 1px solid rgba(255,255,255,0.25);
+                box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+                border: 1px solid rgba(0,0,0,0.1);
             `;
         }
     });
