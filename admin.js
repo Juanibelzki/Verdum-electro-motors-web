@@ -1206,6 +1206,33 @@ function showAddVehicleForm() {
 
 function closeAddVehicleForm() {
     document.getElementById('addVehicleModal').style.display = 'none';
+    document.getElementById('newVehiclePhoto').value = '';
+    const preview = document.getElementById('newVehiclePhotoPreview');
+    if (preview) preview.style.display = 'none';
+    window._newVehiclePhotoData = null;
+}
+
+function previewNewVehiclePhoto(event) {
+    const file = event.target.files[0];
+    const err = validateImageFile(file, 5);
+    if (err) {
+        alert('❌ ' + err);
+        event.target.value = '';
+        window._newVehiclePhotoData = null;
+        const preview = document.getElementById('newVehiclePhotoPreview');
+        if (preview) preview.style.display = 'none';
+        return;
+    }
+    resizeImage(file, 600, 450, 0.6).then(async (result) => {
+        const base64 = await blobToBase64(result.blob);
+        window._newVehiclePhotoData = base64;
+        const preview = document.getElementById('newVehiclePhotoPreview');
+        const img = document.getElementById('newVehiclePhotoPreviewImg');
+        if (preview && img) {
+            img.src = base64;
+            preview.style.display = 'block';
+        }
+    });
 }
 
 async function saveNewVehicle() {
@@ -1265,7 +1292,8 @@ async function saveNewVehicle() {
     }
 
     // --- localStorage fallback ---
-    customVehicles.push({
+    const photoData = window._newVehiclePhotoData || null;
+    const vehicleData = {
         id: newId,
         category: category,
         categoryText: categoryTexts[category] || category,
@@ -1275,11 +1303,18 @@ async function saveNewVehicle() {
         km: km || '0 KM',
         color: color || '—',
         descripcion: descripcion
-    });
+    };
+    if (photoData) {
+        vehicleData.image = photoData;
+    }
+    customVehicles.push(vehicleData);
 
     saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
     closeAddVehicleForm();
     await renderVehiclesEditor();
+    if (photoData) {
+        uploadVehicleImageToSupabase(newId, photoData);
+    }
     await addChange(`Vehículo agregado: ${marca} ${modelo} (#${newId})`);
     alert('✓ Vehículo agregado correctamente');
 }
