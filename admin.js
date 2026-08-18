@@ -93,9 +93,7 @@ const SITE_IMAGE_SLOTS = [
     { key: 'hero_visual', label: 'Hero Visual', fileHint: 'hero_visual.png' },
     { key: 'service_1', label: 'Servicio 1 — Autos 0KM', fileHint: 'service_1.png' },
     { key: 'service_2', label: 'Servicio 2 — Autos Usados', fileHint: 'service_2.png' },
-    { key: 'service_3', label: 'Servicio 3 — Motos Eléctricas', fileHint: 'service_3.png' },
-    { key: 'service_4', label: 'Servicio 4 — Patinetas', fileHint: 'service_4.png' },
-    { key: 'service_5', label: 'Servicio 5 — Vehículos Especiales', fileHint: 'service_5.png' }
+    { key: 'service_5', label: 'Servicio 3 — Vehículos Especiales', fileHint: 'service_5.png' }
 ];
 
 const DEFAULT_VEHICLES = [
@@ -108,13 +106,6 @@ const DEFAULT_VEHICLES = [
     { id: 7, category: 'Autos Usados', marca: 'Peugeot', modelo: '208', precio: 1250000, anio: 2018, km: '95000', color: 'Azul' },
     { id: 8, category: 'Autos Usados', marca: 'Honda', modelo: 'Civic', precio: 1650000, anio: 2019, km: '68000', color: 'Plateado' },
     { id: 9, category: 'Autos Usados', marca: 'Renault', modelo: 'Kwid', precio: 950000, anio: 2020, km: '45000', color: 'Negro' },
-    { id: 10, category: 'Motos Eléctricas', marca: 'Energica', modelo: 'EVA', precio: 450000, anio: 2024, km: '0 KM', color: 'Negro' },
-    { id: 11, category: 'Motos Eléctricas', marca: 'Super Soco', modelo: 'TC Max', precio: 280000, anio: 2024, km: '0 KM', color: 'Rojo' },
-    { id: 12, category: 'Motos Eléctricas', marca: 'Volta', modelo: 'V1', precio: 350000, anio: 2023, km: '5000', color: 'Blanco' },
-    { id: 13, category: 'Patinetas Eléctricas', marca: 'Xiaomi', modelo: 'Mi 3 Pro', precio: 95000, anio: 2024, km: '0 KM', color: 'Negro' },
-    { id: 14, category: 'Patinetas Eléctricas', marca: 'Ninebot', modelo: 'Max G30', precio: 125000, anio: 2024, km: '0 KM', color: 'Gris' },
-    { id: 15, category: 'Patinetas Eléctricas', marca: 'Segway', modelo: 'Ninebot Pro', precio: 140000, anio: 2023, km: '2000', color: 'Blanco' },
-    { id: 16, category: 'Patinetas Eléctricas', marca: 'Hiboy', modelo: 'S2 Pro', precio: 110000, anio: 2024, km: '0 KM', color: 'Negro' },
     { id: 17, category: 'Vehículos Especiales', marca: 'Ford', modelo: 'Ranger', precio: 4200000, anio: 2024, km: '0 KM', color: 'Gris' },
     { id: 18, category: 'Vehículos Especiales', marca: 'Toyota', modelo: 'Hilux', precio: 4800000, anio: 2024, km: '0 KM', color: 'Blanco' },
     { id: 19, category: 'Vehículos Especiales', marca: 'Fiat', modelo: 'Fiorino', precio: 1800000, anio: 2023, km: '15000', color: 'Blanco' }
@@ -307,13 +298,11 @@ async function loadServices() {
     const defaults = [
         { desc: 'Nacionales e importados. Las mejores marcas con financiación propia.', features: ['VW', 'Nissan', 'Chevrolet'] },
         { desc: 'Revisados y garantizados. Todas las marcas con documentación completa.', features: ['Garantía', 'Revisados', 'Legales'] },
-        { desc: 'Eficiencia y potencia eléctrica para la ciudad. Bajos costos operativos.', features: ['Eco-friendly', 'Rápida', 'Potente'] },
-        { desc: 'Movilidad urbana sostenible y económica. Perfecta para desplazamientos.', features: ['Sostenible', 'Práctica', 'Urbana'] },
         { desc: 'Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.', features: ['4x4', 'Comerciales', 'A medida'] }
     ];
     const services = await sbGetContent('services') || loadStoredData('services', defaults);
-    if (services.length !== 5) {
-        services.length = 5;
+    if (services.length !== 3) {
+        services.length = 3;
         defaults.forEach((d, i) => { if (!services[i]) services[i] = d; });
         dataCache.services = services;
         try { await sbSaveContent('services', services); } catch {}
