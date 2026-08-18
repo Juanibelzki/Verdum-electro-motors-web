@@ -965,6 +965,18 @@ function getVehicleDefaultName(v) {
     return `${v.marca} ${v.modelo}`;
 }
 
+async function getDeletedDefaults() {
+    const local = loadStoredData(DELETED_DEFAULT_VEHICLES_KEY, []);
+    const remote = await sbGetContent('deleted_default_vehicles');
+    const merged = [...new Set([...(Array.isArray(remote) ? remote : []), ...local])];
+    return merged;
+}
+
+async function setDeletedDefaults(list) {
+    saveStoredData(DELETED_DEFAULT_VEHICLES_KEY, list);
+    try { await sbSaveContent('deleted_default_vehicles', list); } catch (e) { console.warn('No se pudo sincronizar eliminados:', e.message); }
+}
+
 async function renderVehiclesEditor() {
     const container = document.getElementById('vehiclesEditor');
     if (!container) return;
@@ -973,7 +985,7 @@ async function renderVehiclesEditor() {
 
     const overrides = await getVehicleOverrides();
     const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
-    const deletedDefaults = loadStoredData(DELETED_DEFAULT_VEHICLES_KEY, []);
+    const deletedDefaults = await getDeletedDefaults();
     let nextCustomId = 100;
 
     let html = '';
@@ -1383,11 +1395,11 @@ async function deleteVehicle(id) {
         }
     }
 
-    // --- localStorage: marcar como eliminado ---
-    const deletedDefaults = loadStoredData(DELETED_DEFAULT_VEHICLES_KEY, []);
+    // --- localStorage + Supabase: marcar como eliminado ---
+    const deletedDefaults = await getDeletedDefaults();
     if (!deletedDefaults.includes(id)) {
         deletedDefaults.push(id);
-        saveStoredData(DELETED_DEFAULT_VEHICLES_KEY, deletedDefaults);
+        await setDeletedDefaults(deletedDefaults);
     }
 
     if (idMap[id]) {
