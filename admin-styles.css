@@ -813,14 +813,14 @@ body {
 
 .vehicle-edit-body {
     display: grid;
-    grid-template-columns: minmax(140px, 180px) 1fr;
+    grid-template-columns: minmax(200px, 280px) 1fr;
     gap: 16px;
     align-items: start;
 }
 
 .vehicle-edit-preview {
     width: 100%;
-    max-width: 220px;
+    max-width: 280px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -835,6 +835,67 @@ body {
     object-position: center;
     border-radius: 8px;
     border: 1px solid rgba(45, 107, 228, 0.3);
+}
+
+.vehicle-thumbs-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.thumb-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(45, 107, 228, 0.3);
+}
+
+.thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-delete-thumb {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(255, 59, 48, 0.85);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    z-index: 2;
+}
+
+.btn-add-thumb {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    border: 1px dashed rgba(45, 107, 228, 0.5);
+    background: rgba(45, 107, 228, 0.06);
+    color: var(--primary-400, #2d6be4);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    transition: all 0.2s ease;
+}
+
+.btn-add-thumb:hover {
+    background: rgba(45, 107, 228, 0.15);
 }
 
 .vehicle-edit-fields {
@@ -867,12 +928,6 @@ body {
 .vehicle-edit-fields textarea:focus {
     outline: none;
     border-color: var(--primary-500);
-}
-
-.vehicle-photo-btn {
-    width: 100%;
-    padding: 8px 12px;
-    font-size: 12px;
 }
 
 .vehicle-save-btn {

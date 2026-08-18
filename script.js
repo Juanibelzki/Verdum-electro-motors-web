@@ -67,7 +67,7 @@ async function loadStockFromSupabase() {
                 precio: v.precio || 'Consultar',
                 descripcion: v.descripcion || '',
                 image: photoUrl,
-                fotos: v.photos || [],
+                fotos: sorted,
                 slug: v.slug,
                 folder: cat.slug,
                 whatsappMsg: v.whatsapp_msg || `Hola! Me interesa el ${v.nombre} que vi en su sitio web.`
@@ -186,16 +186,27 @@ function renderVehicles(vehicles, category) {
         const whatsappMsg = vehicle.whatsappMsg
             ? String(vehicle.whatsappMsg).replace(/'/g, "\\'")
             : '';
+        const fotos = (vehicle.fotos || []).filter(f => f && f.url);
+        const cardId = vehicle.id;
+        const carouselControls = fotos.length > 1 ? `
+            <button class="carousel-btn prev" onclick="event.stopPropagation(); prevVehiclePhoto(${cardId})">&#10094;</button>
+            <button class="carousel-btn next" onclick="event.stopPropagation(); nextVehiclePhoto(${cardId})">&#10095;</button>
+            <div class="carousel-dots">
+                ${fotos.map((_, i) => `<span class="carousel-dot${i === 0 ? ' active' : ''}"></span>`).join('')}
+            </div>
+        ` : '';
 
         vehicleCard.innerHTML = `
-            <div class="vehicle-image-wrapper">
+            <div class="vehicle-image-wrapper" data-card-id="${cardId}">
                 <img 
                     src="${imageSrc}" 
                     alt="${displayName}" 
-                    class="vehicle-image"
+                    class="vehicle-image carousel-img"
+                    data-index="0"
                     loading="lazy"
                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"225\"/%3E'"
                 >
+                ${carouselControls}
             </div>
             <div class="vehicle-info">
                 <h4 class="vehicle-title">${displayName}</h4>
@@ -223,6 +234,30 @@ function renderVehicles(vehicles, category) {
         container.appendChild(vehicleCard);
     });
 }
+
+/**
+ * Navega el carrusel de fotos de una card de stock
+ */
+function changeVehiclePhoto(cardId, dir) {
+    const card = document.querySelector(`.vehicle-image-wrapper[data-card-id="${cardId}"]`);
+    if (!card) return;
+    const img = card.querySelector('.carousel-img');
+    const fotos = (currentStockVehicles.find(v => v.id === Number(cardId)) || {}).fotos || [];
+    const validFotos = fotos.filter(f => f && f.url);
+    if (!img || validFotos.length < 2) return;
+
+    let idx = parseInt(img.dataset.index, 10) || 0;
+    idx = (idx + dir + validFotos.length) % validFotos.length;
+    img.src = validFotos[idx].url;
+    img.dataset.index = idx;
+
+    card.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === idx);
+    });
+}
+
+window.prevVehiclePhoto = (cardId) => changeVehiclePhoto(cardId, -1);
+window.nextVehiclePhoto = (cardId) => changeVehiclePhoto(cardId, 1);
 
 
 /**

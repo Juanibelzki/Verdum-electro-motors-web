@@ -2283,6 +2283,70 @@ section#inicio,
     transform: scale(1.04);
 }
 
+/* Carrusel de fotos en cards de stock */
+.carousel-btn {
+    background: rgba(18, 20, 24, 0.7);
+    backdrop-filter: blur(4px);
+    color: #FFF;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    transition: all 0.2s ease;
+    opacity: 0;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+}
+
+.vehicle-card:hover .carousel-btn {
+    opacity: 1;
+}
+
+.carousel-btn:hover {
+    background: rgba(18, 20, 24, 0.9);
+}
+
+.carousel-btn.prev {
+    left: 8px;
+}
+
+.carousel-btn.next {
+    right: 8px;
+}
+
+.carousel-dots {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 5;
+}
+
+.carousel-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transition: all 0.2s;
+}
+
+.carousel-dot.active {
+    width: 16px;
+    border-radius: 4px;
+    background: var(--brand-green);
+}
+
 /* Información del vehículo */
 .vehicle-info {
     padding: 20px;
@@ -2451,6 +2515,10 @@ section#inicio,
 
     .vehicle-card {
         border-radius: 12px;
+    }
+
+    .vehicle-card .carousel-btn {
+        opacity: 0.9;
     }
 
     .vehicle-info {
