@@ -205,11 +205,15 @@ function resizeImage(file, maxW, maxH, quality = 0.8) {
         const img = new Image();
         img.onload = () => {
             let { width: w, height: h } = img;
-            if (w > maxW) { h = h * maxW / w; w = maxW; }
-            if (h > maxH) { w = w * maxH / h; h = maxH; }
+            if (w > maxW || h > maxH) {
+                const ratio = Math.min(maxW / w, maxH / h);
+                w = Math.round(w * ratio);
+                h = Math.round(h * ratio);
+            }
             const c = document.createElement('canvas');
             c.width = w; c.height = h;
-            c.getContext('2d').drawImage(img, 0, 0, w, h);
+            const ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
             c.toBlob((blob) => {
                 resolve({ blob, width: w, height: h, originalName: file.name });
             }, 'image/webp', quality);
@@ -814,7 +818,7 @@ function initImagesSection() {
             const file = e.target.files[0];
             const err = validateImageFile(file, 5);
             if (err) { alert('❌ ' + err); e.target.value = ''; return; }
-            const result = await resizeImage(file, 600, 450, 0.6);
+            const result = await resizeImage(file, 900, 1200, 0.85);
             const base64 = await blobToBase64(result.blob);
             const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
             const isCustom = customVehicles.some(v => v.id === id);
