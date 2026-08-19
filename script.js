@@ -11,6 +11,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const FINANCING_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'1200\' height=\'900\'%3E%3Cdefs%3E%3ClinearGradient id=\'g\' x1=\'0\' y1=\'0\' x2=\'1\' y2=\'1\'%3E%3Cstop offset=\'0\' stop-color=\'%2312181f\'/%3E%3Cstop offset=\'1\' stop-color=\'%2325d366\' stop-opacity=\'0.25\'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=\'1200\' height=\'900\' fill=\'url(%23g)\'/%3E%3Ctext x=\'600\' y=\'440\' font-family=\'Arial,%20Helvetica,%20sans-serif\' font-size=\'72\' font-weight=\'bold\' fill=\'%23ffffff\' text-anchor=\'middle\'%3EVERDUN%3C/text%3E%3Ctext x=\'600\' y=\'500\' font-family=\'Arial,%20Helvetica,%20sans-serif\' font-size=\'32\' fill=\'%2325d366\' text-anchor=\'middle\'%3EAUTOMOTORES%3C/text%3E%3C/svg%3E';
+window.FINANCING_PLACEHOLDER = FINANCING_PLACEHOLDER;
+
 const CATEGORY_MAPPING = {
     'autos-0km': '0km',
     'autos-usados': 'usados',

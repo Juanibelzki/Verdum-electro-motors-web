@@ -252,24 +252,25 @@
     </section>
 
     <!-- ============================================
-         OPCIONES DE CRÉDITO
+         MÉTODOS DE PAGO
     ============================================ -->
     <section id="creditos" class="creditos">
         <div class="creditos-container">
-            <h2 class="section-title fade-in">Opciones de Financiación</h2>
-            <p class="section-subtitle fade-in">Descubrí todo lo que podemos hacer por vos</p>
+            <h2 class="section-title fade-in">Métodos de Pago</h2>
+            <p class="section-subtitle fade-in">Transferencia, efectivo, financiación propia y tomamos tu vehículo como parte de pago.</p>
             
             <div class="creditos-grid">
                 <!-- Opción 1: Financiación Propia -->
                 <div class="financing-card" data-financing-type="financing_own">
                     <div class="financing-card-image-wrapper">
                         <img
-                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'/%3E"
+                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'%3E%3Crect width='1200' height='900' fill='%2312181f'/%3E%3Ctext x='600' y='470' font-family='Arial,%20sans-serif' font-size='64' font-weight='bold' fill='%2325d366' text-anchor='middle'%3EVERDUN%3C/text%3E%3C/svg%3E"
                             alt="Financiación Propia"
                             class="financing-card-image"
                             data-image-type="financing_own"
                             width="1200" height="900"
                             loading="lazy"
+                            onerror="this.onerror=null;this.src=window.FINANCING_PLACEHOLDER||this.src"
                         />
                         <div class="financing-card-overlay"></div>
                     </div>
@@ -292,12 +293,13 @@
                 <div class="financing-card" data-financing-type="financing_bank">
                     <div class="financing-card-image-wrapper">
                         <img
-                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'/%3E"
+                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'%3E%3Crect width='1200' height='900' fill='%2312181f'/%3E%3Ctext x='600' y='470' font-family='Arial,%20sans-serif' font-size='64' font-weight='bold' fill='%2325d366' text-anchor='middle'%3EVERDUN%3C/text%3E%3C/svg%3E"
                             alt="Crédito Bancario"
                             class="financing-card-image"
                             data-image-type="financing_bank"
                             width="1200" height="900"
                             loading="lazy"
+                            onerror="this.onerror=null;this.src=window.FINANCING_PLACEHOLDER||this.src"
                         />
                         <div class="financing-card-overlay"></div>
                     </div>
@@ -320,12 +322,13 @@
                 <div class="financing-card" data-financing-type="financing_permuta">
                     <div class="financing-card-image-wrapper">
                         <img
-                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'/%3E"
+                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'%3E%3Crect width='1200' height='900' fill='%2312181f'/%3E%3Ctext x='600' y='470' font-family='Arial,%20sans-serif' font-size='64' font-weight='bold' fill='%2325d366' text-anchor='middle'%3EVERDUN%3C/text%3E%3C/svg%3E"
                             alt="Permuta"
                             class="financing-card-image"
                             data-image-type="financing_permuta"
                             width="1200" height="900"
                             loading="lazy"
+                            onerror="this.onerror=null;this.src=window.FINANCING_PLACEHOLDER||this.src"
                         />
                         <div class="financing-card-overlay"></div>
                     </div>
@@ -503,6 +506,6 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-    <script src="script.js?v=20"></script>
+    <script src="script.js?v=21"></script>
 </body>
 </html>
