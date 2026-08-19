@@ -1685,6 +1685,29 @@ async function deleteVehicle(id) {
     alert('✓ Vehículo eliminado');
 }
 
+async function massPublishVehicles() {
+    const confirmed = confirm('¿Estás seguro de publicar todos los vehículos?\n\nEsto activará y hará visibles en la web todas las unidades sincronizadas.');
+    if (!confirmed) return;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('vehicles')
+            .update({ activo: true })
+            .eq('activo', false);
+
+        if (error) throw error;
+
+        const count = data ? data.length : 0;
+        alert(`¡Todos los vehículos han sido publicados con éxito!${count > 0 ? ` (${count} unidades activadas)` : ''}`);
+        await addChange(`Acción masiva: todos los vehículos publicados`);
+        pendientesFilterActive = false;
+        await renderVehiclesEditor();
+    } catch (err) {
+        console.error('Mass publish failed:', err);
+        alert('❌ Error al publicar: ' + (err.message || 'Error desconocido'));
+    }
+}
+
 async function loadImagesSection() {
     await loadLogoPreview();
     await renderSiteImagesGrid();
