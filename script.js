@@ -38,7 +38,10 @@ async function loadStockFromSupabase() {
 
     const inventory = {};
     let idCounter = 0;
+    const allMotos = [];
 
+    // 1) Cargar vehículos por categoría (autos, especiales, etc.)
+    const categoryVehicles = [];
     for (const cat of categories || []) {
         const { data: vehicles } = await supabaseClient
             .from('vehicles')
@@ -87,8 +90,25 @@ async function loadStockFromSupabase() {
             };
         });
 
+        // Separar motos del resto
+        const motos = mapped.filter(v => v.esMoto);
+        const noMotos = mapped.filter(v => !v.esMoto);
+
+        // Acumular todas las motos para la categoría combinada
+        allMotos.push(...motos);
+
         const htmlKey = HTML_KEY_FROM_SLUG[cat.slug] || cat.slug;
-        inventory[htmlKey] = { title: cat.nombre, vehicles: mapped };
+        // Para categorías de motos en Supabase, no mostrar duplicado (se muestra en "motos" combinado)
+        if (cat.slug === 'motos-electricas') {
+            inventory[htmlKey] = { title: cat.nombre, vehicles: [] };
+        } else {
+            inventory[htmlKey] = { title: cat.nombre, vehicles: noMotos };
+        }
+    }
+
+    // 2) Agregar categoría combinada "motos" con todas las motos
+    if (allMotos.length > 0) {
+        inventory['motos'] = { title: 'Motos', vehicles: allMotos };
     }
 
     stockCache = inventory;
