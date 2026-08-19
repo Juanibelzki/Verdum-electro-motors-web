@@ -44,7 +44,7 @@ async function loadStockFromSupabase() {
             .from('vehicles')
             .select(`
                 id, slug, nombre, marca, modelo, año, km, color,
-                precio, precio_numero, descripcion, whatsapp_msg,
+                descripcion, whatsapp_msg,
                 photos(url, url_thumb, posicion)
             `)
             .eq('category_id', cat.id)
@@ -52,30 +52,34 @@ async function loadStockFromSupabase() {
             .order('created_at', { ascending: false })
             .limit(100);
 
-        const mapped = (vehicles || []).map(v => {
-            idCounter++;
-            const sorted = (v.photos || []).sort((a, b) => a.posicion - b.posicion);
-            const firstPhoto = sorted[0];
-            const photoUrl = firstPhoto?.url || `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"/%3E`;
+        const mapped = (vehicles || [])
+            .filter(v => {
+                const photos = v.photos || [];
+                return photos.length > 0 && photos.some(p => p.url);
+            })
+            .map(v => {
+                idCounter++;
+                const sorted = (v.photos || []).sort((a, b) => a.posicion - b.posicion);
+                const firstPhoto = sorted[0];
+                const photoUrl = firstPhoto?.url || '';
 
-            return {
-                id: idCounter,
-                uuid: v.id,
-                marca: v.marca,
-                modelo: v.modelo,
-                nombre: v.nombre,
-                año: v.año,
-                km: v.km,
-                color: v.color,
-                precio: v.precio || 'Consultar',
-                descripcion: v.descripcion || '',
-                image: photoUrl,
-                fotos: sorted,
-                slug: v.slug,
-                folder: cat.slug,
-                whatsappMsg: v.whatsapp_msg || `Hola! Me interesa el ${v.nombre} que vi en su sitio web.`
-            };
-        });
+                return {
+                    id: idCounter,
+                    uuid: v.id,
+                    marca: v.marca,
+                    modelo: v.modelo,
+                    nombre: v.nombre,
+                    año: v.año,
+                    km: v.km,
+                    color: v.color,
+                    descripcion: v.descripcion || '',
+                    image: photoUrl,
+                    fotos: sorted,
+                    slug: v.slug,
+                    folder: cat.slug,
+                    whatsappMsg: v.whatsapp_msg || `Hola! Quiero consultar el precio y disponibilidad del ${v.marca} ${v.modelo} (${v.año || ''}) que vi en su web.`
+                };
+            });
 
         const htmlKey = HTML_KEY_FROM_SLUG[cat.slug] || cat.slug;
         inventory[htmlKey] = { title: cat.nombre, vehicles: mapped };
@@ -96,7 +100,7 @@ function getVehicleDisplayName(vehicle) {
 const WHATSAPP_NUMBER = '543795300020';
 
 function consultarWhatsApp(vehicleName, año, customMsg) {
-    const mensaje = customMsg || `Hola! Me interesa el ${vehicleName}${año ? ' (' + año + ')' : ''} que vi en su sitio web. ¿Podrían darme más información?`;
+    const mensaje = customMsg || `¡Hola! Quiero consultar el precio y disponibilidad del ${vehicleName}${año ? ' (' + año + ')' : ''} que vi en su web.`;
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 }
