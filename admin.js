@@ -712,7 +712,7 @@ async function syncVehiclesFromSupabase() {
     try {
         const { data } = await supabaseClient
             .from('vehicles')
-            .select('id, slug, nombre, marca, modelo, año, km, color, descripcion, category_id, photos(url, url_thumb, posicion)')
+            .select('id, slug, nombre, marca, modelo, año, km, color, descripcion, category_id, status, photos(url, url_thumb, posicion)')
             .eq('activo', true);
         rows = data || [];
     } catch (sbErr) {
@@ -784,6 +784,7 @@ async function syncVehiclesFromSupabase() {
             o.km = row.km || o.km;
             o.color = row.color || o.color;
             o.descripcion = row.descripcion || o.descripcion;
+            o.status = row.status || 'publicado';
             const photos = (row.photos || []).slice().sort((a, b) => a.posicion - b.posicion);
             const prevFotos = (overrides[dv.id] && overrides[dv.id].fotos) || [];
             const pendingLocal = prevFotos.filter(f => typeof f === 'string' && f.startsWith('data:'));
@@ -813,6 +814,7 @@ async function syncVehiclesFromSupabase() {
             km: row.km || '0 KM',
             color: row.color || '—',
             descripcion: row.descripcion || '',
+            status: row.status || 'publicado',
             image: photos[0] ? photos[0].url : '',
             fotos: photos.slice(0, 5)
         });
@@ -960,7 +962,11 @@ function initImagesSection() {
 
             renderVehiclesEditor();
 
-            addChange(`Fotos del vehículo #${id} actualizadas`);
+            if (uploadedUrls.length > 0) {
+                addChange(`Fotos del vehículo #${id} actualizadas → Publicado`);
+            } else {
+                addChange(`Fotos del vehículo #${id} actualizadas`);
+            }
             e.target.value = '';
         });
     }
@@ -1038,6 +1044,32 @@ async function uploadVehicleImageToSupabase(adminId, photoFilesArray) {
     } catch (err) {
         console.warn('Supabase image upload failed:', err.message);
     }
+
+    // Si se subió al menos 1 foto, cambiar status a 'publicado'
+    if (uploadedUrls.length > 0) {
+        try {
+            const idMap = loadStoredData('supabase_vehicle_map', {});
+            const supabaseVehicleId = idMap[adminId];
+            if (supabaseVehicleId) {
+                await supabaseClient.from('vehicles').update({ status: 'publicado' }).eq('id', supabaseVehicleId);
+                // Actualizar status en localStorage también
+                const overrides = getVehicleOverrides();
+                if (overrides[adminId]) {
+                    overrides[adminId].status = 'publicado';
+                    setVehicleOverrides(overrides);
+                }
+                const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+                const cvIdx = customVehicles.findIndex(v => v.id === adminId);
+                if (cvIdx !== -1) {
+                    customVehicles[cvIdx].status = 'publicado';
+                    saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+                }
+            }
+        } catch (statusErr) {
+            console.warn('No se pudo actualizar status:', statusErr.message);
+        }
+    }
+
     return uploadedUrls;
 }
 
@@ -1133,6 +1165,48 @@ function vehicleThumbsHtml(adminId, fotos) {
     return `<div class="vehicle-thumbs-grid">${thumbs}${add}</div>`;
 }
 
+function vehicleStatusBadgeHtml(status, fotos) {
+    const hasFotos = fotos && fotos.length > 0;
+    const isPending = status === 'pendiente_fotos' || !hasFotos;
+    if (isPending) {
+        return '<span class="vehicle-status-badge badge-pendiente">⚠ Falta Fotos</span>';
+    }
+    return '<span class="vehicle-status-badge badge-publicado">✓ Publicado</span>';
+}
+
+function getPendingPhotosCount(overrides, customVehicles, deletedDefaults) {
+    let count = 0;
+    DEFAULT_VEHICLES.forEach(v => {
+        if (deletedDefaults.includes(v.id)) return;
+        const o = overrides[v.id] || {};
+        const fotos = o.fotos || (o.image ? [o.image] : []);
+        const status = o.status || 'publicado';
+        if (status === 'pendiente_fotos' || fotos.length === 0) count++;
+    });
+    customVehicles.forEach(cv => {
+        const fotos = cv.fotos || (cv.image ? [cv.image] : []);
+        const status = cv.status || 'publicado';
+        if (status === 'pendiente_fotos' || fotos.length === 0) count++;
+    });
+    return count;
+}
+
+function renderPendientesBanner(count, isActive) {
+    if (count === 0) return '';
+    const activeClass = isActive ? ' active' : '';
+    const label = isActive
+        ? `Mostrando solo vehículos pendientes <span class="banner-count">${count}</span>`
+        : `⚡ Hay ${count} vehículo${count > 1 ? 's' : ''} nuevo${count > 1 ? 's' : ''} sincronizado${count > 1 ? 's' : ''} esperando fotos <span class="banner-count">${count}</span>`;
+    return `<div class="pendientes-banner${activeClass}" onclick="togglePendientesFilter()">${label}</div>`;
+}
+
+let pendientesFilterActive = false;
+
+function togglePendientesFilter() {
+    pendientesFilterActive = !pendientesFilterActive;
+    renderVehiclesEditor();
+}
+
 async function renderVehiclesEditor() {
     const container = document.getElementById('vehiclesEditor');
     if (!container) return;
@@ -1144,7 +1218,8 @@ async function renderVehiclesEditor() {
     const deletedDefaults = await getDeletedDefaults();
     let nextCustomId = 100;
 
-    let html = '';
+    const pendingCount = getPendingPhotosCount(overrides, customVehicles, deletedDefaults);
+    let html = renderPendientesBanner(pendingCount, pendientesFilterActive);
 
     // Vehículos por defecto
     DEFAULT_VEHICLES.forEach((v) => {
@@ -1157,11 +1232,15 @@ async function renderVehiclesEditor() {
         const descripcion = o.descripcion || '';
         const imgSrc = o.image || '';
         const defaultFotos = o.fotos || (o.image ? [o.image] : []);
+        const status = o.status || 'publicado';
+
+        if (pendientesFilterActive && status !== 'pendiente_fotos' && defaultFotos.length > 0) return;
 
         html += `
             <div class="vehicle-edit-card" data-id="${v.id}">
                 <div class="vehicle-edit-header">
                     <span class="vehicle-category-tag">${v.category}</span>
+                    ${vehicleStatusBadgeHtml(status, defaultFotos)}
                     <span class="vehicle-id-tag">#${v.id}</span>
                 </div>
                 <div class="vehicle-edit-body">
@@ -1195,10 +1274,15 @@ async function renderVehiclesEditor() {
         nextCustomId = Math.max(nextCustomId, cv.id + 1);
         const imgSrc = cv.image || '';
         const customFotos = cv.fotos || (cv.image ? [cv.image] : []);
+        const status = cv.status || 'publicado';
+
+        if (pendientesFilterActive && status !== 'pendiente_fotos' && customFotos.length > 0) return;
+
         html += `
             <div class="vehicle-edit-card vehicle-custom" data-id="${cv.id}">
                 <div class="vehicle-edit-header">
                     <span class="vehicle-category-tag">${cv.categoryText || cv.category}</span>
+                    ${vehicleStatusBadgeHtml(status, customFotos)}
                     <span class="vehicle-id-tag" style="color:var(--primary-400)">#${cv.id} ✚</span>
                 </div>
                 <div class="vehicle-edit-body">
@@ -1296,7 +1380,8 @@ async function saveVehicle(id) {
             color,
             descripcion,
             whatsapp_msg,
-            activo: true
+            activo: true,
+            status: 'pendiente_fotos'
         };
 
         let result;
@@ -1333,6 +1418,8 @@ async function saveVehicle(id) {
                     url_thumb: publicUrl,
                     posicion: 0
                 });
+                    // Foto subida → cambiar status a publicado
+                    await supabaseClient.from('vehicles').update({ status: 'publicado' }).eq('id', supabaseVehicleId);
                 }
             }
         }
