@@ -42,7 +42,7 @@
             color: var(--text-primary);
         }
     </style>
-    <link rel="stylesheet" href="admin-styles.css?v=15">
+    <link rel="stylesheet" href="admin-styles.css?v=16">
 </head>
 <body>
     <!-- ============================================
@@ -296,7 +296,7 @@
                     <div class="financing-editor">
                         <!-- FINANCING 1 -->
                         <div class="service-edit-card">
-                            <h3>Financiación Propia</h3>
+                            <h3>Métodos de Pago</h3>
                             <div class="image-preview-box" style="margin-bottom:12px">
                                 <img id="preview-financing_own" src="" alt="Preview" class="preview-img" style="display:none">
                                 <span class="preview-placeholder" id="ph-financing_own">Sin imagen</span>
@@ -307,15 +307,15 @@
                             </div>
                             <div class="form-group">
                                 <label>Título</label>
-                                <input type="text" id="financing_own-title" placeholder="Financiación Propia">
+                                <input type="text" id="financing_own-title" placeholder="Métodos de Pago">
                             </div>
                             <div class="form-group">
                                 <label>Descripción</label>
-                                <textarea id="financing_own-desc" placeholder="Sin banco. Aprobación en el día..." rows="3"></textarea>
+                                <textarea id="financing_own-desc" placeholder="Elegí la forma más conveniente..." rows="3"></textarea>
                             </div>
                             <div class="form-group">
                                 <label>Beneficios (separados por coma)</label>
-                                <textarea id="financing_own-features" placeholder="Aprobación inmediata,Cuotas fijas,Sin comisiones..." rows="3"></textarea>
+                                <textarea id="financing_own-features" placeholder="Transferencia bancaria,Efectivo,Crédito prendario y financiación bancaria,Tomamos tu vehículo usado como parte de pago" rows="3"></textarea>
                             </div>
                             <button type="button" class="btn-update" onclick="updateFinancingOption('financing_own')">✓ Guardar Cambios</button>
                         </div>
@@ -592,6 +592,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-    <script src="admin.js?v=15"></script>
+    <script src="admin.js?v=16"></script>
 </body>
 </html>

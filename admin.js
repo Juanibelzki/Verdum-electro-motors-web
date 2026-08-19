@@ -328,7 +328,7 @@ async function loadServices() {
 
 async function loadFinancingOptions() {
     const defaults = {
-        financing_own: { title: 'Financiación Propia', description: 'Sin banco. Aprobación en el día con cuotas fijas en pesos.', features: ['Aprobación inmediata', 'Cuotas fijas', 'Sin comisiones ocultas', 'Hasta 84 meses'] },
+        financing_own: { title: 'Métodos de Pago', description: 'Elegí la forma más conveniente para llevarte tu próximo vehículo:', features: ['Transferencia bancaria', 'Efectivo', 'Crédito prendario y financiación bancaria', 'Tomamos tu vehículo usado como parte de pago'] },
         financing_bank: { title: 'Crédito Bancario', description: 'Mejores tasas del mercado con nuestros bancos aliados.', features: ['Tasas competitivas', 'Múltiples opciones', 'Tramitación rápida', 'Asesoramiento gratuito'] },
         financing_permuta: { title: 'Permuta', description: 'Tu usado como parte de pago. Tasación justa y transparente.', features: ['Tasación real', 'Proceso transparente', 'Compra de tu usado', 'Trámites incluidos'] }
     };
