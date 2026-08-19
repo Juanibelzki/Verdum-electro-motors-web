@@ -712,7 +712,7 @@ async function syncVehiclesFromSupabase() {
     try {
         const { data } = await supabaseClient
             .from('vehicles')
-            .select('id, slug, nombre, marca, modelo, año, km, color, descripcion, category_id, status, photos(url, url_thumb, posicion)')
+            .select('id, slug, nombre, marca, modelo, año, km, color, descripcion, category_id, status, tipo, photos(url, url_thumb, posicion)')
             .eq('activo', true);
         rows = data || [];
     } catch (sbErr) {
@@ -785,6 +785,7 @@ async function syncVehiclesFromSupabase() {
             o.color = row.color || o.color;
             o.descripcion = row.descripcion || o.descripcion;
             o.status = row.status || 'publicado';
+            o.tipo = row.tipo || 'auto';
             const photos = (row.photos || []).slice().sort((a, b) => a.posicion - b.posicion);
             const prevFotos = (overrides[dv.id] && overrides[dv.id].fotos) || [];
             const pendingLocal = prevFotos.filter(f => typeof f === 'string' && f.startsWith('data:'));
@@ -815,6 +816,7 @@ async function syncVehiclesFromSupabase() {
             color: row.color || '—',
             descripcion: row.descripcion || '',
             status: row.status || 'publicado',
+            tipo: row.tipo || 'auto',
             image: photos[0] ? photos[0].url : '',
             fotos: photos.slice(0, 5)
         });
@@ -1233,6 +1235,8 @@ async function renderVehiclesEditor() {
         const imgSrc = o.image || '';
         const defaultFotos = o.fotos || (o.image ? [o.image] : []);
         const status = o.status || 'publicado';
+        const tipo = o.tipo || 'auto';
+        const tipoBadge = tipo === 'moto' ? '<span class="vehicle-type-tag" style="background:#f59e0b;color:#111">Moto</span>' : '';
 
         if (pendientesFilterActive && status !== 'pendiente_fotos' && defaultFotos.length > 0) return;
 
@@ -1240,6 +1244,7 @@ async function renderVehiclesEditor() {
             <div class="vehicle-edit-card" data-id="${v.id}">
                 <div class="vehicle-edit-header">
                     <span class="vehicle-category-tag">${v.category}</span>
+                    ${tipoBadge}
                     ${vehicleStatusBadgeHtml(status, defaultFotos)}
                     <span class="vehicle-id-tag">#${v.id}</span>
                 </div>
@@ -1275,6 +1280,8 @@ async function renderVehiclesEditor() {
         const imgSrc = cv.image || '';
         const customFotos = cv.fotos || (cv.image ? [cv.image] : []);
         const status = cv.status || 'publicado';
+        const tipo = cv.tipo || 'auto';
+        const tipoBadge = tipo === 'moto' ? '<span class="vehicle-type-tag" style="background:#f59e0b;color:#111">Moto</span>' : '';
 
         if (pendientesFilterActive && status !== 'pendiente_fotos' && customFotos.length > 0) return;
 
@@ -1282,6 +1289,7 @@ async function renderVehiclesEditor() {
             <div class="vehicle-edit-card vehicle-custom" data-id="${cv.id}">
                 <div class="vehicle-edit-header">
                     <span class="vehicle-category-tag">${cv.categoryText || cv.category}</span>
+                    ${tipoBadge}
                     ${vehicleStatusBadgeHtml(status, customFotos)}
                     <span class="vehicle-id-tag" style="color:var(--primary-400)">#${cv.id} ✚</span>
                 </div>
@@ -1337,7 +1345,8 @@ async function saveVehicle(id) {
     let categorySlug = 'autos-usados';
     let marca = 'Generica';
     let modelo = nombre;
-    let whatsapp_msg = `Hola! Quiero consultar por el ${nombre}`;
+    let tipo = 'auto';
+    let whatsapp_msg = `¡Hola! Quiero consultar el precio y disponibilidad del ${nombre} que vi en su web.`;
 
     if (isCustom) {
         const cv = customVehicles.find(v => v.id === id);
@@ -1345,6 +1354,7 @@ async function saveVehicle(id) {
             categorySlug = cv.category;
             marca = cv.marca;
             modelo = cv.modelo;
+            tipo = cv.tipo || 'auto';
         }
     } else {
         const dv = DEFAULT_VEHICLES.find(v => v.id === id);
@@ -1353,8 +1363,13 @@ async function saveVehicle(id) {
             const parts = nombre.split(' ');
             marca = parts[0] || dv.marca;
             modelo = parts.slice(1).join(' ') || dv.modelo;
+            tipo = dv.tipo || 'auto';
         }
     }
+
+    whatsapp_msg = tipo === 'moto'
+        ? `¡Hola! Quiero consultar el precio y disponibilidad de la moto ${marca} ${modelo} (${anio || ''}) que vi en su web.`
+        : `¡Hola! Quiero consultar el precio y disponibilidad del ${marca} ${modelo} (${anio || ''}) que vi en su web.`;
 
     const catId = await resolveCategoryId(categorySlug);
     const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
@@ -1379,6 +1394,7 @@ async function saveVehicle(id) {
             km,
             color,
             descripcion,
+            tipo,
             whatsapp_msg,
             activo: true,
             status: 'pendiente_fotos'
@@ -1440,6 +1456,7 @@ async function saveVehicle(id) {
             const parts = nombre.split(' ');
             return {
                 ...v,
+                tipo: tipo,
                 marca: parts[0] || v.marca,
                 modelo: parts.slice(1).join(' ') || v.modelo,
                 anio: anio,
@@ -1457,6 +1474,7 @@ async function saveVehicle(id) {
         overrides[id].km = km;
         overrides[id].color = color;
         overrides[id].descripcion = descripcion;
+        overrides[id].tipo = tipo;
         await setVehicleOverrides(overrides);
     }
 
@@ -1471,6 +1489,7 @@ function showAddVehicleForm() {
 function closeAddVehicleForm() {
     document.getElementById('addVehicleModal').style.display = 'none';
     document.getElementById('newVehiclePhoto').value = '';
+    document.getElementById('newVehicleTipo').value = 'auto';
     const preview = document.getElementById('newVehiclePhotoPreview');
     if (preview) preview.style.display = 'none';
     window._newVehiclePhotoData = null;
@@ -1500,6 +1519,7 @@ function previewNewVehiclePhoto(event) {
 }
 
 async function saveNewVehicle() {
+    const tipo = document.getElementById('newVehicleTipo').value || 'auto';
     const category = document.getElementById('newVehicleCategory').value;
     const marca = document.getElementById('newVehicleMarca').value.trim();
     const modelo = document.getElementById('newVehicleModelo').value.trim();
@@ -1541,7 +1561,10 @@ async function saveNewVehicle() {
             km: km || '0 KM',
             color: color || '—',
             descripcion,
-            whatsapp_msg: `Hola! Quiero consultar por el ${nombre}`,
+            tipo,
+            whatsapp_msg: tipo === 'moto'
+                ? `¡Hola! Quiero consultar el precio y disponibilidad de la moto ${marca} ${modelo} (${anio || ''}) que vi en su web.`
+                : `¡Hola! Quiero consultar el precio y disponibilidad del ${marca} ${modelo} (${anio || ''}) que vi en su web.`,
             activo: true
         };
 
@@ -1561,6 +1584,7 @@ async function saveNewVehicle() {
         id: newId,
         category: category,
         categoryText: categoryTexts[category] || category,
+        tipo: tipo,
         marca: marca,
         modelo: modelo,
         anio: anio,

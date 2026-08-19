@@ -44,7 +44,7 @@ async function loadStockFromSupabase() {
             .from('vehicles')
             .select(`
                 id, slug, nombre, marca, modelo, año, km, color,
-                descripcion, whatsapp_msg,
+                descripcion, whatsapp_msg, tipo,
                 photos(url, url_thumb, posicion)
             `)
             .eq('category_id', cat.id)
@@ -61,6 +61,8 @@ async function loadStockFromSupabase() {
             const fotosConUrl = sorted.filter(p => p.url);
             const kmNum = parseFloat(String(v.km).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
             const esCeroKm = kmNum <= 100;
+            const tipo = v.tipo || 'auto';
+            const esMoto = tipo === 'moto';
 
             return {
                 id: idCounter,
@@ -71,13 +73,17 @@ async function loadStockFromSupabase() {
                 año: v.año,
                 km: v.km,
                 color: v.color,
+                tipo,
+                esMoto,
                 descripcion: v.descripcion || '',
                 image: photoUrl,
                 fotos: fotosConUrl,
                 slug: v.slug,
                 folder: cat.slug,
                 esCeroKm,
-                whatsappMsg: v.whatsapp_msg || `¡Hola! Quiero consultar el precio y disponibilidad del ${v.marca} ${v.modelo} (${v.año || ''}) que vi en su web.`
+                whatsappMsg: v.whatsapp_msg || (esMoto
+                    ? `¡Hola! Quiero consultar el precio y disponibilidad de la moto ${v.marca} ${v.modelo} (${v.año || ''}) que vi en su web.`
+                    : `¡Hola! Quiero consultar el precio y disponibilidad del ${v.marca} ${v.modelo} (${v.año || ''}) que vi en su web.`)
             };
         });
 
@@ -206,10 +212,14 @@ function renderVehicles(vehicles, category) {
         const condicionBadge = vehicle.esCeroKm
             ? '<span class="vehicle-badge badge-0km">0 KM</span>'
             : '<span class="vehicle-badge badge-usado">Usado</span>';
+        const tipoBadge = vehicle.esMoto
+            ? '<span class="vehicle-badge badge-moto">Moto</span>'
+            : '';
 
         vehicleCard.innerHTML = `
             <div class="vehicle-image-wrapper" data-card-id="${cardId}">
                 ${condicionBadge}
+                ${tipoBadge}
                 <img 
                     src="${imageSrc}" 
                     alt="${displayName}" 
