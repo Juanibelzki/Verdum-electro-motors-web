@@ -48,38 +48,38 @@ async function loadStockFromSupabase() {
                 photos(url, url_thumb, posicion)
             `)
             .eq('category_id', cat.id)
-            .eq('activo', true)
             .order('created_at', { ascending: false })
             .limit(100);
 
-        const mapped = (vehicles || [])
-            .filter(v => {
-                const photos = v.photos || [];
-                return photos.length > 0 && photos.some(p => p.url);
-            })
-            .map(v => {
-                idCounter++;
-                const sorted = (v.photos || []).sort((a, b) => a.posicion - b.posicion);
-                const firstPhoto = sorted[0];
-                const photoUrl = firstPhoto?.url || '';
+        const PLACEHOLDER_IMG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%231a1d21' width='400' height='300'/%3E%3Ctext x='200' y='140' text-anchor='middle' fill='%236b7280' font-family='system-ui' font-size='14'%3EFotos disponibles%3Cbr%2F%3Ea la brevedad%3C/text%3E%3C/svg%3E`;
 
-                return {
-                    id: idCounter,
-                    uuid: v.id,
-                    marca: v.marca,
-                    modelo: v.modelo,
-                    nombre: v.nombre,
-                    año: v.año,
-                    km: v.km,
-                    color: v.color,
-                    descripcion: v.descripcion || '',
-                    image: photoUrl,
-                    fotos: sorted,
-                    slug: v.slug,
-                    folder: cat.slug,
-                    whatsappMsg: v.whatsapp_msg || `Hola! Quiero consultar el precio y disponibilidad del ${v.marca} ${v.modelo} (${v.año || ''}) que vi en su web.`
-                };
-            });
+        const mapped = (vehicles || []).map(v => {
+            idCounter++;
+            const sorted = (v.photos || []).sort((a, b) => a.posicion - b.posicion);
+            const firstPhoto = sorted[0];
+            const photoUrl = firstPhoto?.url || PLACEHOLDER_IMG;
+            const fotosConUrl = sorted.filter(p => p.url);
+            const kmNum = parseFloat(String(v.km).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+            const esCeroKm = kmNum <= 100;
+
+            return {
+                id: idCounter,
+                uuid: v.id,
+                marca: v.marca,
+                modelo: v.modelo,
+                nombre: v.nombre,
+                año: v.año,
+                km: v.km,
+                color: v.color,
+                descripcion: v.descripcion || '',
+                image: photoUrl,
+                fotos: fotosConUrl,
+                slug: v.slug,
+                folder: cat.slug,
+                esCeroKm,
+                whatsappMsg: v.whatsapp_msg || `¡Hola! Quiero consultar el precio y disponibilidad del ${v.marca} ${v.modelo} (${v.año || ''}) que vi en su web.`
+            };
+        });
 
         const htmlKey = HTML_KEY_FROM_SLUG[cat.slug] || cat.slug;
         inventory[htmlKey] = { title: cat.nombre, vehicles: mapped };
@@ -193,7 +193,7 @@ function renderVehicles(vehicles, category) {
         const whatsappMsg = vehicle.whatsappMsg
             ? String(vehicle.whatsappMsg).replace(/'/g, "\\'")
             : '';
-        const fotos = (vehicle.fotos || []).filter(f => f && f.url);
+        const fotos = vehicle.fotos || [];
         const cardId = vehicle.id;
         const carouselControls = fotos.length > 1 ? `
             <button class="carousel-btn prev" onclick="event.stopPropagation(); prevVehiclePhoto(${cardId})">&#10094;</button>
@@ -203,15 +203,20 @@ function renderVehicles(vehicles, category) {
             </div>
         ` : '';
 
+        const condicionBadge = vehicle.esCeroKm
+            ? '<span class="vehicle-badge badge-0km">0 KM</span>'
+            : '<span class="vehicle-badge badge-usado">Usado</span>';
+
         vehicleCard.innerHTML = `
             <div class="vehicle-image-wrapper" data-card-id="${cardId}">
+                ${condicionBadge}
                 <img 
                     src="${imageSrc}" 
                     alt="${displayName}" 
                     class="vehicle-image carousel-img"
                     data-index="0"
                     loading="lazy"
-                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"225\"/%3E'"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%231a1d21%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%22200%22 y=%22140%22 text-anchor=%22middle%22 fill=%22%236b7280%22 font-family=%22system-ui%22 font-size=%2214%22%3EFotos disponibles%3Cbr/%3Ea la brevedad%3C/text%3E%3C/svg%3E'"
                 >
                 ${carouselControls}
             </div>
@@ -223,7 +228,7 @@ function renderVehicles(vehicles, category) {
                         <strong>Año:</strong> ${vehicle.año}
                     </span>
                     <span class="detail-item">
-                        <strong>KM:</strong> ${vehicle.km}
+                        <strong>KM:</strong> ${vehicle.km || '—'}
                     </span>
                     <span class="detail-item">
                         <strong>Color:</strong> ${vehicle.color}
