@@ -1536,7 +1536,7 @@ async function deleteCustomVehicle(id) {
 }
 
 async function deleteVehicle(id) {
-    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
     const isCustom = customVehicles.some(v => v.id === id);
     if (isCustom) return deleteCustomVehicle(id);
 
@@ -1586,7 +1586,7 @@ async function deleteVehicle(id) {
     }
 
     // Limpiar customVehicles si por algún motivo contiene este id
-    let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
     const before = customVehicles.length;
     customVehicles = customVehicles.filter(v => v.id !== id);
     if (customVehicles.length !== before) {
