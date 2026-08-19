@@ -1689,6 +1689,10 @@ async function massPublishVehicles() {
     const confirmed = confirm('¿Estás seguro de publicar todos los vehículos?\n\nEsto activará y hará visibles en la web todas las unidades sincronizadas.');
     if (!confirmed) return;
 
+    const btn = document.querySelector('[onclick="massPublishVehicles()"]');
+    const originalText = btn ? btn.textContent : '';
+    if (btn) { btn.textContent = '⏳ Publicando...'; btn.disabled = true; }
+
     try {
         const { data, error } = await supabaseClient
             .from('vehicles')
@@ -1705,6 +1709,8 @@ async function massPublishVehicles() {
     } catch (err) {
         console.error('Mass publish failed:', err);
         alert('❌ Error al publicar: ' + (err.message || 'Error desconocido'));
+    } finally {
+        if (btn) { btn.textContent = originalText; btn.disabled = false; }
     }
 }
 
