@@ -357,12 +357,18 @@ async function updateFinancingOption(type) {
     const featuresStr = document.getElementById(`${type}-features`).value.trim();
     if (!title || !description) { alert('Completá título y descripción'); return; }
     const features = featuresStr.split(',').map(f => f.trim()).filter(Boolean);
-    const financing = await sbGetContent('financing_images') || {};
-    financing[type] = { ...(financing[type] || {}), title, description, features, updatedAt: new Date().toISOString() };
-    await sbSaveContent('financing_images', financing);
-    try { localStorage.setItem('financing_images', JSON.stringify(financing)); } catch {}
-    await addChange(`Opción de financiación "${type}" actualizada`);
-    alert('✓ Guardado');
+    try {
+        const financing = await sbGetContent('financing_images') || {};
+        financing[type] = { ...(financing[type] || {}), title, description, features, updatedAt: new Date().toISOString() };
+        await sbSaveContent('financing_images', financing);
+        try { localStorage.setItem('financing_images', JSON.stringify(financing)); } catch {}
+        await addChange(`Opción de financiación "${type}" actualizada`);
+        console.log(`[Supabase] financing_images guardado correctamente en admin_content (${type})`);
+        alert('✓ Guardado en Supabase');
+    } catch (err) {
+        console.error('[Supabase] Error al guardar financing_images en admin_content:', err);
+        alert('✗ Error al guardar en Supabase. Revisá la consola para más detalles.');
+    }
 }
 
 async function handleFinancingImageUpload(event) {
