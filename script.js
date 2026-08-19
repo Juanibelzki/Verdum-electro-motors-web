@@ -107,9 +107,7 @@ async function loadStockFromSupabase() {
     }
 
     // 2) Agregar categoría combinada "motos" con todas las motos
-    if (allMotos.length > 0) {
-        inventory['motos'] = { title: 'Motos', vehicles: allMotos };
-    }
+    inventory['motos'] = { title: 'Motos', vehicles: allMotos };
 
     stockCache = inventory;
     return inventory;
