@@ -700,7 +700,7 @@ const VEHICLE_CATEGORY_NAMES = {
 
 async function syncVehiclesFromSupabase() {
     let overrides = loadStoredData(VEHICLES_STORAGE_KEY, {});
-    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
     let idMap = loadStoredData('supabase_vehicle_map', {});
 
     // Mapa category_id (uuid) -> slug admin
@@ -719,8 +719,50 @@ async function syncVehiclesFromSupabase() {
         console.warn('Sync from Supabase failed:', sbErr.message);
         return;
     }
+
+    const supabaseIdsEnResult = new Set(rows.map(r => r.id));
+
+    // --- LIMPIEZA: Supabase como ÚNICA fuente de verdad ---
+    // 1) Borrar customVehicles que no existen en Supabase (salvo fotos pendientes base64)
+    customVehicles = customVehicles.filter(cv => {
+        const tieneFotosPendientes = (cv.fotos || []).some(f => typeof f === 'string' && f.startsWith('data:'));
+        if (tieneFotosPendientes) return true;
+        return cv.uuid && supabaseIdsEnResult.has(cv.uuid);
+    });
+
+    // 2) Borrar overrides de default vehicles que no están en Supabase ni en deletedDefaults
+    const deletedDefaults = await getDeletedDefaults();
+    const defaultIdsEnSupabase = new Set();
+    for (const row of rows) {
+        const dv = DEFAULT_VEHICLES.find(
+            d => String(d.marca).toLowerCase() === String(row.marca).toLowerCase()
+                && String(d.modelo).toLowerCase() === String(row.modelo).toLowerCase()
+        );
+        if (dv) defaultIdsEnSupabase.add(dv.id);
+    }
+    for (const localId of Object.keys(overrides)) {
+        const numId = Number(localId);
+        if (DEFAULT_VEHICLES.some(dv => dv.id === numId)
+            && !defaultIdsEnSupabase.has(numId) && !deletedDefaults.includes(numId)) {
+            delete overrides[numId];
+        }
+    }
+
+    // 3) Borrar idMap entries que apuntan a IDs de Supabase que ya no existen
+    for (const localId of Object.keys(idMap)) {
+        const sbId = idMap[localId];
+        if (!supabaseIdsEnResult.has(sbId)) {
+            delete idMap[localId];
+        }
+    }
+
+    saveStoredData(VEHICLES_STORAGE_KEY, overrides);
+    saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+    saveStoredData('supabase_vehicle_map', idMap);
+
     if (!rows.length) return;
 
+    // --- MERGE: traer vehículos nuevos de Supabase ---
     const knownSupabaseIds = new Set(Object.values(idMap));
     const takenLocalIds = new Set(customVehicles.map(v => v.id));
     let maxId = customVehicles.reduce((mx, v) => Math.max(mx, v.id), 100);
@@ -1479,6 +1521,13 @@ async function deleteCustomVehicle(id) {
     const removed = customVehicles.find(v => v.id === id);
     customVehicles = customVehicles.filter(v => v.id !== id);
     saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+
+    // Limpiar overrides e idMap por si quedaron referencias
+    const overrides = await getVehicleOverrides();
+    if (overrides[id]) { delete overrides[id]; await setVehicleOverrides(overrides); }
+    const idMapLocal = loadStoredData('supabase_vehicle_map', {});
+    if (idMapLocal[id]) { delete idMapLocal[id]; saveStoredData('supabase_vehicle_map', idMapLocal); }
+
     await renderVehiclesEditor();
     if (removed) {
         await addChange(`Vehículo eliminado: ${removed.marca} ${removed.modelo} (#${id})`);
@@ -1534,6 +1583,14 @@ async function deleteVehicle(id) {
     if (overrides[id]) {
         delete overrides[id];
         await setVehicleOverrides(overrides);
+    }
+
+    // Limpiar customVehicles si por algún motivo contiene este id
+    let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const before = customVehicles.length;
+    customVehicles = customVehicles.filter(v => v.id !== id);
+    if (customVehicles.length !== before) {
+        saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
     }
 
     await renderVehiclesEditor();
