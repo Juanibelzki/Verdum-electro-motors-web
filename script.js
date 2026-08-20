@@ -24,7 +24,7 @@ async function loadStockFromSupabase() {
     // 1) Traer TODOS los vehículos de golpe, sin filtro de categoría
     const { data: vehicles, error } = await supabaseClient
         .from('vehicles')
-        .select('*')
+        .select('*, seccion')
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -73,6 +73,7 @@ async function loadStockFromSupabase() {
             color: v.color || '—',
             tipo,
             esMoto,
+            seccion: v.seccion || null,
             descripcion: v.descripcion || '',
             image: photoUrl,
             fotos: fotosConUrl,
@@ -86,16 +87,34 @@ async function loadStockFromSupabase() {
         };
     });
 
-    // 4) Clasificar en memoria según tipo y km
-    const autos0km = allVehicles.filter(v => !v.esMoto && v.esCeroKm);
-    const autosUsados = allVehicles.filter(v => !v.esMoto && !v.esCeroKm);
-    const motos = allVehicles.filter(v => v.esMoto);
+    // 4) Clasificar: prioridad SECCIÓN MANUAL > auto-detect por tipo/km
+    const autos0km = allVehicles.filter(v => {
+        if (v.seccion === '0km') return true;
+        if (v.seccion && v.seccion !== '0km') return false;
+        return !v.esMoto && v.esCeroKm;
+    });
+    const autosUsados = allVehicles.filter(v => {
+        if (v.seccion === 'usados') return true;
+        if (v.seccion && v.seccion !== 'usados') return false;
+        return !v.esMoto && !v.esCeroKm;
+    });
+    const motos = allVehicles.filter(v => {
+        if (v.seccion === 'motos') return true;
+        if (v.seccion && v.seccion !== 'motos') return false;
+        return v.esMoto;
+    });
+    const especiales = allVehicles.filter(v => {
+        if (v.seccion === 'especiales') return true;
+        if (v.seccion && v.seccion !== 'especiales') return false;
+        return false;
+    });
 
     const inventory = {
         'todos': { title: 'Todos', vehicles: allVehicles },
         '0km': { title: 'Autos 0KM', vehicles: autos0km },
         'usados': { title: 'Autos Usados', vehicles: autosUsados },
-        'motos': { title: 'Motos', vehicles: motos }
+        'motos': { title: 'Motos', vehicles: motos },
+        'especiales': { title: 'Veh. Especiales', vehicles: especiales }
     };
 
     // 5) Log de auditoría
@@ -105,6 +124,7 @@ async function loadStockFromSupabase() {
     console.log('  0 KM:', autos0km.length);
     console.log('  Usados:', autosUsados.length);
     console.log('  Motos:', motos.length);
+    console.log('  Especiales:', especiales.length);
     console.log('═══════════════════════════════════════');
 
     stockCache = inventory;
@@ -149,9 +169,10 @@ async function openStockModal(category) {
     const keyMap = {
         'autos-0km': '0km',
         'autos-usados': 'usados',
-        'vehiculos-especiales': 'usados',
+        'vehiculos-especiales': 'especiales',
         'motos-electricas': 'motos',
-        'motos': 'motos'
+        'motos': 'motos',
+        'especiales': 'especiales'
     };
     const inventoryKey = keyMap[category] || category;
     const inventory = merged[inventoryKey];

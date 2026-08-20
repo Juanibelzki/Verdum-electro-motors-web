@@ -705,7 +705,7 @@ async function syncVehiclesFromSupabase() {
     try {
         const { data } = await supabaseClient
             .from('vehicles')
-            .select('id, slug, nombre, marca, modelo, año, km, color, descripcion, category_id, activo, status, tipo, photos(url, url_thumb, posicion)')
+            .select('id, slug, nombre, marca, modelo, año, km, color, descripcion, category_id, activo, status, tipo, seccion, photos(url, url_thumb, posicion)')
             .order('created_at', { ascending: false });
         rows = data || [];
     } catch (sbErr) {
@@ -1145,7 +1145,7 @@ async function refreshVehiclesTable() {
     try {
         const { data } = await supabaseClient
             .from('vehicles')
-            .select('id, slug, nombre, marca, modelo, año, km, color, tipo, activo, status, created_at, photos(url, posicion)')
+            .select('id, slug, nombre, marca, modelo, año, km, color, tipo, activo, status, seccion, created_at, photos(url, posicion)')
             .order('created_at', { ascending: false });
         rows = data || [];
     } catch (e) {
@@ -1160,6 +1160,14 @@ async function refreshVehiclesTable() {
         return;
     }
 
+    const seccionOptions = [
+        { value: '', label: '— Auto' },
+        { value: 'usados', label: 'Autos Usados' },
+        { value: '0km', label: 'Autos 0 KM' },
+        { value: 'motos', label: 'Motos' },
+        { value: 'especiales', label: 'Veh. Especiales' }
+    ];
+
     const rowsHtml = rows.map(v => {
         const fotos = (v.photos || []).sort((a, b) => a.posicion - b.posicion);
         const hasPhotos = fotos.length > 0 && fotos[0].url;
@@ -1167,7 +1175,7 @@ async function refreshVehiclesTable() {
         const es0km = kmNum <= 100;
         const tipo = v.tipo || 'auto';
         const activo = v.activo !== false;
-        const status = v.status || 'publicado';
+        const seccion = v.seccion || '';
 
         const tipoBadge = tipo === 'moto'
             ? '<span style="background:#f59e0b;color:#111;padding:2px 8px;border-radius:10px;font-size:0.75rem;font-weight:600">Moto</span>'
@@ -1189,7 +1197,11 @@ async function refreshVehiclesTable() {
             ? `<img src="${fotos[0].url}" style="width:48px;height:36px;object-fit:cover;border-radius:6px" alt="">`
             : '<span style="color:var(--text-secondary);font-size:0.75rem">—</span>';
 
-        const previewBtn = `<button class="btn-secondary-outline" style="padding:4px 10px;font-size:0.8rem" onclick="openStockModal('${v.tipo === 'moto' ? 'motos' : 'autos-usados'}')">👁</button>`;
+        const seccionSelect = `<select onchange="updateVehicleSeccion('${v.id}', this.value)" style="padding:4px 6px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.8rem;min-width:120px">
+            ${seccionOptions.map(o => `<option value="${o.value}" ${seccion === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+        </select>`;
+
+        const previewBtn = `<button class="btn-secondary-outline" style="padding:4px 10px;font-size:0.8rem" onclick="openStockModal('${seccion || (v.tipo === 'moto' ? 'motos' : 'usados')}')">👁</button>`;
 
         return `<tr style="border-bottom:1px solid var(--border)">
             <td style="padding:10px 8px">${previewImg}</td>
@@ -1199,6 +1211,7 @@ async function refreshVehiclesTable() {
             <td style="padding:10px 8px">${tipoBadge}</td>
             <td style="padding:10px 8px">${fotoBadge}</td>
             <td style="padding:10px 8px">${activoBadge}</td>
+            <td style="padding:10px 8px">${seccionSelect}</td>
             <td style="padding:10px 8px">${previewBtn}</td>
         </tr>`;
     }).join('');
@@ -1214,12 +1227,38 @@ async function refreshVehiclesTable() {
                     <th style="padding:12px 8px;text-align:left">Tipo</th>
                     <th style="padding:12px 8px;text-align:left">Fotos</th>
                     <th style="padding:12px 8px;text-align:left">Estado</th>
+                    <th style="padding:12px 8px;text-align:left">Sección</th>
                     <th style="padding:12px 8px;text-align:left">Ver</th>
                 </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
         </table>
     `;
+}
+
+async function updateVehicleSeccion(vehicleId, newSeccion) {
+    try {
+        const { error } = await supabaseClient
+            .from('vehicles')
+            .update({ seccion: newSeccion || null })
+            .eq('id', vehicleId);
+        if (error) throw error;
+
+        // Actualizar en localStorage overrides si existe
+        const overrides = await getVehicleOverrides();
+        for (const key in overrides) {
+            if (overrides[key].uuid === vehicleId || overrides[key].supabaseId === vehicleId) {
+                overrides[key].seccion = newSeccion || null;
+            }
+        }
+        await setVehicleOverrides(overrides);
+
+        const seccionLabel = newSeccion || 'automática';
+        await addChange(`Vehículo #${vehicleId} movido a sección "${seccionLabel}"`);
+    } catch (e) {
+        console.error('Error actualizando sección:', e);
+        alert('Error al guardar sección: ' + e.message);
+    }
 }
 
 async function renderVehiclesEditor() {
@@ -1275,6 +1314,14 @@ async function renderVehiclesEditor() {
                         <input type="number" class="vehicle-anio" data-id="${v.id}" value="${anio}" min="1990" max="2030">
                         <label>KM</label>
                         <input type="text" class="vehicle-km" data-id="${v.id}" value="${escapeHtml(km)}">
+                        <label>Categoría / Sección</label>
+                        <select class="vehicle-seccion" data-id="${v.id}">
+                            <option value="" ${(!o.seccion) ? 'selected' : ''}>— Automática (por KM/tipo)</option>
+                            <option value="usados" ${(o.seccion === 'usados') ? 'selected' : ''}>Autos Usados</option>
+                            <option value="0km" ${(o.seccion === '0km') ? 'selected' : ''}>Autos 0 KM</option>
+                            <option value="motos" ${(o.seccion === 'motos') ? 'selected' : ''}>Motos</option>
+                            <option value="especiales" ${(o.seccion === 'especiales') ? 'selected' : ''}>Veh. Especiales</option>
+                        </select>
                         <label>Color</label>
                         <input type="text" class="vehicle-color" data-id="${v.id}" value="${escapeHtml(color)}">
                         <label>Descripción</label>
@@ -1320,6 +1367,14 @@ async function renderVehiclesEditor() {
                         <input type="number" class="vehicle-anio" data-id="${cv.id}" value="${cv.anio || 2024}" min="1990" max="2030">
                         <label>KM</label>
                         <input type="text" class="vehicle-km" data-id="${cv.id}" value="${escapeHtml(cv.km || '0 KM')}">
+                        <label>Categoría / Sección</label>
+                        <select class="vehicle-seccion" data-id="${cv.id}">
+                            <option value="" ${(!cv.seccion) ? 'selected' : ''}>— Automática (por KM/tipo)</option>
+                            <option value="usados" ${(cv.seccion === 'usados') ? 'selected' : ''}>Autos Usados</option>
+                            <option value="0km" ${(cv.seccion === '0km') ? 'selected' : ''}>Autos 0 KM</option>
+                            <option value="motos" ${(cv.seccion === 'motos') ? 'selected' : ''}>Motos</option>
+                            <option value="especiales" ${(cv.seccion === 'especiales') ? 'selected' : ''}>Veh. Especiales</option>
+                        </select>
                         <label>Color</label>
                         <input type="text" class="vehicle-color" data-id="${cv.id}" value="${escapeHtml(cv.color || '—')}">
                         <label>Descripción</label>
@@ -1344,6 +1399,8 @@ async function saveVehicle(id) {
     const km = card.querySelector('.vehicle-km').value.trim();
     const color = card.querySelector('.vehicle-color').value.trim();
     const descripcion = card.querySelector('.vehicle-descripcion').value.trim();
+    const seccionEl = card.querySelector('.vehicle-seccion');
+    const seccion = seccionEl ? seccionEl.value || null : null;
 
     if (!nombre || isNaN(anio)) {
         alert('Completá nombre y año');
@@ -1408,6 +1465,7 @@ async function saveVehicle(id) {
             color,
             descripcion,
             tipo,
+            seccion,
             whatsapp_msg,
             activo: true,
             status: 'pendiente_fotos'
@@ -1470,6 +1528,7 @@ async function saveVehicle(id) {
             return {
                 ...v,
                 tipo: tipo,
+                seccion: seccion,
                 marca: parts[0] || v.marca,
                 modelo: parts.slice(1).join(' ') || v.modelo,
                 anio: anio,
@@ -1488,6 +1547,7 @@ async function saveVehicle(id) {
         overrides[id].color = color;
         overrides[id].descripcion = descripcion;
         overrides[id].tipo = tipo;
+        overrides[id].seccion = seccion;
         await setVehicleOverrides(overrides);
     }
 
