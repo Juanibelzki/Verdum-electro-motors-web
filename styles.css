@@ -859,13 +859,36 @@ section#inicio,
     gap: 40px;
 }
 
+/* Contenedor de la tarjeta */
 .service-card-flip {
+    position: relative;
+    overflow: hidden;
     perspective: 1000px;
-    height: 360px;
     cursor: pointer;
+    height: 360px;
     flex: 0 0 calc(33.33% - 40px);
     max-width: 400px;
     min-width: 280px;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                box-shadow 0.6s ease,
+                border-color 0.4s ease;
+}
+
+.service-card-flip:hover {
+    transform: scale(1.03);
+    border-color: var(--primary-500, #3b82f6);
+    box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.25);
+}
+
+/* Cara frontal */
+.service-card-front {
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.service-card-flip:hover .service-card-front svg,
+.service-card-flip:hover .service-card-front .service-icon {
+    transform: scale(0);
+    opacity: 0;
 }
 
 .service-card-inner {
@@ -873,15 +896,16 @@ section#inicio,
     width: 100%;
     height: 100%;
     transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: bottom;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .service-card-flip:hover .service-card-inner {
-    transform: rotateY(180deg);
+    transform: rotateX(180deg);
 }
 
 .service-card-flip.flipped .service-card-inner {
-    transform: rotateY(180deg);
+    transform: rotateX(180deg);
 }
 
 .service-card-front,
@@ -929,7 +953,12 @@ section#inicio,
 }
 
 .service-card-back {
-    transform: rotateY(180deg);
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    transform: rotateX(180deg);
     display: flex;
     flex-direction: column;
     justify-content: center;
