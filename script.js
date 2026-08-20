@@ -14,131 +14,98 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 const FINANCING_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'1200\' height=\'900\'%3E%3Cdefs%3E%3ClinearGradient id=\'g\' x1=\'0\' y1=\'0\' x2=\'1\' y2=\'1\'%3E%3Cstop offset=\'0\' stop-color=\'%2312181f\'/%3E%3Cstop offset=\'1\' stop-color=\'%2325d366\' stop-opacity=\'0.25\'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=\'1200\' height=\'900\' fill=\'url(%23g)\'/%3E%3Ctext x=\'600\' y=\'440\' font-family=\'Arial,%20Helvetica,%20sans-serif\' font-size=\'72\' font-weight=\'bold\' fill=\'%23ffffff\' text-anchor=\'middle\'%3EVERDUN%3C/text%3E%3Ctext x=\'600\' y=\'500\' font-family=\'Arial,%20Helvetica,%20sans-serif\' font-size=\'32\' fill=\'%2325d366\' text-anchor=\'middle\'%3EAUTOMOTORES%3C/text%3E%3C/svg%3E';
 window.FINANCING_PLACEHOLDER = FINANCING_PLACEHOLDER;
 
-const CATEGORY_MAPPING = {
-    'autos-0km': '0km',
-    'autos-usados': 'usados',
-    'motos-electricas': 'motos',
-    'patinetas-electricas': 'patacletas',
-    'vehiculos-especiales': 'especiales'
-};
-
-const HTML_KEY_FROM_SLUG = Object.fromEntries(
-    Object.entries(CATEGORY_MAPPING).map(([k, v]) => [v, k])
-);
+const PLACEHOLDER_IMG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%231a1d21' width='400' height='300'/%3E%3Ctext x='200' y='140' text-anchor='middle' fill='%236b7280' font-family='system-ui' font-size='14'%3EFotos disponibles%3Cbr%2F%3Ea la brevedad%3C/text%3E%3C/svg%3E`;
 
 let stockCache = null;
 
 async function loadStockFromSupabase() {
-    // Siempre recargar (sin caché) para garantizar datos frescos
     stockCache = null;
 
-    const { data: categories } = await supabaseClient
-        .from('categories')
+    // 1) Traer TODOS los vehículos de golpe, sin filtro de categoría
+    const { data: vehicles, error } = await supabaseClient
+        .from('vehicles')
         .select('*')
-        .order('posicion');
+        .order('created_at', { ascending: false });
 
-    console.log('Categorías encontradas:', categories?.length, categories?.map(c => c.slug));
+    if (error) {
+        console.error('Error cargando vehículos:', error);
+        return { 'todos': { title: 'Todos', vehicles: [] } };
+    }
 
-    const inventory = {};
+    console.log('TOTAL VEHÍCULOS RECIBIDOS:', vehicles ? vehicles.length : 0, vehicles);
+
+    // 2) Traer TODAS las fotos de golpe
+    const vehicleIds = (vehicles || []).map(v => v.id);
+    let photosMap = {};
+    if (vehicleIds.length > 0) {
+        const { data: allPhotos } = await supabaseClient
+            .from('photos')
+            .select('vehicle_id, url, url_thumb, posicion')
+            .in('vehicle_id', vehicleIds);
+
+        for (const p of allPhotos || []) {
+            if (!photosMap[p.vehicle_id]) photosMap[p.vehicle_id] = [];
+            photosMap[p.vehicle_id].push(p);
+        }
+    }
+
+    // 3) Mapear cada vehículo con sus fotos
     let idCounter = 0;
-    const allMotos = [];
+    const allVehicles = (vehicles || []).map(v => {
+        idCounter++;
+        const fotos = (photosMap[v.id] || []).sort((a, b) => a.posicion - b.posicion);
+        const firstPhoto = fotos[0];
+        const photoUrl = (firstPhoto && firstPhoto.url) ? firstPhoto.url : PLACEHOLDER_IMG;
+        const fotosConUrl = fotos.filter(p => p.url);
+        const kmNum = parseFloat(String(v.km).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+        const esCeroKm = kmNum <= 100;
+        const tipo = v.tipo || 'auto';
+        const esMoto = tipo === 'moto';
 
-    // 1) Cargar vehículos por categoría (sin JOIN de fotos para evitar límites)
-    for (const cat of categories || []) {
-        const { data: vehicles, error } = await supabaseClient
-            .from('vehicles')
-            .select('id, slug, nombre, marca, modelo, año, km, color, descripcion, whatsapp_msg, tipo, activo, status')
-            .eq('category_id', cat.id)
-            .order('created_at', { ascending: false });
+        return {
+            id: idCounter,
+            uuid: v.id,
+            marca: v.marca || '',
+            modelo: v.modelo || '',
+            nombre: v.nombre || `${v.marca || ''} ${v.modelo || ''}`.trim(),
+            año: v.año,
+            km: v.km || '0 KM',
+            color: v.color || '—',
+            tipo,
+            esMoto,
+            descripcion: v.descripcion || '',
+            image: photoUrl,
+            fotos: fotosConUrl,
+            slug: v.slug || '',
+            esCeroKm,
+            activo: v.activo !== false,
+            status: v.status || 'publicado',
+            whatsappMsg: v.whatsapp_msg || (esMoto
+                ? `¡Hola! Quiero consultar el precio y disponibilidad de la moto ${v.marca} ${v.modelo} (${v.año || ''}) que vi en su web.`
+                : `¡Hola! Quiero consultar el precio y disponibilidad del ${v.marca} ${v.modelo} (${v.año || ''}) que vi en su web.`)
+        };
+    });
 
-        if (error) {
-            console.error(`Error cargando categoría ${cat.slug}:`, error);
-            continue;
-        }
+    // 4) Clasificar en memoria según tipo y km
+    const autos0km = allVehicles.filter(v => !v.esMoto && v.esCeroKm);
+    const autosUsados = allVehicles.filter(v => !v.esMoto && !v.esCeroKm);
+    const motos = allVehicles.filter(v => v.esMoto);
 
-        console.log(`Categoría "${cat.slug}": ${(vehicles || []).length} vehículos`);
+    const inventory = {
+        'todos': { title: 'Todos', vehicles: allVehicles },
+        '0km': { title: 'Autos 0KM', vehicles: autos0km },
+        'usados': { title: 'Autos Usados', vehicles: autosUsados },
+        'motos': { title: 'Motos', vehicles: motos }
+    };
 
-        // Cargar fotos para cada vehículo por separado
-        const vehicleIds = (vehicles || []).map(v => v.id);
-        let photosMap = {};
-        if (vehicleIds.length > 0) {
-            const { data: allPhotos } = await supabaseClient
-                .from('photos')
-                .select('vehicle_id, url, url_thumb, posicion')
-                .in('vehicle_id', vehicleIds);
-
-            for (const p of allPhotos || []) {
-                if (!photosMap[p.vehicle_id]) photosMap[p.vehicle_id] = [];
-                photosMap[p.vehicle_id].push(p);
-            }
-        }
-
-        const PLACEHOLDER_IMG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%231a1d21' width='400' height='300'/%3E%3Ctext x='200' y='140' text-anchor='middle' fill='%236b7280' font-family='system-ui' font-size='14'%3EFotos disponibles%3Cbr%2F%3Ea la brevedad%3C/text%3E%3C/svg%3E`;
-
-        const mapped = (vehicles || []).map(v => {
-            idCounter++;
-            const fotos = (photosMap[v.id] || []).sort((a, b) => a.posicion - b.posicion);
-            const firstPhoto = fotos[0];
-            const photoUrl = (firstPhoto && firstPhoto.url) ? firstPhoto.url : PLACEHOLDER_IMG;
-            const fotosConUrl = fotos.filter(p => p.url);
-            const kmNum = parseFloat(String(v.km).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
-            const esCeroKm = kmNum <= 100;
-            const tipo = v.tipo || 'auto';
-            const esMoto = tipo === 'moto';
-
-            return {
-                id: idCounter,
-                uuid: v.id,
-                marca: v.marca,
-                modelo: v.modelo,
-                nombre: v.nombre,
-                año: v.año,
-                km: v.km,
-                color: v.color,
-                tipo,
-                esMoto,
-                descripcion: v.descripcion || '',
-                image: photoUrl,
-                fotos: fotosConUrl,
-                slug: v.slug,
-                folder: cat.slug,
-                esCeroKm,
-                activo: v.activo !== false,
-                status: v.status || 'publicado',
-                whatsappMsg: v.whatsapp_msg || (esMoto
-                    ? `¡Hola! Quiero consultar el precio y disponibilidad de la moto ${v.marca} ${v.modelo} (${v.año || ''}) que vi en su web.`
-                    : `¡Hola! Quiero consultar el precio y disponibilidad del ${v.marca} ${v.modelo} (${v.año || ''}) que vi en su web.`)
-            };
-        });
-
-        // Separar motos del resto
-        const motos = mapped.filter(v => v.esMoto);
-        const noMotos = mapped.filter(v => !v.esMoto);
-
-        // Acumular todas las motos para la categoría combinada
-        allMotos.push(...motos);
-
-        const htmlKey = HTML_KEY_FROM_SLUG[cat.slug] || cat.slug;
-        // Para categorías de motos en Supabase, no mostrar duplicado (se muestra en "motos" combinado)
-        if (cat.slug === 'motos-electricas') {
-            inventory[htmlKey] = { title: cat.nombre, vehicles: [] };
-        } else {
-            inventory[htmlKey] = { title: cat.nombre, vehicles: noMotos };
-        }
-    }
-
-    // 2) Agregar categoría combinada "motos" con todas las motos
-    inventory['motos'] = { title: 'Motos', vehicles: allMotos };
-
-    // Log de auditoría completo
-    const totalCount = Object.values(inventory).reduce((sum, cat) => sum + cat.vehicles.length, 0);
+    // 5) Log de auditoría
     console.log('═══════════════════════════════════════');
-    console.log('TOTAL VEHÍCULOS RECIBIDOS:', totalCount);
-    for (const [key, cat] of Object.entries(inventory)) {
-        console.log(`  ${key}: ${cat.vehicles.length} vehículo(s)`);
-    }
+    console.log('TOTAL VEHÍCULOS:', allVehicles.length);
+    console.log('  Todos:', allVehicles.length);
+    console.log('  0 KM:', autos0km.length);
+    console.log('  Usados:', autosUsados.length);
+    console.log('  Motos:', motos.length);
     console.log('═══════════════════════════════════════');
-    console.log('Inventario completo:', inventory);
 
     stockCache = inventory;
     return inventory;
@@ -177,7 +144,17 @@ let currentStockVehicles = [];
 async function openStockModal(category) {
     const modal = document.getElementById('stockModal');
     const merged = await getMergedVehicleInventory();
-    const inventory = merged[category];
+
+    // Mapear slugs del HTML a las keys del inventario
+    const keyMap = {
+        'autos-0km': '0km',
+        'autos-usados': 'usados',
+        'vehiculos-especiales': 'usados',
+        'motos-electricas': 'motos',
+        'motos': 'motos'
+    };
+    const inventoryKey = keyMap[category] || category;
+    const inventory = merged[inventoryKey];
     
     if (!inventory) {
         console.error(`Categoría ${category} no encontrada`);
