@@ -860,90 +860,81 @@ section#inicio,
 }
 
 /* Contenedor de la tarjeta */
+.service-card,
 .service-card-flip {
     position: relative;
+    border-radius: 16px;
     overflow: hidden;
-    perspective: 1000px;
+    min-height: 280px;
     cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.service-card-flip {
     height: 360px;
     flex: 0 0 calc(33.33% - 40px);
     max-width: 400px;
     min-width: 280px;
-    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                box-shadow 0.6s ease,
-                border-color 0.4s ease;
 }
 
+.service-card:hover,
 .service-card-flip:hover {
-    transform: scale(1.03);
-    border-color: var(--primary-500, #3b82f6);
-    box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.25);
+    transform: translateY(-6px);
+    border-color: #3b82f6;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.25);
 }
 
-/* Cara frontal */
-.service-card-front {
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.service-card-flip:hover .service-card-front svg,
-.service-card-flip:hover .service-card-front .service-icon {
-    transform: scale(0);
-    opacity: 0;
-}
-
+/* Envoltorio interno: mantiene las caras dentro de la tarjeta */
 .service-card-inner {
     position: relative;
     width: 100%;
     height: 100%;
-    transform-style: preserve-3d;
-    transform-origin: bottom;
-    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.service-card-flip:hover .service-card-inner {
-    transform: rotateX(180deg);
-}
-
-.service-card-flip.flipped .service-card-inner {
-    transform: rotateX(180deg);
-}
-
-.service-card-front,
-.service-card-back {
+/* Imagen de fondo permanente */
+.service-card-front {
     position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    backface-visibility: hidden;
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-.service-card-front {
-    background: linear-gradient(135deg, var(--brand-slate-dark) 0%, var(--brand-black) 100%);
+    z-index: 1;
     display: flex;
     align-items: flex-end;
+    background: linear-gradient(135deg, var(--brand-slate-dark) 0%, var(--brand-black) 100%);
 }
 
-.service-image {
+.service-card-front img,
+.service-card-front .service-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
-    background: var(--brand-slate-dark);
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.service-card-flip:hover .service-image {
-    transform: scale(1.05);
+.service-card:hover .service-card-front img,
+.service-card-flip:hover .service-card-front img,
+.service-card:hover .service-card-front .service-image,
+.service-card-flip:hover .service-card-front .service-image {
+    transform: scale(1.08); /* Zoom elegante a la foto */
 }
 
-.service-overlay {
+/* Etiqueta del título que se ve inicialmente sobre la foto */
+.service-card-front .service-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     padding: 24px;
     background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.35), transparent);
-    z-index: 2;
+    transition: opacity 0.3s ease;
+}
+
+.service-card:hover .service-overlay,
+.service-card-flip:hover .service-overlay {
+    opacity: 0;
 }
 
 .service-title-front {
@@ -952,22 +943,31 @@ section#inicio,
     color: var(--text-inverse);
 }
 
+/* Menú interno desplegable (Sube suave desde abajo tipo vidrio) */
 .service-card-back {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    transform: rotateX(180deg);
+    z-index: 2;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 40%, rgba(15, 23, 42, 0.75) 100%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
+    text-align: center;
     gap: 16px;
-    background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-app) 100%);
-    backdrop-filter: var(--glass-blur) saturate(180%);
-    -webkit-backdrop-filter: var(--glass-blur) saturate(180%);
-    border: var(--glass-border-light);
-    padding: 32px;
+    transform: translateY(100%); /* Oculto abajo */
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.service-card:hover .service-card-back,
+.service-card-flip:hover .service-card-back,
+.service-card.active .service-card-back {
+    transform: translateY(0); /* Entra en escena */
+    opacity: 1;
 }
 
 .service-card-back h3 {
