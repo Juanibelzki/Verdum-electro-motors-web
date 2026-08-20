@@ -737,7 +737,11 @@ async function syncVehiclesFromSupabase() {
         const numId = Number(localId);
         if (DEFAULT_VEHICLES.some(dv => dv.id === numId)
             && !defaultIdsEnSupabase.has(numId) && !deletedDefaults.includes(numId)) {
-            delete overrides[numId];
+            const o = overrides[numId] || {};
+            const tieneFotosPendientes = (o.fotos || []).some(f => typeof f === 'string' && f.startsWith('data:'));
+            if (!tieneFotosPendientes) {
+                delete overrides[numId];
+            }
         }
     }
 
@@ -889,6 +893,17 @@ function initImagesSection() {
             const files = Array.from(e.target.files || []);
             if (!files.length) return;
 
+            const card = e.target.closest('.vehicle-edit-card');
+
+            // Vista previa inmediata con la primera imagen seleccionada
+            const previewImg = card ? card.querySelector('.vehicle-preview-img') : null;
+            const placeholder = card ? card.querySelector('.preview-placeholder') : null;
+            if (previewImg && files[0]) {
+                previewImg.src = URL.createObjectURL(files[0]);
+                previewImg.style.display = 'block';
+                if (placeholder) placeholder.style.display = 'none';
+            }
+
             const currentFotos = getVehiclePhotos(id);
             const availableSlots = 5 - currentFotos.length;
             if (availableSlots <= 0) {
@@ -917,6 +932,9 @@ function initImagesSection() {
             // Si el upload fue exitoso, guardamos las URLs (evita duplicar base64 en el próximo sync)
             const finalPhotos = uploadedUrls.length ? uploadedUrls : newPhotos;
             setVehiclePhotos(id, currentFotos.concat(finalPhotos));
+
+            // Actualizar status local a 'publicado' si hay fotos subidas o pendientes
+            setVehicleStatusLocal(id, 'publicado');
 
             renderVehiclesEditor();
 
@@ -956,6 +974,20 @@ async function loadLogoPreview() {
         updateLogoPreview(src);
         pendingLogoData = logo.data || null;
         pendingLogoUrl = logo.url || null;
+    }
+}
+
+function setVehicleStatusLocal(adminId, status) {
+    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const isCustom = customVehicles.some(v => v.id === adminId);
+    if (isCustom) {
+        const updated = customVehicles.map(v => v.id !== adminId ? v : { ...v, status });
+        saveStoredData(CUSTOM_VEHICLES_KEY, updated);
+    } else {
+        const overrides = getVehicleOverrides();
+        if (!overrides[adminId]) overrides[adminId] = {};
+        overrides[adminId].status = status;
+        setVehicleOverrides(overrides);
     }
 }
 
@@ -1094,11 +1126,10 @@ function vehicleThumbsHtml(adminId, fotos) {
 
 function vehicleStatusBadgeHtml(status, fotos) {
     const hasFotos = fotos && fotos.length > 0;
-    const isPending = status === 'pendiente_fotos' || !hasFotos;
-    if (isPending) {
+    if (!hasFotos) {
         return '<span class="vehicle-status-badge badge-pendiente">⚠ Falta Fotos</span>';
     }
-    return '<span class="vehicle-status-badge badge-publicado">✓ Publicado</span>';
+    return '<span class="vehicle-status-badge badge-publicado">✓ Foto cargada</span>';
 }
 
 function getPendingPhotosCount(overrides, customVehicles, deletedDefaults) {
@@ -1480,41 +1511,28 @@ async function saveVehicle(id) {
         if (result.error) throw result.error;
         supabaseVehicleId = result.data.id;
 
-        // Subir imagen si existe y no hay fotos previas en Supabase
-        const imgEl = card.querySelector('.vehicle-preview-img');
-        if (imgEl && imgEl.src && imgEl.src.startsWith('data:')) {
-            const { data: existingPhotos } = await supabaseClient
-                .from('photos')
-                .select('id')
-                .eq('vehicle_id', supabaseVehicleId)
-                .limit(1);
-            if (!existingPhotos || !existingPhotos.length) {
-                const blob = await (await fetch(imgEl.src)).blob();
-                const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
-                const fileName = `${Date.now()}-${id}.${ext}`;
-                const storagePath = `vehicles/${supabaseVehicleId}/${fileName}`;
-
-                const { error: upErr } = await supabaseClient.storage
-                    .from('stock-photos')
-                    .upload(storagePath, blob, { upsert: true, contentType: blob.type });
-                if (!upErr) {
-                    const { data: { publicUrl } } = supabaseClient.storage.from('stock-photos').getPublicUrl(storagePath);
-                    await supabaseClient.from('photos').insert({
-                    vehicle_id: supabaseVehicleId,
-                    url: publicUrl,
-                    url_thumb: publicUrl,
-                    posicion: 0
-                });
-                    // Foto subida → cambiar status a publicado
-                    await supabaseClient.from('vehicles').update({ status: 'publicado' }).eq('id', supabaseVehicleId);
-                }
-            }
-        }
-
-        // Almacenar el mapping admin_id -> supabase_id
+        // Almacenar el mapping admin_id -> supabase_id ANTES de subir fotos
         const idMap = loadStoredData('supabase_vehicle_map', {});
         idMap[id] = supabaseVehicleId;
         saveStoredData('supabase_vehicle_map', idMap);
+
+        // Subir TODAS las fotos base64 pendientes que aún no estén en Supabase
+        const fotosLocales = getVehiclePhotos(id);
+        const pendingBase64 = (fotosLocales || []).filter(f => typeof f === 'string' && f.startsWith('data:'));
+        if (pendingBase64.length) {
+            const uploadedUrls = await uploadVehicleImageToSupabase(id, pendingBase64);
+            if (uploadedUrls.length) {
+                // Reemplazar las base64 subidas por sus URLs públicas en el estado local
+                let i = 0;
+                const finalFotos = (fotosLocales || []).map(f => {
+                    if (typeof f === 'string' && f.startsWith('data:') && i < uploadedUrls.length) {
+                        return uploadedUrls[i++];
+                    }
+                    return f;
+                });
+                setVehiclePhotos(id, finalFotos);
+            }
+        }
 
     } catch (sbErr) {
         console.warn('Supabase save failed, falling back to localStorage:', sbErr.message);
