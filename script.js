@@ -153,49 +153,45 @@ function enviarWhatsApp(mensaje) {
 }
 
 // ============================================
-// FUNCIONES DE MODAL DE STOCK
+// FUNCIONES DE SECCIÓN DE STOCK
 // ============================================
 
 let currentStockVehicles = [];
 
 /**
- * Abre el modal de stock para la categoría especificada
+ * Activa el filtro de la categoría especificada y hace scroll suave a la sección de stock
  */
-async function openStockModal(category) {
-    const modal = document.getElementById('stockModal');
-    const merged = await getMergedVehicleInventory();
+async function goToStock(category) {
+    await setStockFilter(category);
 
-    // Mapear slugs del HTML a las keys del inventario
-    const keyMap = {
-        'autos-0km': '0km',
-        'autos-usados': 'usados',
-        'vehiculos-especiales': 'especiales',
-        'motos-electricas': 'motos',
-        'motos': 'motos',
-        'especiales': 'especiales'
-    };
-    const inventoryKey = keyMap[category] || category;
-    const inventory = merged[inventoryKey];
-    
+    const stockSection = document.getElementById('stock');
+    if (stockSection) {
+        stockSection.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+/**
+ * Activa el filtro de categoría y renderiza los vehículos en la sección de stock
+ */
+async function setStockFilter(category) {
+    const merged = await getMergedVehicleInventory();
+    const inventory = merged[category];
+
     if (!inventory) {
         console.error(`Categoría ${category} no encontrada`);
         return;
     }
-    
-    // Actualizar título
-    document.getElementById('stockModalTitle').textContent = inventory.title;
+
     currentStockVehicles = inventory.vehicles;
-    
-    // Limpiar filtro
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === category);
+    });
+
     const filterInput = document.getElementById('stockFilter');
     if (filterInput) filterInput.value = '';
-    
-    // Renderizar vehículos
+
     renderVehicles(currentStockVehicles, category);
-    
-    // Mostrar modal con animación
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Prevenir scroll
 }
 
 function filterStock() {
@@ -212,14 +208,9 @@ function filterStock() {
     renderVehicles(filtered);
 }
 
-/**
- * Cierra el modal de stock
- */
-function closeStockModal() {
-    const modal = document.getElementById('stockModal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto'; // Restaurar scroll
-}
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => setStockFilter(btn.dataset.filter));
+});
 
 /**
  * Renderiza los vehículos en el contenedor del modal
@@ -337,30 +328,6 @@ function formatPrice(price) {
 }
 
 // ============================================
-// EVENT LISTENERS PARA MODAL
-// ============================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('stockModal');
-    
-    // Cerrar modal al hacer clic en el overlay
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeStockModal();
-            }
-        });
-    }
-    
-    // Cerrar modal con tecla Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
-            closeStockModal();
-        }
-    });
-});
-
-// ============================================
 // CARGAR DATOS EDITADOS DEL ADMIN
 // ============================================
 
@@ -416,7 +383,7 @@ function applySiteImages(images) {
         heroImg.src = heroData.url || heroData.data;
     }
 
-    const serviceImages = document.querySelectorAll('.service-card-front .service-image');
+    const serviceImages = document.querySelectorAll('.service-card .service-image');
     serviceImages.forEach((img, index) => {
         const key = `service_${index + 1}`;
         const slot = images[key];
@@ -466,15 +433,13 @@ function applyContentData(content, services, testimonios) {
     }
 
     if (services && services.length > 0) {
-        const serviceCards = document.querySelectorAll('.service-card-flip');
+        const serviceCards = document.querySelectorAll('.service-card');
         serviceCards.forEach((card, index) => {
             const service = services[index];
             if (!service || !card) return;
-            const backCard = card.querySelector('.service-card-back');
-            if (!backCard) return;
-            const p = backCard.querySelector('p');
-            const featuresDiv = backCard.querySelector('.service-features');
-            if (p) p.textContent = service.desc;
+            const descEl = card.querySelector('.service-desc');
+            const featuresDiv = card.querySelector('.service-features');
+            if (descEl && service.desc) descEl.textContent = service.desc;
             if (featuresDiv && service.features) {
                 featuresDiv.innerHTML = service.features.map(f =>
                     `<span class="feature-tag">${f}</span>`
@@ -574,20 +539,7 @@ style.innerHTML = `
 document.head.appendChild(style);
 
 // ============================================
-// 4. FLIP CARDS EN MOBILE (TAP)
-// ============================================
-document.querySelectorAll('.service-card-flip').forEach(card => {
-    card.addEventListener('click', function() {
-        // Solo en dispositivos móviles
-        if (window.innerWidth <= 1023) {
-            const inner = this.querySelector('.service-card-inner');
-            inner.classList.toggle('flipped');
-        }
-    });
-});
-
-// ============================================
-// 5. CONTADOR ANIMADO
+// 4. CONTADOR ANIMADO
 // ============================================
 function animateCounter(element, target, duration = 2000) {
     const isPercent = target.toString().includes('%');
@@ -1019,6 +971,13 @@ document.addEventListener('DOMContentLoaded', () => {
             window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank');
         });
     }
+});
+
+// ============================================
+// 20. INICIALIZACIÓN DE SECCIÓN DE STOCK
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    setStockFilter('todos');
 });
 
 // ============================================

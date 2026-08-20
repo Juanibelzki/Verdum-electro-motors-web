@@ -859,48 +859,37 @@ section#inicio,
     gap: 40px;
 }
 
-.service-card-flip {
-    perspective: 1000px;
-    height: 360px;
-    cursor: pointer;
+.service-card {
+    position: relative;
     flex: 0 0 calc(33.33% - 40px);
     max-width: 400px;
     min-width: 280px;
-}
-
-.service-card-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.service-card-flip:hover .service-card-inner {
-    transform: rotateY(180deg);
-}
-
-.service-card-flip.flipped .service-card-inner {
-    transform: rotateY(180deg);
-}
-
-.service-card-front,
-.service-card-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 16px;
+    height: 360px;
+    cursor: pointer;
     overflow: hidden;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-app) 100%);
+    backdrop-filter: var(--glass-blur) saturate(180%);
+    -webkit-backdrop-filter: var(--glass-blur) saturate(180%);
+    border: var(--glass-border-light);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 0 rgba(255,255,255,0.06);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s ease,
+                border-color 0.3s ease;
 }
 
-.service-card-front {
-    background: linear-gradient(135deg, var(--brand-slate-dark) 0%, var(--brand-black) 100%);
-    display: flex;
-    align-items: flex-end;
+.service-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(59, 130, 246, 0.25);
+    border-color: var(--primary-500, #3b82f6);
 }
 
-.service-image {
+.service-card:active {
+    transform: scale(0.98);
+}
+
+.service-card .service-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -908,7 +897,7 @@ section#inicio,
     background: var(--brand-slate-dark);
 }
 
-.service-card-flip:hover .service-image {
+.service-card:hover .service-image {
     transform: scale(1.05);
 }
 
@@ -918,7 +907,7 @@ section#inicio,
     left: 0;
     right: 0;
     padding: 24px;
-    background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.35), transparent);
+    background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.45), transparent);
     z-index: 2;
 }
 
@@ -926,37 +915,21 @@ section#inicio,
     font-size: 24px;
     font-weight: 600;
     color: var(--text-inverse);
+    margin-bottom: 6px;
 }
 
-.service-card-back {
-    transform: rotateY(180deg);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 16px;
-    background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-app) 100%);
-    backdrop-filter: var(--glass-blur) saturate(180%);
-    -webkit-backdrop-filter: var(--glass-blur) saturate(180%);
-    border: var(--glass-border-light);
-    padding: 32px;
-}
-
-.service-card-back h3 {
-    color: var(--brand-green-accent);
-    font-size: 20px;
-}
-
-.service-card-back p {
-    color: rgba(255,255,255,0.75);
-    font-size: 14px;
-    line-height: 1.6;
+.service-desc {
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 10px;
 }
 
 .service-features {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: 4px;
 }
 
 .feature-tag {
@@ -980,6 +953,40 @@ section#inicio,
 .stock-container {
     max-width: 1400px;
     margin: 0 auto;
+}
+
+.stock-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.filter-btn {
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    color: var(--text-primary);
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    border-color: var(--brand-green);
+    color: var(--brand-green-accent);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-accent) 100%);
+    border-color: transparent;
+    color: #0A0F14;
+    box-shadow: 0 6px 16px -6px rgba(37,211,102,0.4);
 }
 
 .vehicles-grid {
@@ -1602,7 +1609,7 @@ section#inicio,
     .services-grid {
         justify-content: center;
     }
-    .service-card-flip {
+    .service-card {
         flex: 0 0 calc(50% - 40px);
     }
 
@@ -1675,7 +1682,7 @@ section#inicio,
     .services-grid {
         gap: 24px;
     }
-    .service-card-flip {
+    .service-card {
         flex: 0 0 100%;
         max-width: 100%;
         height: 280px;
@@ -2099,41 +2106,8 @@ section#inicio,
 }
 
 /* ============================================
-   MODAL DE STOCK DE VEHÍCULOS
+   CONTENEDOR DE VEHÍCULOS EN STOCK
 ============================================ */
-
-/* Overlay del modal */
-#stockModal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    padding: 20px;
-    overflow-y: auto;
-    animation: fadeInOverlay 0.3s ease forwards;
-}
-
-#stockModal.active {
-    display: flex;
-}
-
-@keyframes fadeInOverlay {
-    from {
-        opacity: 0;
-        backdrop-filter: blur(0px);
-    }
-    to {
-        opacity: 1;
-        backdrop-filter: blur(8px);
-    }
-}
 
 /* Contenedor del modal */
 .modal-content {
@@ -2521,11 +2495,7 @@ section#inicio,
         font-size: 22px;
     }
 
-    /* Modal de Stock - Responsive */
-    #stockModal {
-        padding: 10px;
-    }
-
+    /* Stock - Responsive */
     .modal-content {
         padding: 20px;
         border-radius: 16px;
@@ -2596,11 +2566,6 @@ section#inicio,
 }
 
 @media (max-width: 480px) {
-    #stockModal {
-        padding: 0;
-        align-items: flex-start;
-    }
-
     .modal-content {
         padding: 16px;
         border-radius: 12px 12px 0 0;
