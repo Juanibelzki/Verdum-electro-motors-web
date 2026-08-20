@@ -824,6 +824,48 @@ async function syncVehiclesFromSupabase() {
     saveStoredData(VEHICLES_STORAGE_KEY, overrides);
     saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
     saveStoredData('supabase_vehicle_map', idMap);
+
+    await syncPendingPhotosToSupabase(overrides, customVehicles, idMap);
+}
+
+async function syncPendingPhotosToSupabase(overrides, customVehicles, idMap) {
+    try {
+        const toSync = [];
+
+        for (const cv of customVehicles) {
+            const pendientes = (cv.fotos || []).filter(f => typeof f === 'string' && f.startsWith('data:'));
+            if (pendientes.length && idMap[cv.id]) {
+                toSync.push({ adminId: cv.id, base64: pendientes });
+            }
+        }
+
+        for (const localId of Object.keys(overrides || {})) {
+            const numId = Number(localId);
+            const o = overrides[numId] || {};
+            const pendientes = (o.fotos || []).filter(f => typeof f === 'string' && f.startsWith('data:'));
+            if (pendientes.length && idMap[numId]) {
+                toSync.push({ adminId: numId, base64: pendientes });
+            }
+        }
+
+        for (const item of toSync) {
+            const uploadedUrls = await uploadVehicleImageToSupabase(item.adminId, item.base64);
+            if (uploadedUrls.length) {
+                let i = 0;
+                const finalFotos = (getVehiclePhotos(item.adminId) || []).map(f => {
+                    if (typeof f === 'string' && f.startsWith('data:') && i < uploadedUrls.length) {
+                        return uploadedUrls[i++];
+                    }
+                    return f;
+                });
+                setVehiclePhotos(item.adminId, finalFotos);
+                setVehicleStatusLocal(item.adminId, 'publicado');
+                addChange(`Fotos pendientes sincronizadas a Supabase (vehículo #${item.adminId})`);
+            }
+        }
+    } catch (err) {
+        console.warn('syncPendingPhotosToSupabase failed:', err.message);
+    }
 }
 
 function initImagesSection() {
@@ -991,11 +1033,104 @@ function setVehicleStatusLocal(adminId, status) {
     }
 }
 
+async function ensureVehicleInSupabase(adminId) {
+    const idMap = loadStoredData('supabase_vehicle_map', {});
+    if (idMap[adminId]) return idMap[adminId];
+
+    const card = document.querySelector(`.vehicle-edit-card[data-id="${adminId}"]`);
+    if (!card) return null;
+
+    const nombre = (card.querySelector('.vehicle-nombre')?.value || '').trim();
+    if (!nombre) return null;
+
+    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const isCustom = customVehicles.some(v => v.id === adminId);
+
+    let categorySlug = 'autos-usados';
+    let marca = 'Generica';
+    let modelo = nombre;
+    let tipo = 'auto';
+    let seccion = null;
+    let anio = parseInt(card.querySelector('.vehicle-anio')?.value, 10) || 2024;
+    const km = (card.querySelector('.vehicle-km')?.value || '0 KM').trim();
+    const color = (card.querySelector('.vehicle-color')?.value || '—').trim();
+    const descripcion = (card.querySelector('.vehicle-descripcion')?.value || '').trim();
+    const seccionEl = card.querySelector('.vehicle-seccion');
+    if (seccionEl) seccion = seccionEl.value || null;
+
+    if (isCustom) {
+        const cv = customVehicles.find(v => v.id === adminId);
+        if (cv) {
+            categorySlug = cv.category;
+            marca = cv.marca;
+            modelo = cv.modelo;
+            tipo = cv.tipo || 'auto';
+        }
+    } else {
+        const dv = DEFAULT_VEHICLES.find(v => v.id === adminId);
+        if (dv) {
+            categorySlug = CATEGORY_TEXT_TO_SLUG[dv.category] || 'autos-usados';
+            const parts = nombre.split(' ');
+            marca = parts[0] || dv.marca;
+            modelo = parts.slice(1).join(' ') || dv.modelo;
+            tipo = dv.tipo || 'auto';
+        }
+    }
+
+    const catId = await resolveCategoryId(categorySlug);
+    const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    const whatsapp_msg = tipo === 'moto'
+        ? `¡Hola! Quiero consultar el precio y disponibilidad de la moto ${marca} ${modelo} (${anio || ''}) que vi en su web.`
+        : `¡Hola! Quiero consultar el precio y disponibilidad del ${marca} ${modelo} (${anio || ''}) que vi en su web.`;
+
+    try {
+        const { data: existing } = await supabaseClient
+            .from('vehicles')
+            .select('id')
+            .eq('slug', slug)
+            .maybeSingle();
+
+        const payload = {
+            category_id: catId,
+            slug,
+            nombre,
+            marca,
+            modelo,
+            año: anio,
+            km,
+            color,
+            descripcion,
+            tipo,
+            seccion,
+            whatsapp_msg,
+            activo: true,
+            status: 'pendiente_fotos'
+        };
+
+        let result;
+        if (existing) {
+            result = await supabaseClient.from('vehicles').update(payload).eq('id', existing.id).select().single();
+        } else {
+            result = await supabaseClient.from('vehicles').insert([payload]).select().single();
+        }
+        if (result.error) throw result.error;
+
+        idMap[adminId] = result.data.id;
+        saveStoredData('supabase_vehicle_map', idMap);
+        return result.data.id;
+    } catch (err) {
+        console.warn('ensureVehicleInSupabase failed:', err.message);
+        return null;
+    }
+}
+
 async function uploadVehicleImageToSupabase(adminId, photoFilesArray) {
     const uploadedUrls = [];
     try {
-        const idMap = loadStoredData('supabase_vehicle_map', {});
-        const supabaseVehicleId = idMap[adminId];
+        let supabaseVehicleId = loadStoredData('supabase_vehicle_map', {})[adminId];
+        if (!supabaseVehicleId) {
+            supabaseVehicleId = await ensureVehicleInSupabase(adminId);
+        }
         if (!supabaseVehicleId) return uploadedUrls;
 
         const items = Array.isArray(photoFilesArray) ? photoFilesArray : [photoFilesArray];
