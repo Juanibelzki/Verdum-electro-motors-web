@@ -153,45 +153,49 @@ function enviarWhatsApp(mensaje) {
 }
 
 // ============================================
-// FUNCIONES DE SECCIÓN DE STOCK
+// FUNCIONES DE MODAL DE STOCK
 // ============================================
 
 let currentStockVehicles = [];
 
 /**
- * Activa el filtro de la categoría especificada y hace scroll suave a la sección de stock
+ * Abre el modal de stock para la categoría especificada
  */
-async function goToStock(category) {
-    await setStockFilter(category);
-
-    const stockSection = document.getElementById('stock');
-    if (stockSection) {
-        stockSection.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
-/**
- * Activa el filtro de categoría y renderiza los vehículos en la sección de stock
- */
-async function setStockFilter(category) {
+async function openStockModal(category) {
+    const modal = document.getElementById('stockModal');
     const merged = await getMergedVehicleInventory();
-    const inventory = merged[category];
 
+    // Mapear slugs del HTML a las keys del inventario
+    const keyMap = {
+        'autos-0km': '0km',
+        'autos-usados': 'usados',
+        'vehiculos-especiales': 'especiales',
+        'motos-electricas': 'motos',
+        'motos': 'motos',
+        'especiales': 'especiales'
+    };
+    const inventoryKey = keyMap[category] || category;
+    const inventory = merged[inventoryKey];
+    
     if (!inventory) {
         console.error(`Categoría ${category} no encontrada`);
         return;
     }
-
+    
+    // Actualizar título
+    document.getElementById('stockModalTitle').textContent = inventory.title;
     currentStockVehicles = inventory.vehicles;
-
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.filter === category);
-    });
-
+    
+    // Limpiar filtro
     const filterInput = document.getElementById('stockFilter');
     if (filterInput) filterInput.value = '';
-
+    
+    // Renderizar vehículos
     renderVehicles(currentStockVehicles, category);
+    
+    // Mostrar modal con animación
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevenir scroll
 }
 
 function filterStock() {
@@ -208,9 +212,14 @@ function filterStock() {
     renderVehicles(filtered);
 }
 
-document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => setStockFilter(btn.dataset.filter));
-});
+/**
+ * Cierra el modal de stock
+ */
+function closeStockModal() {
+    const modal = document.getElementById('stockModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Restaurar scroll
+}
 
 /**
  * Renderiza los vehículos en el contenedor del modal
@@ -328,6 +337,30 @@ function formatPrice(price) {
 }
 
 // ============================================
+// EVENT LISTENERS PARA MODAL
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('stockModal');
+    
+    // Cerrar modal al hacer clic en el overlay
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeStockModal();
+            }
+        });
+    }
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            closeStockModal();
+        }
+    });
+});
+
+// ============================================
 // CARGAR DATOS EDITADOS DEL ADMIN
 // ============================================
 
@@ -383,7 +416,7 @@ function applySiteImages(images) {
         heroImg.src = heroData.url || heroData.data;
     }
 
-    const serviceImages = document.querySelectorAll('.service-card .service-image');
+    const serviceImages = document.querySelectorAll('.service-card-front .service-image');
     serviceImages.forEach((img, index) => {
         const key = `service_${index + 1}`;
         const slot = images[key];
@@ -433,15 +466,15 @@ function applyContentData(content, services, testimonios) {
     }
 
     if (services && services.length > 0) {
-        const serviceCards = document.querySelectorAll('.service-card');
+        const serviceCards = document.querySelectorAll('.service-card-flip');
         serviceCards.forEach((card, index) => {
             const service = services[index];
             if (!service || !card) return;
-            const frontDesc = card.querySelector('.service-card-front .service-desc');
-            const backDesc = card.querySelector('.service-card-back p');
-            const featuresDiv = card.querySelector('.service-features');
-            if (frontDesc && service.desc) frontDesc.textContent = service.desc;
-            if (backDesc && service.desc) backDesc.textContent = service.desc;
+            const backCard = card.querySelector('.service-card-back');
+            if (!backCard) return;
+            const p = backCard.querySelector('p');
+            const featuresDiv = backCard.querySelector('.service-features');
+            if (p) p.textContent = service.desc;
             if (featuresDiv && service.features) {
                 featuresDiv.innerHTML = service.features.map(f =>
                     `<span class="feature-tag">${f}</span>`
@@ -541,7 +574,20 @@ style.innerHTML = `
 document.head.appendChild(style);
 
 // ============================================
-// 4. CONTADOR ANIMADO
+// 4. FLIP CARDS EN MOBILE (TAP)
+// ============================================
+document.querySelectorAll('.service-card-flip').forEach(card => {
+    card.addEventListener('click', function() {
+        // Solo en dispositivos móviles
+        if (window.innerWidth <= 1023) {
+            const inner = this.querySelector('.service-card-inner');
+            inner.classList.toggle('flipped');
+        }
+    });
+});
+
+// ============================================
+// 5. CONTADOR ANIMADO
 // ============================================
 function animateCounter(element, target, duration = 2000) {
     const isPercent = target.toString().includes('%');
@@ -973,13 +1019,6 @@ document.addEventListener('DOMContentLoaded', () => {
             window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank');
         });
     }
-});
-
-// ============================================
-// 20. INICIALIZACIÓN DE SECCIÓN DE STOCK
-// ============================================
-document.addEventListener('DOMContentLoaded', () => {
-    setStockFilter('todos');
 });
 
 // ============================================

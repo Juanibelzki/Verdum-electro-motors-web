@@ -123,83 +123,97 @@
     </div>
 
     <!-- ============================================
-         SERVICIOS / CATEGORÍAS
+         SERVICIOS - FLIP CARDS
     ============================================ -->
-    <section id="servicios" class="services-section">
-        <h2 class="section-title fade-in">Nuestros Servicios</h2>
-        <p class="section-subtitle fade-in">Soluciones completas en movilidad</p>
-
-        <div class="services-grid">
-            <!-- Service: Autos Usados -->
-            <div class="service-card fade-in" data-category="usados" onclick="goToStock('usados')" style="cursor: pointer;">
-                <div class="service-card-front">
-                    <img src="images/service_2.jpg" alt="Autos Usados" class="service-image" width="400" height="300" loading="lazy">
-                    <h3 class="service-title-front">Autos Usados</h3>
-                    <p class="service-desc">Revisados y garantizados. Todas las marcas con documentación completa.</p>
-                </div>
-                <div class="service-card-back">
-                    <h3>Autos Usados</h3>
-                    <p>Revisados y garantizados. Todas las marcas con documentación completa.</p>
-                    <div class="service-features">
-                        <span class="feature-tag">Garantía</span>
-                        <span class="feature-tag">Revisados</span>
-                        <span class="feature-tag">Legales</span>
+    <section id="servicios" class="servicios">
+        <div class="servicios-container">
+            <h2 class="section-title fade-in">Nuestros Servicios</h2>
+            <p class="section-subtitle fade-in">Soluciones completas en movilidad</p>
+            
+            <div class="services-grid">
+                <!-- Service 1: Autos 0KM -->
+                <div class="service-card-flip fade-in" onclick="openStockModal('autos-0km')" style="cursor: pointer;">
+                    <div class="service-card-inner">
+                        <div class="service-card-front">
+                            <img src="images/service_1.jpg" alt="Autos 0KM" class="service-image" width="400" height="300" loading="lazy">
+                            <div class="service-overlay">
+                                <h3 class="service-title-front">Autos 0KM</h3>
+                            </div>
+                        </div>
+                        <div class="service-card-back glass-card">
+                            <h3>Autos 0KM</h3>
+                            <p>Nacionales e importados. Las mejores marcas con financiación propia.</p>
+                            <div class="service-features">
+                                <span class="feature-tag">VW</span>
+                                <span class="feature-tag">Nissan</span>
+                                <span class="feature-tag">Chevrolet</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Service: Autos 0KM -->
-            <div class="service-card fade-in" data-category="0km" onclick="goToStock('0km')" style="cursor: pointer;">
-                <div class="service-card-front">
-                    <img src="images/service_1.jpg" alt="Autos 0KM" class="service-image" width="400" height="300" loading="lazy">
-                    <h3 class="service-title-front">Autos 0KM</h3>
-                    <p class="service-desc">Nacionales e importados. Las mejores marcas con financiación propia.</p>
-                </div>
-                <div class="service-card-back">
-                    <h3>Autos 0KM</h3>
-                    <p>Nacionales e importados. Las mejores marcas con financiación propia.</p>
-                    <div class="service-features">
-                        <span class="feature-tag">VW</span>
-                        <span class="feature-tag">Nissan</span>
-                        <span class="feature-tag">Chevrolet</span>
+                <!-- Service 2: Autos Usados -->
+                <div class="service-card-flip fade-in" onclick="openStockModal('autos-usados')" style="cursor: pointer;">
+                    <div class="service-card-inner">
+                        <div class="service-card-front">
+                            <img src="images/service_2.jpg" alt="Autos Usados" class="service-image" width="400" height="300" loading="lazy">
+                            <div class="service-overlay">
+                                <h3 class="service-title-front">Autos Usados</h3>
+                            </div>
+                        </div>
+                        <div class="service-card-back glass-card">
+                            <h3>Autos Usados</h3>
+                            <p>Revisados y garantizados. Todas las marcas con documentación completa.</p>
+                            <div class="service-features">
+                                <span class="feature-tag">Garantía</span>
+                                <span class="feature-tag">Revisados</span>
+                                <span class="feature-tag">Legales</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Service: Motos -->
-            <div class="service-card fade-in" data-category="motos" onclick="goToStock('motos')" style="cursor: pointer;">
-                <div class="service-card-front">
-                    <div class="service-image" style="background:linear-gradient(135deg,#1a1d21,#2d3238);display:flex;align-items:center;justify-content:center;">
-                        <span style="font-size:3rem;">🏍</span>
+                <!-- Service 5: Vehículos Especiales -->
+                <div class="service-card-flip fade-in" onclick="openStockModal('vehiculos-especiales')" style="cursor: pointer;">
+                    <div class="service-card-inner">
+                        <div class="service-card-front">
+                            <img src="images/service_5.jpg" alt="Vehículos Especiales" class="service-image" width="400" height="300" loading="lazy">
+                            <div class="service-overlay">
+                                <h3 class="service-title-front">Vehículos Especiales</h3>
+                            </div>
+                        </div>
+                        <div class="service-card-back glass-card">
+                            <h3>Vehículos Especiales</h3>
+                            <p>Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.</p>
+                            <div class="service-features">
+                                <span class="feature-tag">4x4</span>
+                                <span class="feature-tag">Comerciales</span>
+                                <span class="feature-tag">A medida</span>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="service-title-front">Motos</h3>
-                    <p class="service-desc">Motos eléctricas y convencionales. Las mejores marcas con financiación propia.</p>
                 </div>
-                <div class="service-card-back">
-                    <h3>Motos</h3>
-                    <p>Motos eléctricas y convencionales. Las mejores marcas con financiación propia.</p>
-                    <div class="service-features">
-                        <span class="feature-tag">Eléctricas</span>
-                        <span class="feature-tag">Convencionales</span>
-                        <span class="feature-tag">Financiación</span>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Service: Vehículos Especiales -->
-            <div class="service-card fade-in" data-category="especiales" onclick="goToStock('especiales')" style="cursor: pointer;">
-                <div class="service-card-front">
-                    <img src="images/service_5.jpg" alt="Vehículos Especiales" class="service-image" width="400" height="300" loading="lazy">
-                    <h3 class="service-title-front">Vehículos Especiales</h3>
-                    <p class="service-desc">Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.</p>
-                </div>
-                <div class="service-card-back">
-                    <h3>Vehículos Especiales</h3>
-                    <p>Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.</p>
-                    <div class="service-features">
-                        <span class="feature-tag">4x4</span>
-                        <span class="feature-tag">Comerciales</span>
-                        <span class="feature-tag">A medida</span>
+                <!-- Service 6: Motos -->
+                <div class="service-card-flip fade-in" onclick="openStockModal('motos')" style="cursor: pointer;">
+                    <div class="service-card-inner">
+                        <div class="service-card-front">
+                            <div class="service-image" style="background:linear-gradient(135deg,#1a1d21,#2d3238);display:flex;align-items:center;justify-content:center;">
+                                <span style="font-size:3rem;">🏍</span>
+                            </div>
+                            <div class="service-overlay">
+                                <h3 class="service-title-front">Motos</h3>
+                            </div>
+                        </div>
+                        <div class="service-card-back glass-card">
+                            <h3>Motos</h3>
+                            <p>Motos eléctricas y convencionales. Las mejores marcas con financiación propia.</p>
+                            <div class="service-features">
+                                <span class="feature-tag">Eléctricas</span>
+                                <span class="feature-tag">Convencionales</span>
+                                <span class="feature-tag">Financiación</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -207,30 +221,22 @@
     </section>
 
     <!-- ============================================
-         SECCIÓN STOCK / CATÁLOGO
+         MODAL DE STOCK
     ============================================ -->
-    <section id="stock" class="stock">
-        <div class="stock-container">
-            <h2 class="section-title fade-in">Stock Disponible</h2>
-            <p class="section-subtitle fade-in">Explorá nuestro catálogo y filtrá por categoría</p>
-
-            <div class="stock-filters fade-in">
-                <button class="filter-btn active" data-filter="todos">Todos</button>
-                <button class="filter-btn" data-filter="0km">Autos 0KM</button>
-                <button class="filter-btn" data-filter="usados">Autos Usados</button>
-                <button class="filter-btn" data-filter="motos">Motos</button>
-                <button class="filter-btn" data-filter="especiales">Veh. Especiales</button>
-            </div>
-
-            <div class="stock-filter fade-in">
+    <div id="stockModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeStockModal()">&times;</button>
+            <h2 class="modal-title" id="stockModalTitle">Stock Disponible</h2>
+            
+            <div class="stock-filter">
                 <input type="text" id="stockFilter" placeholder="Buscar por marca, modelo..." oninput="filterStock()">
             </div>
-
             <div class="stock-vehicles-container" id="stockVehiclesContainer">
                 <!-- Se llenará dinámicamente con JavaScript -->
             </div>
+            
         </div>
-    </section>
+    </div>
 
     <!-- ============================================
          SECCIÓN NOSOTROS
@@ -489,7 +495,7 @@
                 <ul>
                     <li><a href="#inicio">Inicio</a></li>
                     <li><a href="#servicios">Servicios</a></li>
-                    <li><a href="#stock">Stock</a></li>
+                    <li><a href="#servicios">Stock</a></li>
                     <li><a href="#nosotros">Nosotros</a></li>
                 </ul>
             </div>
@@ -497,9 +503,9 @@
             <div class="footer-column">
                 <h4>SERVICIOS</h4>
                 <ul>
-                    <li><a href="javascript:void(0)" onclick="goToStock('0km')">Autos 0KM</a></li>
-                    <li><a href="javascript:void(0)" onclick="goToStock('usados')">Autos Usados</a></li>
-                    <li><a href="javascript:void(0)" onclick="goToStock('motos')">Motos</a></li>
+                    <li><a href="javascript:void(0)" onclick="openStockModal('autos-0km')">Autos 0KM</a></li>
+                    <li><a href="javascript:void(0)" onclick="openStockModal('autos-usados')">Autos Usados</a></li>
+                    <li><a href="javascript:void(0)" onclick="openStockModal('motos')">Motos</a></li>
                     <li><a href="#creditos">Financiación</a></li>
                     <li><a href="#contacto">Trámites</a></li>
                 </ul>
