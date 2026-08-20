@@ -89,13 +89,6 @@ async function sbUploadImage(folder, filename, blob, contentType) {
     return publicUrl;
 }
 
-const SITE_IMAGE_SLOTS = [
-    { key: 'hero_visual', label: 'Hero Visual', fileHint: 'hero_visual.png' },
-    { key: 'service_1', label: 'Servicio 1 — Autos 0KM', fileHint: 'service_1.png' },
-    { key: 'service_2', label: 'Servicio 2 — Autos Usados', fileHint: 'service_2.png' },
-    { key: 'service_5', label: 'Servicio 3 — Vehículos Especiales', fileHint: 'service_5.png' }
-];
-
 const DEFAULT_VEHICLES = [
     { id: 1, category: 'Autos 0KM', marca: 'Volkswagen', modelo: 'Virtus', precio: 2850000, anio: 2024, km: '0 KM', color: 'Blanco' },
     { id: 2, category: 'Autos 0KM', marca: 'Nissan', modelo: 'Versa', precio: 2450000, anio: 2024, km: '0 KM', color: 'Plata' },
@@ -868,43 +861,6 @@ function initImagesSection() {
         logoSaveBtn.addEventListener('click', saveLogo);
     }
 
-    const siteGrid = document.getElementById('siteImagesGrid');
-    if (siteGrid) {
-        siteGrid.addEventListener('click', (e) => {
-            const uploadBtn = e.target.closest('.site-upload-btn');
-            const removeBtn = e.target.closest('.site-remove-btn');
-            if (uploadBtn) {
-                const input = siteGrid.querySelector(`.site-image-input[data-key="${uploadBtn.dataset.key}"]`);
-                if (input) input.click();
-            }
-            if (removeBtn) {
-                removeSiteImage(removeBtn.dataset.key);
-            }
-        });
-
-        siteGrid.addEventListener('change', async (e) => {
-            if (!e.target.classList.contains('site-image-input')) return;
-            const key = e.target.dataset.key;
-            const file = e.target.files[0];
-            const err = validateImageFile(file, 5);
-            if (err) { alert('❌ ' + err); e.target.value = ''; return; }
-            const result = await resizeImage(file, 1920, 1080, 0.85);
-            const base64 = await blobToBase64(result.blob);
-            let url = null;
-            try {
-                url = await sbUploadImage('site', `${key}.webp`, result.blob, 'image/webp');
-            } catch (e) {
-                console.warn('No se pudo subir la imagen a Supabase:', e);
-            }
-            const images = await getSiteImages();
-            images[key] = { url: url || null, data: base64, timestamp: new Date().toLocaleString('es-AR') };
-            await setSiteImages(images);
-            await renderSiteImagesGrid();
-            await addChange(`Imagen de sitio "${key}" actualizada`);
-            e.target.value = '';
-        });
-    }
-
     const vehiclesEditor = document.getElementById('vehiclesEditor');
     if (vehiclesEditor) {
         vehiclesEditor.addEventListener('click', (e) => {
@@ -1100,41 +1056,10 @@ async function removeSiteImage(key) {
         pendingLogoData = null;
         pendingLogoUrl = null;
         updateLogoPreview(null);
-    } else {
-        await renderSiteImagesGrid();
     }
 
     await addChange(`Imagen "${key}" eliminada`);
     alert('✓ Imagen eliminada');
-}
-
-async function renderSiteImagesGrid() {
-    const grid = document.getElementById('siteImagesGrid');
-    if (!grid) return;
-
-    const images = await getSiteImages();
-
-    grid.innerHTML = SITE_IMAGE_SLOTS.map((slot) => {
-        const stored = images[slot.key];
-        const previewSrc = stored && (stored.url || stored.data) ? (stored.url || stored.data) : '';
-        const previewStyle = previewSrc ? '' : 'display:none';
-        const placeholderStyle = previewSrc ? 'display:none' : '';
-        return `
-            <div class="site-image-card" data-key="${slot.key}">
-                <h4>${slot.label}</h4>
-                <p class="image-file-hint">${slot.fileHint}</p>
-                <div class="image-preview-box site-preview-box">
-                    <img class="preview-img site-slot-preview" src="${previewSrc}" alt="${slot.label}" style="${previewStyle}">
-                    <span class="preview-placeholder" style="${placeholderStyle}">Sin imagen</span>
-                </div>
-                <input type="file" class="site-image-input" accept="image/*" data-key="${slot.key}" hidden>
-                <div class="image-card-actions">
-                    <button type="button" class="btn-update site-upload-btn" data-key="${slot.key}">📤 Subir</button>
-                    <button type="button" class="btn-secondary-outline site-remove-btn" data-key="${slot.key}">🗑️ Eliminar</button>
-                </div>
-            </div>
-        `;
-    }).join('');
 }
 
 function getVehicleDefaultName(v) {
@@ -1740,6 +1665,5 @@ async function massPublishVehicles() {
 
 async function loadImagesSection() {
     await loadLogoPreview();
-    await renderSiteImagesGrid();
     await renderVehiclesEditor();
 }
