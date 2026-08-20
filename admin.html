@@ -431,11 +431,16 @@
                     </div>
 
                     <div class="images-subsection">
-                        <h3 class="subsection-title">B) Cards de vehículos (stock)</h3>
-                        <p class="subsection-hint">Nombre, descripción y foto de cada vehículo del modal de stock</p>
-                        <button type="button" class="btn-update" onclick="showAddVehicleForm()" style="margin-bottom:20px">➕ Agregar Vehículo</button>
-                        <button type="button" class="btn-secondary-outline" onclick="massPublishVehicles()" style="margin-bottom:20px; margin-left:10px">🚀 Publicar todo el stock</button>
-                        <div id="vehiclesEditor" class="vehicles-editor"></div>
+                        <h3 class="subsection-title">B) Inventario completo (Supabase)</h3>
+                        <p class="subsection-hint">Todos los vehículos sincronizados desde la base de datos</p>
+                        <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+                            <button type="button" class="btn-update" onclick="refreshVehiclesTable()">🔄 Refrescar datos desde Supabase</button>
+                            <button type="button" class="btn-update" onclick="showAddVehicleForm()">➕ Agregar Vehículo</button>
+                            <button type="button" class="btn-secondary-outline" onclick="massPublishVehicles()">🚀 Publicar todo el stock</button>
+                            <span id="vehiclesCount" style="color:var(--text-secondary);font-size:0.9rem"></span>
+                        </div>
+                        <div id="vehiclesTableContainer" style="overflow-x:auto"></div>
+                        <div id="vehiclesEditor" class="vehicles-editor" style="margin-top:24px"></div>
                     </div>
 
                     <!-- Modal para agregar vehículo -->

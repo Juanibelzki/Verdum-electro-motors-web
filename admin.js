@@ -705,8 +705,8 @@ async function syncVehiclesFromSupabase() {
     try {
         const { data } = await supabaseClient
             .from('vehicles')
-            .select('id, slug, nombre, marca, modelo, año, km, color, descripcion, category_id, status, tipo, photos(url, url_thumb, posicion)')
-            .eq('activo', true);
+            .select('id, slug, nombre, marca, modelo, año, km, color, descripcion, category_id, activo, status, tipo, photos(url, url_thumb, posicion)')
+            .order('created_at', { ascending: false });
         rows = data || [];
     } catch (sbErr) {
         console.warn('Sync from Supabase failed:', sbErr.message);
@@ -1132,6 +1132,98 @@ let pendientesFilterActive = false;
 function togglePendientesFilter() {
     pendientesFilterActive = !pendientesFilterActive;
     renderVehiclesEditor();
+}
+
+async function refreshVehiclesTable() {
+    const container = document.getElementById('vehiclesTableContainer');
+    const countEl = document.getElementById('vehiclesCount');
+    if (!container) return;
+
+    container.innerHTML = '<p style="color:var(--text-secondary)">Cargando...</p>';
+
+    let rows = [];
+    try {
+        const { data } = await supabaseClient
+            .from('vehicles')
+            .select('id, slug, nombre, marca, modelo, año, km, color, tipo, activo, status, created_at, photos(url, posicion)')
+            .order('created_at', { ascending: false });
+        rows = data || [];
+    } catch (e) {
+        container.innerHTML = `<p style="color:#ef4444">Error al cargar: ${e.message}</p>`;
+        return;
+    }
+
+    if (countEl) countEl.textContent = `${rows.length} vehículo${rows.length !== 1 ? 's' : ''} en total`;
+
+    if (rows.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-secondary)">No hay vehículos en Supabase</p>';
+        return;
+    }
+
+    const rowsHtml = rows.map(v => {
+        const fotos = (v.photos || []).sort((a, b) => a.posicion - b.posicion);
+        const hasPhotos = fotos.length > 0 && fotos[0].url;
+        const kmNum = parseFloat(String(v.km).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+        const es0km = kmNum <= 100;
+        const tipo = v.tipo || 'auto';
+        const activo = v.activo !== false;
+        const status = v.status || 'publicado';
+
+        const tipoBadge = tipo === 'moto'
+            ? '<span style="background:#f59e0b;color:#111;padding:2px 8px;border-radius:10px;font-size:0.75rem;font-weight:600">Moto</span>'
+            : '<span style="background:#374151;color:#d1d5db;padding:2px 8px;border-radius:10px;font-size:0.75rem">Auto</span>';
+
+        const kmBadge = es0km
+            ? '<span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.75rem;font-weight:600">0 KM</span>'
+            : `<span style="color:var(--text-secondary)">${escapeHtml(v.km || '—')}</span>`;
+
+        const fotoBadge = hasPhotos
+            ? `<span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.75rem">✓ ${fotos.length} foto${fotos.length > 1 ? 's' : ''}</span>`
+            : '<span style="background:#f97316;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.75rem">⚠ Sin fotos</span>';
+
+        const activoBadge = activo
+            ? '<span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.75rem">Publicado</span>'
+            : '<span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.75rem">Oculto</span>';
+
+        const statusBadge = status === 'pendiente_fotos'
+            ? '<span style="background:#f59e0b;color:#111;padding:2px 8px;border-radius:10px;font-size:0.75rem;margin-left:4px">Pendiente</span>'
+            : '';
+
+        const previewImg = hasPhotos
+            ? `<img src="${fotos[0].url}" style="width:48px;height:36px;object-fit:cover;border-radius:6px" alt="">`
+            : '<span style="color:var(--text-secondary);font-size:0.75rem">—</span>';
+
+        const previewBtn = `<button class="btn-secondary-outline" style="padding:4px 10px;font-size:0.8rem" onclick="openStockModal('${v.tipo === 'moto' ? 'motos' : 'autos-usados'}')">👁</button>`;
+
+        return `<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px 8px">${previewImg}</td>
+            <td style="padding:10px 8px;font-weight:500">${escapeHtml(v.marca || '')} ${escapeHtml(v.modelo || '')}</td>
+            <td style="padding:10px 8px">${escapeHtml(String(v.año || ''))}</td>
+            <td style="padding:10px 8px">${kmBadge}</td>
+            <td style="padding:10px 8px">${tipoBadge}</td>
+            <td style="padding:10px 8px">${fotoBadge}</td>
+            <td style="padding:10px 8px">${activoBadge}${statusBadge}</td>
+            <td style="padding:10px 8px">${previewBtn}</td>
+        </tr>`;
+    }).join('');
+
+    container.innerHTML = `
+        <table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:12px;overflow:hidden;font-size:0.9rem">
+            <thead>
+                <tr style="background:var(--surface-alt);border-bottom:2px solid var(--border)">
+                    <th style="padding:12px 8px;text-align:left;width:50px"></th>
+                    <th style="padding:12px 8px;text-align:left">Marca / Modelo</th>
+                    <th style="padding:12px 8px;text-align:left">Año</th>
+                    <th style="padding:12px 8px;text-align:left">KM</th>
+                    <th style="padding:12px 8px;text-align:left">Tipo</th>
+                    <th style="padding:12px 8px;text-align:left">Fotos</th>
+                    <th style="padding:12px 8px;text-align:left">Estado</th>
+                    <th style="padding:12px 8px;text-align:left">Ver</th>
+                </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+        </table>
+    `;
 }
 
 async function renderVehiclesEditor() {
@@ -1665,5 +1757,6 @@ async function massPublishVehicles() {
 
 async function loadImagesSection() {
     await loadLogoPreview();
+    refreshVehiclesTable();
     await renderVehiclesEditor();
 }

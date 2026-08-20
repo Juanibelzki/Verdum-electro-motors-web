@@ -109,6 +109,10 @@ async function loadStockFromSupabase() {
     // 2) Agregar categoría combinada "motos" con todas las motos
     inventory['motos'] = { title: 'Motos', vehicles: allMotos };
 
+    // Log de auditoría
+    const totalCount = Object.values(inventory).reduce((sum, cat) => sum + cat.vehicles.length, 0);
+    console.log('Vehículos cargados desde Supabase:', totalCount, inventory);
+
     stockCache = inventory;
     return inventory;
 }
