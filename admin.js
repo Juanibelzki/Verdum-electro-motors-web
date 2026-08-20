@@ -1840,6 +1840,7 @@ async function deleteCustomVehicle(id) {
     if (!confirm('¿Eliminar este vehículo personalizado?')) return;
 
     // --- SUPABASE ---
+    let deletedSupabase = false;
     try {
         const idMap = loadStoredData('supabase_vehicle_map', {});
         const removed = customVehicles.find(v => v.id === id);
@@ -1848,7 +1849,9 @@ async function deleteCustomVehicle(id) {
             // Borrar fotos asociadas
             await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
             // Borrar vehículo
-            await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
+            const { error } = await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
+            if (error) throw error;
+            deletedSupabase = true;
             delete idMap[id];
             saveStoredData('supabase_vehicle_map', idMap);
         }
@@ -1872,7 +1875,11 @@ async function deleteCustomVehicle(id) {
     if (removed) {
         await addChange(`Vehículo eliminado: ${removed.marca} ${removed.modelo} (#${id})`);
     }
-    alert('✓ Vehículo eliminado');
+    if (deletedSupabase) {
+        alert('✓ Vehículo eliminado');
+    } else {
+        alert('⚠ Vehículo eliminado del panel, pero no se encontró su registro en Supabase. Si sigue apareciendo en la web, borralo desde la tabla de inventario.');
+    }
 }
 
 async function deleteVehicle(id) {
@@ -1887,24 +1894,50 @@ async function deleteVehicle(id) {
     // --- SUPABASE: borrar el vehículo por defecto si fue guardado ---
     const idMap = loadStoredData('supabase_vehicle_map', {});
     const supabaseId = idMap[id];
+    let deletedSupabase = false;
     if (supabaseId) {
         try {
             await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
-            await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
+            const { error } = await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
+            if (error) throw error;
+            deletedSupabase = true;
         } catch (sbErr) {
             console.warn('Supabase delete failed:', sbErr.message);
         }
-    } else {
-        // Intentar por slug (por si se guardó sin mapping)
+    }
+
+    if (!deletedSupabase) {
+        // Fallback: buscar por slug y por marca+modelo (los slugs reales incluyen sufijos tipo "-fila-N")
         try {
-            const slug = `${dv.marca}-${dv.modelo}-${dv.anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
-            const { data: existing } = await supabaseClient.from('vehicles').select('id').eq('slug', slug).maybeSingle();
-            if (existing) {
-                await supabaseClient.from('photos').delete().eq('vehicle_id', existing.id);
-                await supabaseClient.from('vehicles').delete().eq('id', existing.id);
+            const slugBase = `${dv.marca}-${dv.modelo}-${dv.anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+            const { data: matches } = await supabaseClient
+                .from('vehicles')
+                .select('id')
+                .or(`slug.eq.${slugBase},slug.like.${slugBase}-%`);
+            for (const m of matches || []) {
+                await supabaseClient.from('photos').delete().eq('vehicle_id', m.id);
+                await supabaseClient.from('vehicles').delete().eq('id', m.id);
             }
+            if (matches && matches.length > 0) deletedSupabase = true;
         } catch (sbErr) {
             console.warn('Supabase slug delete failed:', sbErr.message);
+        }
+    }
+
+    if (!deletedSupabase) {
+        const { data: byNombre } = await supabaseClient
+            .from('vehicles')
+            .select('id, nombre')
+            .ilike('nombre', `%${dv.modelo}%`);
+        const target = (byNombre || []).find(v => String(v.nombre || '').toLowerCase().includes(String(dv.marca).toLowerCase()));
+        if (target) {
+            try {
+                await supabaseClient.from('photos').delete().eq('vehicle_id', target.id);
+                await supabaseClient.from('vehicles').delete().eq('id', target.id);
+                deletedSupabase = true;
+            } catch (sbErr) {
+                console.warn('Supabase name delete failed:', sbErr.message);
+            }
         }
     }
 
@@ -1935,7 +1968,11 @@ async function deleteVehicle(id) {
 
     await renderVehiclesEditor();
     await addChange(`Vehículo eliminado del stock: ${dv.marca} ${dv.modelo}`);
-    alert('✓ Vehículo eliminado');
+    if (deletedSupabase) {
+        alert('✓ Vehículo eliminado');
+    } else {
+        alert('⚠ Vehículo oculto localmente, pero no se encontró en Supabase para borrarlo. Si sigue apareciendo en la web, borralo desde "Agregar vehículos" o la tabla de inventario.');
+    }
 }
 
 async function massPublishVehicles() {
