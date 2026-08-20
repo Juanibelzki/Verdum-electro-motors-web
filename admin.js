@@ -1232,7 +1232,7 @@ async function refreshVehiclesTable() {
             ${seccionOptions.map(o => `<option value="${o.value}" ${seccion === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
         </select>`;
 
-        const previewBtn = `<button class="btn-secondary-outline" style="padding:4px 10px;font-size:0.8rem" onclick="openStockModal('${seccion || (v.tipo === 'moto' ? 'motos' : 'usados')}')">👁</button>`;
+        const previewBtn = `<button class="btn-secondary-outline" style="padding:4px 10px;font-size:0.8rem" onclick="openQuickPhotoModal('${seccion || (v.tipo === 'moto' ? 'motos' : 'usados')}')">👁</button>`;
 
         return `<tr style="border-bottom:1px solid var(--border)">
             <td style="padding:10px 8px">${previewImg}</td>
@@ -1833,4 +1833,227 @@ async function loadImagesSection() {
     await loadLogoPreview();
     refreshVehiclesTable();
     await renderVehiclesEditor();
+}
+
+/* ============================================
+   MODAL CARGA RÁPIDA DE FOTOS POR CATEGORÍA
+   ============================================ */
+
+let quickPhotoCategory = null;
+let quickPhotoVehicles = [];
+let quickPhotoOnlyPending = true;
+let quickPhotoBound = false;
+
+const QUICK_PHOTO_CATEGORY_TITLES = {
+    'usados': 'Autos Usados',
+    '0km': 'Autos 0 KM',
+    'motos': 'Motos',
+    'especiales': 'Veh. Especiales'
+};
+
+function bindQuickPhotoEvents() {
+    if (quickPhotoBound) return;
+    quickPhotoBound = true;
+
+    document.addEventListener('change', (e) => {
+        const input = e.target.closest('.quick-photo-input');
+        if (!input || !input.files || !input.files[0]) return;
+        const vid = input.getAttribute('data-vid');
+        const file = input.files[0];
+        quickPhotoUpload(vid, file);
+        input.value = '';
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeQuickPhotoModal();
+    });
+
+    document.addEventListener('click', (e) => {
+        const modal = document.getElementById('quickPhotoModal');
+        if (!modal || modal.style.display === 'none') return;
+        if (e.target === modal) closeQuickPhotoModal();
+    });
+}
+
+async function openQuickPhotoModal(category) {
+    bindQuickPhotoEvents();
+    quickPhotoCategory = category;
+    quickPhotoOnlyPending = true;
+    const modal = document.getElementById('quickPhotoModal');
+    const title = document.getElementById('quickPhotoTitle');
+    if (title) {
+        title.textContent = `📸 Carga Rápida — ${QUICK_PHOTO_CATEGORY_TITLES[category] || category}`;
+    }
+    if (modal) modal.style.display = 'flex';
+
+    const { data, error } = await supabaseClient
+        .from('vehicles')
+        .select('id, slug, nombre, marca, modelo, año, km, color, tipo, status, activo, seccion, photos(url, posicion)')
+        .eq('activo', true);
+
+    if (error) {
+        alert('❌ Error cargando vehículos: ' + error.message);
+        closeQuickPhotoModal();
+        return;
+    }
+
+    quickPhotoVehicles = (data || []).filter(v => {
+        const kmNum = parseFloat(String(v.km).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+        const es0km = kmNum <= 100;
+        const esMoto = v.tipo === 'moto';
+        let cat;
+        if (v.seccion === 'usados' || v.seccion === '0km' || v.seccion === 'motos' || v.seccion === 'especiales') {
+            cat = v.seccion;
+        } else if (esMoto) {
+            cat = 'motos';
+        } else if (es0km) {
+            cat = '0km';
+        } else {
+            cat = 'usados';
+        }
+        return cat === category;
+    });
+
+    updateQuickPhotoFilterButtons();
+    renderQuickPhotoList();
+    document.body.style.overflow = 'hidden';
+}
+
+function closeQuickPhotoModal() {
+    const modal = document.getElementById('quickPhotoModal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    quickPhotoVehicles = [];
+}
+
+function setQuickPhotoFilter(onlyPending) {
+    quickPhotoOnlyPending = onlyPending;
+    updateQuickPhotoFilterButtons();
+    renderQuickPhotoList();
+}
+
+function updateQuickPhotoFilterButtons() {
+    const pBtn = document.getElementById('qpFilterPendingBtn');
+    const aBtn = document.getElementById('qpFilterAllBtn');
+    if (pBtn) pBtn.style.opacity = quickPhotoOnlyPending ? '1' : '0.5';
+    if (aBtn) aBtn.style.opacity = quickPhotoOnlyPending ? '0.5' : '1';
+}
+
+function getQuickPhotoFotos(v) {
+    return (v.photos || []).slice().sort((a, b) => a.posicion - b.posicion);
+}
+
+function renderQuickPhotoList() {
+    const container = document.getElementById('quickPhotoList');
+    const countEl = document.getElementById('qpCount');
+    if (!container) return;
+
+    let list = quickPhotoVehicles;
+    if (quickPhotoOnlyPending) {
+        list = quickPhotoVehicles.filter(v => {
+            const fotos = getQuickPhotoFotos(v);
+            return fotos.length === 0 || v.status === 'pendiente_fotos';
+        });
+    }
+
+    if (countEl) countEl.textContent = `${list.length} vehículo${list.length !== 1 ? 's' : ''}`;
+
+    if (!list.length) {
+        container.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:24px">No hay vehículos para mostrar. 🎉</p>';
+        return;
+    }
+
+    container.innerHTML = list.map(v => {
+        const fotos = getQuickPhotoFotos(v);
+        const first = fotos[0];
+        const imgSrc = first && first.url ? first.url : '';
+        const displayName = v.nombre || `${v.marca || ''} ${v.modelo || ''}`.trim();
+        const estado = fotos.length > 0
+            ? `<span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.7rem">✓ ${fotos.length} foto${fotos.length > 1 ? 's' : ''}</span>`
+            : '<span style="background:#f97316;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.7rem">⚠ Falta foto</span>';
+
+        return `
+            <div class="quick-photo-card" data-vid="${v.id}" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px">
+                <div style="width:72px;height:52px;border-radius:8px;overflow:hidden;background:var(--surface-alt);flex-shrink:0;display:flex;align-items:center;justify-content:center">
+                    ${imgSrc
+                        ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover" alt="">`
+                        : '<span style="color:var(--text-secondary);font-size:0.7rem">Sin foto</span>'}
+                </div>
+                <div style="flex:1;min-width:0">
+                    <div style="font-weight:600;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(displayName)}</div>
+                    <div style="color:var(--text-secondary);font-size:0.8rem;margin-top:2px">
+                        ${v.año || '—'} · ${escapeHtml(v.km || '—')} · ${escapeHtml(v.color || '—')}
+                    </div>
+                    <div style="margin-top:4px">${estado}</div>
+                </div>
+                <input type="file" class="quick-photo-input" data-vid="${v.id}" accept="image/*" style="display:none">
+                <button type="button" class="btn-update" style="padding:6px 12px;font-size:0.85rem;flex-shrink:0" onclick="quickPhotoSelect('${v.id}')">📤 Subir foto</button>
+            </div>`;
+    }).join('');
+}
+
+function quickPhotoSelect(vid) {
+    const input = document.querySelector(`.quick-photo-input[data-vid="${vid}"]`);
+    if (input) input.click();
+}
+
+async function quickPhotoUpload(vid, file) {
+    const err = validateImageFile(file, 5);
+    if (err) { alert('❌ ' + err); return; }
+
+    const card = document.querySelector(`.quick-photo-card[data-vid="${vid}"]`);
+    const btn = card ? card.querySelector('button') : null;
+    if (btn) { btn.textContent = '⏳ Subiendo...'; btn.disabled = true; }
+
+    try {
+        const { data: existing } = await supabaseClient
+            .from('photos')
+            .select('posicion')
+            .eq('vehicle_id', vid);
+        let nextPos = existing && existing.length ? Math.max(...existing.map(p => p.posicion), -1) + 1 : 0;
+        if (nextPos >= 5) {
+            alert('⚠️ Máximo 5 fotos por vehículo');
+            return;
+        }
+
+        const result = await resizeImage(file, 900, 1200, 0.85);
+        const fileName = `${nextPos}_${Date.now()}.webp`;
+        const storagePath = `vehicles/${vid}/${fileName}`;
+
+        const { error: upErr } = await supabaseClient.storage
+            .from('stock-photos')
+            .upload(storagePath, result.blob, { upsert: true, contentType: result.blob.type });
+        if (upErr) throw upErr;
+
+        const { data: { publicUrl } } = supabaseClient.storage.from('stock-photos').getPublicUrl(storagePath);
+
+        const { error: insErr } = await supabaseClient.from('photos').insert({
+            vehicle_id: vid,
+            url: publicUrl,
+            url_thumb: publicUrl,
+            posicion: nextPos
+        });
+        if (insErr) throw insErr;
+
+        await supabaseClient.from('vehicles').update({ status: 'publicado' }).eq('id', vid);
+        await addChange(`Foto subida al vehículo desde Carga Rápida (${vid})`);
+
+        const { data: fresh } = await supabaseClient
+            .from('vehicles')
+            .select('id, slug, nombre, marca, modelo, año, km, color, tipo, status, activo, seccion, photos(url, posicion)')
+            .eq('id', vid)
+            .single();
+        if (fresh) {
+            const idx = quickPhotoVehicles.findIndex(v => v.id === vid);
+            if (idx !== -1) quickPhotoVehicles[idx] = fresh;
+        }
+
+        renderQuickPhotoList();
+        refreshVehiclesTable();
+    } catch (err) {
+        console.error('Quick photo upload failed:', err);
+        alert('❌ Error al subir: ' + (err.message || 'Error desconocido'));
+    } finally {
+        if (btn) { btn.textContent = '📤 Subir foto'; btn.disabled = false; }
+    }
 }
