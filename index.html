@@ -123,69 +123,83 @@
     </div>
 
     <!-- ============================================
-         SERVICIOS - CARDS
+         SERVICIOS / CATEGORÍAS
     ============================================ -->
-    <section id="servicios" class="servicios">
-        <div class="servicios-container">
-            <h2 class="section-title fade-in">Nuestros Servicios</h2>
-            <p class="section-subtitle fade-in">Soluciones completas en movilidad</p>
-            
-            <div class="services-grid">
-                <!-- Service 1: Autos 0KM -->
-                <div class="service-card fade-in" data-category="0km" onclick="goToStock('0km')" style="cursor: pointer;">
-                    <img src="images/service_1.jpg" alt="Autos 0KM" class="service-image" width="400" height="300" loading="lazy">
-                    <div class="service-overlay">
-                        <h3 class="service-title-front">Autos 0KM</h3>
-                        <p class="service-desc">Nacionales e importados. Las mejores marcas con financiación propia.</p>
-                        <div class="service-features">
-                            <span class="feature-tag">VW</span>
-                            <span class="feature-tag">Nissan</span>
-                            <span class="feature-tag">Chevrolet</span>
-                        </div>
-                    </div>
-                </div>
+    <section id="servicios" class="services-section">
+        <h2 class="section-title fade-in">Nuestros Servicios</h2>
+        <p class="section-subtitle fade-in">Soluciones completas en movilidad</p>
 
-                <!-- Service 2: Autos Usados -->
-                <div class="service-card fade-in" data-category="usados" onclick="goToStock('usados')" style="cursor: pointer;">
+        <div class="services-grid">
+            <!-- Service: Autos Usados -->
+            <div class="service-card fade-in" data-category="usados" onclick="goToStock('usados')" style="cursor: pointer;">
+                <div class="service-card-front">
                     <img src="images/service_2.jpg" alt="Autos Usados" class="service-image" width="400" height="300" loading="lazy">
-                    <div class="service-overlay">
-                        <h3 class="service-title-front">Autos Usados</h3>
-                        <p class="service-desc">Revisados y garantizados. Todas las marcas con documentación completa.</p>
-                        <div class="service-features">
-                            <span class="feature-tag">Garantía</span>
-                            <span class="feature-tag">Revisados</span>
-                            <span class="feature-tag">Legales</span>
-                        </div>
+                    <h3 class="service-title-front">Autos Usados</h3>
+                    <p class="service-desc">Revisados y garantizados. Todas las marcas con documentación completa.</p>
+                </div>
+                <div class="service-card-back">
+                    <h3>Autos Usados</h3>
+                    <p>Revisados y garantizados. Todas las marcas con documentación completa.</p>
+                    <div class="service-features">
+                        <span class="feature-tag">Garantía</span>
+                        <span class="feature-tag">Revisados</span>
+                        <span class="feature-tag">Legales</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Service 5: Vehículos Especiales -->
-                <div class="service-card fade-in" data-category="especiales" onclick="goToStock('especiales')" style="cursor: pointer;">
-                    <img src="images/service_5.jpg" alt="Vehículos Especiales" class="service-image" width="400" height="300" loading="lazy">
-                    <div class="service-overlay">
-                        <h3 class="service-title-front">Vehículos Especiales</h3>
-                        <p class="service-desc">Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.</p>
-                        <div class="service-features">
-                            <span class="feature-tag">4x4</span>
-                            <span class="feature-tag">Comerciales</span>
-                            <span class="feature-tag">A medida</span>
-                        </div>
+            <!-- Service: Autos 0KM -->
+            <div class="service-card fade-in" data-category="0km" onclick="goToStock('0km')" style="cursor: pointer;">
+                <div class="service-card-front">
+                    <img src="images/service_1.jpg" alt="Autos 0KM" class="service-image" width="400" height="300" loading="lazy">
+                    <h3 class="service-title-front">Autos 0KM</h3>
+                    <p class="service-desc">Nacionales e importados. Las mejores marcas con financiación propia.</p>
+                </div>
+                <div class="service-card-back">
+                    <h3>Autos 0KM</h3>
+                    <p>Nacionales e importados. Las mejores marcas con financiación propia.</p>
+                    <div class="service-features">
+                        <span class="feature-tag">VW</span>
+                        <span class="feature-tag">Nissan</span>
+                        <span class="feature-tag">Chevrolet</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Service 6: Motos -->
-                <div class="service-card fade-in" data-category="motos" onclick="goToStock('motos')" style="cursor: pointer;">
+            <!-- Service: Motos -->
+            <div class="service-card fade-in" data-category="motos" onclick="goToStock('motos')" style="cursor: pointer;">
+                <div class="service-card-front">
                     <div class="service-image" style="background:linear-gradient(135deg,#1a1d21,#2d3238);display:flex;align-items:center;justify-content:center;">
                         <span style="font-size:3rem;">🏍</span>
                     </div>
-                    <div class="service-overlay">
-                        <h3 class="service-title-front">Motos</h3>
-                        <p class="service-desc">Motos eléctricas y convencionales. Las mejores marcas con financiación propia.</p>
-                        <div class="service-features">
-                            <span class="feature-tag">Eléctricas</span>
-                            <span class="feature-tag">Convencionales</span>
-                            <span class="feature-tag">Financiación</span>
-                        </div>
+                    <h3 class="service-title-front">Motos</h3>
+                    <p class="service-desc">Motos eléctricas y convencionales. Las mejores marcas con financiación propia.</p>
+                </div>
+                <div class="service-card-back">
+                    <h3>Motos</h3>
+                    <p>Motos eléctricas y convencionales. Las mejores marcas con financiación propia.</p>
+                    <div class="service-features">
+                        <span class="feature-tag">Eléctricas</span>
+                        <span class="feature-tag">Convencionales</span>
+                        <span class="feature-tag">Financiación</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service: Vehículos Especiales -->
+            <div class="service-card fade-in" data-category="especiales" onclick="goToStock('especiales')" style="cursor: pointer;">
+                <div class="service-card-front">
+                    <img src="images/service_5.jpg" alt="Vehículos Especiales" class="service-image" width="400" height="300" loading="lazy">
+                    <h3 class="service-title-front">Vehículos Especiales</h3>
+                    <p class="service-desc">Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.</p>
+                </div>
+                <div class="service-card-back">
+                    <h3>Vehículos Especiales</h3>
+                    <p>Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.</p>
+                    <div class="service-features">
+                        <span class="feature-tag">4x4</span>
+                        <span class="feature-tag">Comerciales</span>
+                        <span class="feature-tag">A medida</span>
                     </div>
                 </div>
             </div>

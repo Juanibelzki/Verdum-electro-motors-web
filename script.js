@@ -437,9 +437,11 @@ function applyContentData(content, services, testimonios) {
         serviceCards.forEach((card, index) => {
             const service = services[index];
             if (!service || !card) return;
-            const descEl = card.querySelector('.service-desc');
+            const frontDesc = card.querySelector('.service-card-front .service-desc');
+            const backDesc = card.querySelector('.service-card-back p');
             const featuresDiv = card.querySelector('.service-features');
-            if (descEl && service.desc) descEl.textContent = service.desc;
+            if (frontDesc && service.desc) frontDesc.textContent = service.desc;
+            if (backDesc && service.desc) backDesc.textContent = service.desc;
             if (featuresDiv && service.features) {
                 featuresDiv.innerHTML = service.features.map(f =>
                     `<span class="feature-tag">${f}</span>`
