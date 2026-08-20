@@ -1185,10 +1185,6 @@ async function refreshVehiclesTable() {
             ? '<span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.75rem">Publicado</span>'
             : '<span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.75rem">Oculto</span>';
 
-        const statusBadge = status === 'pendiente_fotos'
-            ? '<span style="background:#f59e0b;color:#111;padding:2px 8px;border-radius:10px;font-size:0.75rem;margin-left:4px">Pendiente</span>'
-            : '';
-
         const previewImg = hasPhotos
             ? `<img src="${fotos[0].url}" style="width:48px;height:36px;object-fit:cover;border-radius:6px" alt="">`
             : '<span style="color:var(--text-secondary);font-size:0.75rem">—</span>';
@@ -1202,7 +1198,7 @@ async function refreshVehiclesTable() {
             <td style="padding:10px 8px">${kmBadge}</td>
             <td style="padding:10px 8px">${tipoBadge}</td>
             <td style="padding:10px 8px">${fotoBadge}</td>
-            <td style="padding:10px 8px">${activoBadge}${statusBadge}</td>
+            <td style="padding:10px 8px">${activoBadge}</td>
             <td style="padding:10px 8px">${previewBtn}</td>
         </tr>`;
     }).join('');
