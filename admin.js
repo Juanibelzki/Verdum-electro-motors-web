@@ -783,6 +783,7 @@ async function syncVehiclesFromSupabase() {
             o.descripcion = row.descripcion || o.descripcion;
             o.status = row.status || 'publicado';
             o.tipo = row.tipo || 'auto';
+            o.seccion = row.seccion || null;
             const photos = (row.photos || []).slice().sort((a, b) => a.posicion - b.posicion);
             const prevFotos = (overrides[dv.id] && overrides[dv.id].fotos) || [];
             const pendingLocal = prevFotos.filter(f => typeof f === 'string' && f.startsWith('data:'));
@@ -814,6 +815,7 @@ async function syncVehiclesFromSupabase() {
             descripcion: row.descripcion || '',
             status: row.status || 'publicado',
             tipo: row.tipo || 'auto',
+            seccion: row.seccion || null,
             image: photos[0] ? photos[0].url : '',
             fotos: photos.slice(0, 5)
         });
@@ -1840,7 +1842,8 @@ async function deleteCustomVehicle(id) {
     // --- SUPABASE ---
     try {
         const idMap = loadStoredData('supabase_vehicle_map', {});
-        const supabaseId = idMap[id];
+        const removed = customVehicles.find(v => v.id === id);
+        const supabaseId = idMap[id] || (removed && removed.uuid) || null;
         if (supabaseId) {
             // Borrar fotos asociadas
             await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
