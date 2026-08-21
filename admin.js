@@ -165,6 +165,7 @@ function bindGlobalActions() {
     window.saveNewVehicle = saveNewVehicle;
     window.deleteCustomVehicle = deleteCustomVehicle;
     window.deleteVehicle = deleteVehicle;
+    window.deleteVehicleFromTable = deleteVehicleFromTable;
     window.purgeSupabaseVehicles = purgeSupabaseVehicles;
 }
 
@@ -1372,6 +1373,8 @@ async function refreshVehiclesTable() {
 
         const previewBtn = `<button class="btn-secondary-outline" style="padding:4px 10px;font-size:0.8rem" onclick="openQuickPhotoModal('${seccion || (v.tipo === 'moto' ? 'motos' : 'usados')}')">👁</button>`;
 
+        const deleteBtn = `<button style="padding:4px 10px;font-size:0.8rem;background:#dc2626;color:#fff;border:none;border-radius:6px;cursor:pointer" onclick="deleteVehicleFromTable('${v.id}', '${escapeHtml(v.marca || '')} ${escapeHtml(v.modelo || '')}')">🗑️</button>`;
+
         return `<tr style="border-bottom:1px solid var(--border)">
             <td style="padding:10px 8px">${previewImg}</td>
             <td style="padding:10px 8px;font-weight:500">${escapeHtml(v.marca || '')} ${escapeHtml(v.modelo || '')}</td>
@@ -1381,7 +1384,7 @@ async function refreshVehiclesTable() {
             <td style="padding:10px 8px">${fotoBadge}</td>
             <td style="padding:10px 8px">${activoBadge}</td>
             <td style="padding:10px 8px">${seccionSelect}</td>
-            <td style="padding:10px 8px">${previewBtn}</td>
+            <td style="padding:10px 8px;display:flex;gap:6px;align-items:center">${previewBtn} ${deleteBtn}</td>
         </tr>`;
     }).join('');
 
@@ -1397,7 +1400,7 @@ async function refreshVehiclesTable() {
                     <th style="padding:12px 8px;text-align:left">Fotos</th>
                     <th style="padding:12px 8px;text-align:left">Estado</th>
                     <th style="padding:12px 8px;text-align:left">Sección</th>
-                    <th style="padding:12px 8px;text-align:left">Ver</th>
+                    <th style="padding:12px 8px;text-align:left">Acciones</th>
                 </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
@@ -1858,6 +1861,34 @@ async function saveNewVehicle() {
     alert('✓ Vehículo agregado correctamente');
 }
 
+async function deleteVehicleFromTable(supabaseId, displayName) {
+    if (!confirm(`¿Eliminar "${displayName}" de Supabase?\n\nEsta acción es irreversible.`)) return;
+
+    try {
+        await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
+        const { error } = await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
+        if (error) throw error;
+
+        // Limpiar mapping local
+        const idMap = loadStoredData('supabase_vehicle_map', {});
+        for (const key in idMap) {
+            if (idMap[key] === supabaseId) {
+                delete idMap[key];
+                break;
+            }
+        }
+        saveStoredData('supabase_vehicle_map', idMap);
+
+        await addChange(`Vehículo eliminado desde tabla: ${displayName} (${supabaseId})`);
+        alert(`✓ "${displayName}" eliminado de Supabase`);
+        refreshVehiclesTable();
+        await renderVehiclesEditor();
+    } catch (e) {
+        console.error('Delete from table failed:', e);
+        alert('❌ Error al eliminar: ' + e.message);
+    }
+}
+
 async function deleteCustomVehicle(id) {
     if (!confirm('¿Eliminar este vehículo personalizado?')) return;
 
@@ -2050,7 +2081,9 @@ async function purgeSupabaseVehicles() {
         '¿Purgar registros inválidos y duplicados de Supabase?\n\n' +
         'Esto eliminará:\n' +
         '• Registros con nombre "MODELO COLOR", "CAMION", "MARCA"\n' +
-        '• Duplicados (mismo marca+modelo+año): se conserva el que tenga fotos o el más reciente\n\n' +
+        '• Duplicados por marca+modelo+año exacto\n' +
+        '• Duplicados por KM idéntico + nombre similar\n' +
+        '• Normalizará campo KM\n\n' +
         '¿Continuar?'
     );
     if (!confirmed) return;
@@ -2060,11 +2093,12 @@ async function purgeSupabaseVehicles() {
     if (btn) { btn.textContent = '⏳ Purgando...'; btn.disabled = true; }
 
     let deletedCount = 0;
+    let normalizedCount = 0;
     try {
         // 1) Traer todos los vehículos con fotos
         const { data: vehicles, error } = await supabaseClient
             .from('vehicles')
-            .select('id, nombre, marca, modelo, año, created_at, activo, photos(id)')
+            .select('id, nombre, marca, modelo, km, año, created_at, activo, photos(id)')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -2087,16 +2121,33 @@ async function purgeSupabaseVehicles() {
             }
         }
 
-        // 3) Re-fetch después de limpiar inválidos
-        const { data: cleaned } = await supabaseClient
+        // 3) Normalizar campo KM en todos los registros
+        const { data: allVehicles } = await supabaseClient
             .from('vehicles')
-            .select('id, nombre, marca, modelo, año, created_at, activo, photos(id)')
+            .select('id, km')
             .order('created_at', { ascending: false });
 
-        // 4) Eliminar duplicados: agrupar por marca+modelo+año
+        for (const v of (allVehicles || [])) {
+            const normalized = normalizeKm(v.km);
+            if (normalized !== v.km) {
+                await supabaseClient.from('vehicles').update({ km: normalized }).eq('id', v.id);
+                normalizedCount++;
+            }
+        }
+
+        // 4) Re-fetch después de limpiar inválidos y normalizar
+        const { data: cleaned } = await supabaseClient
+            .from('vehicles')
+            .select('id, nombre, marca, modelo, km, año, created_at, activo, photos(id)')
+            .order('created_at', { ascending: false });
+
+        // 5) Detectar duplicados inteligentes:
+        //    Agrupar por marca + modelo_base (sin trim) + km_normalizado
         const groups = {};
         for (const v of (cleaned || [])) {
-            const key = `${(v.marca || '').toLowerCase().trim()}|${(v.modelo || '').toLowerCase().trim()}|${v.año || ''}`;
+            const kmNum = extractKmNumber(v.km);
+            const modeloBase = normalizeModelo(v.modelo || '');
+            const key = `${(v.marca || '').toLowerCase().trim()}|${modeloBase}|${kmNum}`;
             if (!groups[key]) groups[key] = [];
             groups[key].push(v);
         }
@@ -2114,7 +2165,7 @@ async function purgeSupabaseVehicles() {
                 return new Date(b.created_at) - new Date(a.created_at);
             });
 
-            const toDelete = group.slice(1); // Todos menos el primero
+            const toDelete = group.slice(1);
             for (const v of toDelete) {
                 await supabaseClient.from('photos').delete().eq('vehicle_id', v.id);
                 await supabaseClient.from('vehicles').delete().eq('id', v.id);
@@ -2122,14 +2173,14 @@ async function purgeSupabaseVehicles() {
             }
         }
 
-        await addChange(`Purga de Supabase: ${deletedCount} registros eliminados`);
+        await addChange(`Purga de Supabase: ${deletedCount} duplicados eliminados, ${normalizedCount} KM normalizados`);
 
         // Limpiar referencias residuales en localStorage
         localStorage.removeItem('customVehicles');
         localStorage.removeItem('supabase_vehicle_map');
         localStorage.removeItem(VEHICLES_STORAGE_KEY);
 
-        alert(`✓ Purga completada: ${deletedCount} registros eliminados. La página se recargará.`);
+        alert(`✓ Purga completada:\n• ${deletedCount} duplicados eliminados\n• ${normalizedCount} KM normalizados\n\nLa página se recargará.`);
         pendientesFilterActive = false;
         await renderVehiclesEditor();
         refreshVehiclesTable();
@@ -2142,6 +2193,34 @@ async function purgeSupabaseVehicles() {
     } finally {
         if (btn) { btn.textContent = originalText; btn.disabled = false; }
     }
+}
+
+function extractKmNumber(km) {
+    const num = parseFloat(String(km || '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+    return Math.round(num / 1000) * 1000; // Redondear a miles para agrupar KM similares
+}
+
+function normalizeModelo(modelo) {
+    const TRIM_WORDS = ['xei', 'xei at', 'gls', 'gls at', 'gt', 'gti', 'rs', 'tsi', 'tdi', 'hdl', 'highline', 'comfortline', 'trend', 'trophy', 'limited', 'se', 'sel', 'xls', 'xlt', 'limited premium', 'sport', 'advance', 'executive', 'signature'];
+    let base = modelo.toLowerCase().trim();
+    for (const trim of TRIM_WORDS) {
+        if (base.endsWith(' ' + trim)) {
+            base = base.slice(0, -(trim.length + 1)).trim();
+            break;
+        }
+    }
+    return base;
+}
+
+function normalizeKm(km) {
+    if (!km) return '0 KM';
+    const str = String(km).trim();
+    // Extraer solo el número
+    const num = parseFloat(str.replace(/[^0-9.,]/g, '').replace(',', '.'));
+    if (isNaN(num)) return '0 KM';
+    // Formatear sin decimales, con punto como separador de miles
+    const formatted = num.toLocaleString('es-AR', { maximumFractionDigits: 0 });
+    return `${formatted} KM`;
 }
 
 async function loadImagesSection() {
