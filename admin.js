@@ -1421,8 +1421,20 @@ async function updateVehicleSeccion(vehicleId, newSeccion) {
         }
         await setVehicleOverrides(overrides);
 
+        // También actualizar en customVehicles si existe
+        const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+        const cvIdx = customVehicles.findIndex(v => v.uuid === vehicleId);
+        if (cvIdx !== -1) {
+            customVehicles[cvIdx].seccion = newSeccion || null;
+            saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+        }
+
         const seccionLabel = newSeccion || 'automática';
         await addChange(`Vehículo #${vehicleId} movido a sección "${seccionLabel}"`);
+
+        // Refrescar la UI inmediatamente para que el cambio se refleje
+        refreshVehiclesTable();
+        await renderVehiclesEditor();
     } catch (e) {
         console.error('Error actualizando sección:', e);
         alert('Error al guardar sección: ' + e.message);
@@ -1613,15 +1625,9 @@ async function saveVehicle(id) {
     const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
 
-    // Upsert en Supabase
+    // Upsert en Supabase — SIEMPRE UPDATE si ya existe, INSERT solo si es nuevo
     let supabaseVehicleId = null;
     try {
-        const { data: existing } = await supabaseClient
-            .from('vehicles')
-            .select('id')
-            .eq('slug', slug)
-            .maybeSingle();
-
         const payload = {
             category_id: catId,
             slug,
@@ -1639,17 +1645,32 @@ async function saveVehicle(id) {
             status: 'pendiente_fotos'
         };
 
+        // Buscar el UUID real por el mapa local ANTES de decidir update vs insert
+        const idMap = loadStoredData('supabase_vehicle_map', {});
+        let supabaseId = idMap[id] || null;
+
+        // Si no está en el mapa, buscar por slug como fallback
+        if (!supabaseId) {
+            const { data: bySlug } = await supabaseClient
+                .from('vehicles')
+                .select('id')
+                .eq('slug', slug)
+                .maybeSingle();
+            if (bySlug) supabaseId = bySlug.id;
+        }
+
         let result;
-        if (existing) {
-            result = await supabaseClient.from('vehicles').update(payload).eq('id', existing.id).select().single();
+        if (supabaseId) {
+            // SIEMPRE UPDATE si ya existe un registro — evita duplicados
+            result = await supabaseClient.from('vehicles').update(payload).eq('id', supabaseId).select().single();
         } else {
+            // Solo INSERT si realmente es un vehículo nuevo en Supabase
             result = await supabaseClient.from('vehicles').insert([payload]).select().single();
         }
         if (result.error) throw result.error;
         supabaseVehicleId = result.data.id;
 
-        // Almacenar el mapping admin_id -> supabase_id ANTES de subir fotos
-        const idMap = loadStoredData('supabase_vehicle_map', {});
+        // Actualizar el mapa admin_id -> supabase_id
         idMap[id] = supabaseVehicleId;
         saveStoredData('supabase_vehicle_map', idMap);
 

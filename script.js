@@ -90,10 +90,16 @@ async function loadStockFromSupabase() {
 
     // 4) Clasificar: prioridad SECCIÓN MANUAL > auto-detect por tipo/km
     const seenUuids = new Set();
+    const seenKeys = new Set();
     const uniques = allVehicles.filter(v => {
-        const key = v.uuid || `id-${v.id}`;
-        if (seenUuids.has(key)) return false;
-        seenUuids.add(key);
+        const uuidKey = v.uuid || `id-${v.id}`;
+        if (seenUuids.has(uuidKey)) return false;
+        seenUuids.add(uuidKey);
+
+        const fallbackKey = `${(v.marca || '').toLowerCase().trim()}|${(v.modelo || '').toLowerCase().trim()}|${v.año || ''}`;
+        if (seenKeys.has(fallbackKey)) return false;
+        seenKeys.add(fallbackKey);
+
         return true;
     });
 
