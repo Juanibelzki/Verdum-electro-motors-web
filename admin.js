@@ -2123,10 +2123,19 @@ async function purgeSupabaseVehicles() {
         }
 
         await addChange(`Purga de Supabase: ${deletedCount} registros eliminados`);
-        alert(`✓ Purga completada: ${deletedCount} registros eliminados`);
+
+        // Limpiar referencias residuales en localStorage
+        localStorage.removeItem('customVehicles');
+        localStorage.removeItem('supabase_vehicle_map');
+        localStorage.removeItem(VEHICLES_STORAGE_KEY);
+
+        alert(`✓ Purga completada: ${deletedCount} registros eliminados. La página se recargará.`);
         pendientesFilterActive = false;
         await renderVehiclesEditor();
         refreshVehiclesTable();
+
+        // Forzar recarga limpia para que el index.html tome los datos frescos
+        setTimeout(() => window.location.reload(), 500);
     } catch (err) {
         console.error('Purge failed:', err);
         alert('❌ Error durante la purga: ' + (err.message || 'Error desconocido'));

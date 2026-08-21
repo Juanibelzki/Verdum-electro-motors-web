@@ -89,19 +89,26 @@ async function loadStockFromSupabase() {
     });
 
     // 4) Clasificar: prioridad SECCIÓN MANUAL > auto-detect por tipo/km
-    const seenUuids = new Set();
+    console.group("🔍 [Auditoría Stock Supabase]");
+    console.log("Total registros crudos recibidos:", allVehicles.length);
+
+    const seenIds = new Set();
     const seenKeys = new Set();
-    const uniques = allVehicles.filter(v => {
-        const uuidKey = v.uuid || `id-${v.id}`;
-        if (seenUuids.has(uuidKey)) return false;
-        seenUuids.add(uuidKey);
+    const uniques = [];
 
-        const fallbackKey = `${(v.marca || '').toLowerCase().trim()}|${(v.modelo || '').toLowerCase().trim()}|${v.año || ''}`;
-        if (seenKeys.has(fallbackKey)) return false;
-        seenKeys.add(fallbackKey);
+    for (const v of allVehicles) {
+        const canonicalKey = `${(v.marca||'').trim().toLowerCase()}|${(v.modelo||'').trim().toLowerCase()}|${v.año||v.anio}`;
+        if (!seenIds.has(v.uuid) && !seenKeys.has(canonicalKey)) {
+            seenIds.add(v.uuid);
+            seenKeys.add(canonicalKey);
+            uniques.push(v);
+        } else {
+            console.warn("⚠️ Registro duplicado filtrado en frontend:", v.uuid, canonicalKey);
+        }
+    }
 
-        return true;
-    });
+    console.log("Total vehículos únicos renderizados:", uniques.length);
+    console.groupEnd();
 
     const autos0km = uniques.filter(v => {
         if (v.seccion === '0km') return true;
