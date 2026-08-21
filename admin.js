@@ -1341,7 +1341,17 @@ async function refreshVehiclesTable() {
     const rowsHtml = rows.map(v => {
         const fotos = (v.photos || []).sort((a, b) => a.posicion - b.posicion);
         const hasPhotos = fotos.length > 0 && fotos[0].url;
-        const kmNum = parseFloat(String(v.km).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+        let kmCleaned = String(v.km || '').replace(/[^0-9.,]/g, '');
+        if (kmCleaned.includes('.') && kmCleaned.includes(',')) {
+            kmCleaned = kmCleaned.replace(/\./g, '');
+        }
+        if (kmCleaned.includes('.') && !kmCleaned.includes(',')) {
+            const parts = kmCleaned.split('.');
+            if (parts.length === 2 && parts[1].length === 3) {
+                kmCleaned = parts[0] + parts[1];
+            }
+        }
+        const kmNum = parseFloat(kmCleaned.replace(',', '.')) || 0;
         const es0km = kmNum <= 100;
         const tipo = v.tipo || 'auto';
         const activo = v.activo !== false;
@@ -2196,7 +2206,19 @@ async function purgeSupabaseVehicles() {
 }
 
 function extractKmNumber(km) {
-    const num = parseFloat(String(km || '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+    if (!km) return 0;
+    const str = String(km).trim();
+    let cleaned = str.replace(/[^0-9.,]/g, '');
+    if (cleaned.includes('.') && cleaned.includes(',')) {
+        cleaned = cleaned.replace(/\./g, '');
+    }
+    if (cleaned.includes('.') && !cleaned.includes(',')) {
+        const parts = cleaned.split('.');
+        if (parts.length === 2 && parts[1].length === 3) {
+            cleaned = parts[0] + parts[1];
+        }
+    }
+    const num = parseFloat(cleaned.replace(',', '.')) || 0;
     return Math.round(num / 1000) * 1000; // Redondear a miles para agrupar KM similares
 }
 
@@ -2215,12 +2237,22 @@ function normalizeModelo(modelo) {
 function normalizeKm(km) {
     if (!km) return '0 KM';
     const str = String(km).trim();
-    // Extraer solo el número
-    const num = parseFloat(str.replace(/[^0-9.,]/g, '').replace(',', '.'));
-    if (isNaN(num)) return '0 KM';
-    // Formatear sin decimales, con punto como separador de miles
-    const formatted = num.toLocaleString('es-AR', { maximumFractionDigits: 0 });
-    return `${formatted} KM`;
+    // Quitar todo lo que no sea número, coma o punto
+    let cleaned = str.replace(/[^0-9.,]/g, '');
+    // Si tiene punto Y coma, el punto es separador de miles → quitarlo
+    if (cleaned.includes('.') && cleaned.includes(',')) {
+        cleaned = cleaned.replace(/\./g, '');
+    }
+    // Si tiene punto pero NO coma, podría ser decimal o separador de miles
+    // Si hay más de 3 dígitos después del punto, es separador de miles
+    if (cleaned.includes('.') && !cleaned.includes(',')) {
+        const parts = cleaned.split('.');
+        if (parts.length === 2 && parts[1].length === 3) {
+            cleaned = parts[0] + parts[1]; // "85.000" → "85000"
+        }
+    }
+    const num = parseFloat(cleaned.replace(',', '.')) || 0;
+    return `${num} KM`;
 }
 
 async function loadImagesSection() {

@@ -57,7 +57,18 @@ async function loadStockFromSupabase() {
         const firstPhoto = fotos[0];
         const photoUrl = (firstPhoto && firstPhoto.url) ? firstPhoto.url : PLACEHOLDER_IMG;
         const fotosConUrl = fotos.filter(p => p.url);
-        const kmNum = parseFloat(String(v.km).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+        const kmRaw = String(v.km || '').trim();
+        let kmCleaned = kmRaw.replace(/[^0-9.,]/g, '');
+        if (kmCleaned.includes('.') && kmCleaned.includes(',')) {
+            kmCleaned = kmCleaned.replace(/\./g, '');
+        }
+        if (kmCleaned.includes('.') && !kmCleaned.includes(',')) {
+            const parts = kmCleaned.split('.');
+            if (parts.length === 2 && parts[1].length === 3) {
+                kmCleaned = parts[0] + parts[1];
+            }
+        }
+        const kmNum = parseFloat(kmCleaned.replace(',', '.')) || 0;
         const esCeroKm = (v.seccion === '0km')
             || (v.seccion !== 'usados' && (String(v.km).trim().toUpperCase() === '0 KM' || kmNum <= 100));
         const tipo = v.tipo || 'auto';
