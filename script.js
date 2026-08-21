@@ -70,7 +70,7 @@ async function loadStockFromSupabase() {
         }
         const kmNum = parseFloat(kmCleaned.replace(',', '.')) || 0;
         const esCeroKm = (v.seccion === '0km')
-            || (v.seccion !== 'usados' && (String(v.km).trim().toUpperCase() === '0 KM' || kmNum <= 100));
+            || (v.seccion !== 'usados' && kmNum === 0);
         const tipo = v.tipo || 'auto';
         const esMoto = tipo === 'moto';
 

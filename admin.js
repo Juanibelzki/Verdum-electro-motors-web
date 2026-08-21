@@ -1352,7 +1352,7 @@ async function refreshVehiclesTable() {
             }
         }
         const kmNum = parseFloat(kmCleaned.replace(',', '.')) || 0;
-        const es0km = kmNum <= 100;
+        const es0km = v.seccion === '0km' || (v.seccion !== 'usados' && kmNum === 0);
         const tipo = v.tipo || 'auto';
         const activo = v.activo !== false;
         const seccion = v.seccion || '';
@@ -2324,8 +2324,18 @@ async function openQuickPhotoModal(category) {
     }
 
     quickPhotoVehicles = (data || []).filter(v => {
-        const kmNum = parseFloat(String(v.km).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
-        const es0km = kmNum <= 100;
+        let kmCleaned = String(v.km || '').replace(/[^0-9.,]/g, '');
+        if (kmCleaned.includes('.') && kmCleaned.includes(',')) {
+            kmCleaned = kmCleaned.replace(/\./g, '');
+        }
+        if (kmCleaned.includes('.') && !kmCleaned.includes(',')) {
+            const parts = kmCleaned.split('.');
+            if (parts.length === 2 && parts[1].length === 3) {
+                kmCleaned = parts[0] + parts[1];
+            }
+        }
+        const kmNum = parseFloat(kmCleaned.replace(',', '.')) || 0;
+        const es0km = v.seccion === '0km' || (v.seccion !== 'usados' && kmNum === 0);
         const esMoto = v.tipo === 'moto';
         let cat;
         if (v.seccion === 'usados' || v.seccion === '0km' || v.seccion === 'motos' || v.seccion === 'especiales') {
