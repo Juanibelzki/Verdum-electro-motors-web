@@ -165,6 +165,7 @@ function bindGlobalActions() {
     window.saveNewVehicle = saveNewVehicle;
     window.deleteCustomVehicle = deleteCustomVehicle;
     window.deleteVehicle = deleteVehicle;
+    window.purgeSupabaseVehicles = purgeSupabaseVehicles;
 }
 
 async function handleLogin(e) {
@@ -1860,33 +1861,48 @@ async function saveNewVehicle() {
 async function deleteCustomVehicle(id) {
     if (!confirm('¿Eliminar este vehículo personalizado?')) return;
 
+    // Cargar datos ANTES de usarlos
+    let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const removed = customVehicles.find(v => v.id === id);
+
     // --- SUPABASE ---
     let deletedSupabase = false;
     try {
         const idMap = loadStoredData('supabase_vehicle_map', {});
-        const removed = customVehicles.find(v => v.id === id);
         const supabaseId = idMap[id] || (removed && removed.uuid) || null;
         if (supabaseId) {
-            // Borrar fotos asociadas
             await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
-            // Borrar vehículo
             const { error } = await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
             if (error) throw error;
             deletedSupabase = true;
             delete idMap[id];
             saveStoredData('supabase_vehicle_map', idMap);
+        } else {
+            // Fallback: buscar por marca+modelo en Supabase
+            if (removed) {
+                const { data: matches } = await supabaseClient
+                    .from('vehicles')
+                    .select('id')
+                    .ilike('nombre', `%${removed.modelo || ''}%`);
+                const target = (matches || []).find(v =>
+                    String(v.nombre || '').toLowerCase().includes(String(removed.marca || '').toLowerCase())
+                );
+                if (target) {
+                    await supabaseClient.from('photos').delete().eq('vehicle_id', target.id);
+                    const { error } = await supabaseClient.from('vehicles').delete().eq('id', target.id);
+                    if (error) throw error;
+                    deletedSupabase = true;
+                }
+            }
         }
     } catch (sbErr) {
         console.warn('Supabase delete failed:', sbErr.message);
     }
 
     // --- localStorage ---
-    let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
-    const removed = customVehicles.find(v => v.id === id);
     customVehicles = customVehicles.filter(v => v.id !== id);
     saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
 
-    // Limpiar overrides e idMap por si quedaron referencias
     const overrides = await getVehicleOverrides();
     if (overrides[id]) { delete overrides[id]; await setVehicleOverrides(overrides); }
     const idMapLocal = loadStoredData('supabase_vehicle_map', {});
@@ -1946,19 +1962,23 @@ async function deleteVehicle(id) {
     }
 
     if (!deletedSupabase) {
-        const { data: byNombre } = await supabaseClient
-            .from('vehicles')
-            .select('id, nombre')
-            .ilike('nombre', `%${dv.modelo}%`);
-        const target = (byNombre || []).find(v => String(v.nombre || '').toLowerCase().includes(String(dv.marca).toLowerCase()));
-        if (target) {
-            try {
-                await supabaseClient.from('photos').delete().eq('vehicle_id', target.id);
-                await supabaseClient.from('vehicles').delete().eq('id', target.id);
-                deletedSupabase = true;
-            } catch (sbErr) {
-                console.warn('Supabase name delete failed:', sbErr.message);
+        // Fallback final: buscar por marca+modelo+año en Supabase
+        try {
+            const { data: byName } = await supabaseClient
+                .from('vehicles')
+                .select('id, nombre, marca, modelo')
+                .or(`marca.ilike.%${dv.marca}%,modelo.ilike.%${dv.modelo}%`);
+            for (const v of byName || []) {
+                const matchMarca = String(v.marca || '').toLowerCase() === String(dv.marca).toLowerCase();
+                const matchModelo = String(v.modelo || '').toLowerCase() === String(dv.modelo).toLowerCase();
+                if (matchMarca && matchModelo) {
+                    await supabaseClient.from('photos').delete().eq('vehicle_id', v.id);
+                    await supabaseClient.from('vehicles').delete().eq('id', v.id);
+                    deletedSupabase = true;
+                }
             }
+        } catch (sbErr) {
+            console.warn('Supabase name search delete failed:', sbErr.message);
         }
     }
 
@@ -2020,6 +2040,96 @@ async function massPublishVehicles() {
     } catch (err) {
         console.error('Mass publish failed:', err);
         alert('❌ Error al publicar: ' + (err.message || 'Error desconocido'));
+    } finally {
+        if (btn) { btn.textContent = originalText; btn.disabled = false; }
+    }
+}
+
+async function purgeSupabaseVehicles() {
+    const confirmed = confirm(
+        '¿Purgar registros inválidos y duplicados de Supabase?\n\n' +
+        'Esto eliminará:\n' +
+        '• Registros con nombre "MODELO COLOR", "CAMION", "MARCA"\n' +
+        '• Duplicados (mismo marca+modelo+año): se conserva el que tenga fotos o el más reciente\n\n' +
+        '¿Continuar?'
+    );
+    if (!confirmed) return;
+
+    const btn = document.querySelector('[onclick="purgeSupabaseVehicles()"]');
+    const originalText = btn ? btn.textContent : '';
+    if (btn) { btn.textContent = '⏳ Purgando...'; btn.disabled = true; }
+
+    let deletedCount = 0;
+    try {
+        // 1) Traer todos los vehículos con fotos
+        const { data: vehicles, error } = await supabaseClient
+            .from('vehicles')
+            .select('id, nombre, marca, modelo, año, created_at, activo, photos(id)')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const rows = vehicles || [];
+        const INVALID_NAMES = ['modelo color', 'camion', 'marca'];
+
+        // 2) Eliminar registros con nombre inválido
+        for (const v of rows) {
+            const nombreLower = String(v.nombre || '').toLowerCase().trim();
+            const modeloLower = String(v.modelo || '').toLowerCase().trim();
+            const isInvalid = INVALID_NAMES.some(invalid =>
+                nombreLower === invalid || modeloLower === invalid ||
+                nombreLower.includes(invalid) || modeloLower.includes(invalid)
+            );
+            if (isInvalid) {
+                await supabaseClient.from('photos').delete().eq('vehicle_id', v.id);
+                await supabaseClient.from('vehicles').delete().eq('id', v.id);
+                deletedCount++;
+            }
+        }
+
+        // 3) Re-fetch después de limpiar inválidos
+        const { data: cleaned } = await supabaseClient
+            .from('vehicles')
+            .select('id, nombre, marca, modelo, año, created_at, activo, photos(id)')
+            .order('created_at', { ascending: false });
+
+        // 4) Eliminar duplicados: agrupar por marca+modelo+año
+        const groups = {};
+        for (const v of (cleaned || [])) {
+            const key = `${(v.marca || '').toLowerCase().trim()}|${(v.modelo || '').toLowerCase().trim()}|${v.año || ''}`;
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(v);
+        }
+
+        for (const key in groups) {
+            const group = groups[key];
+            if (group.length <= 1) continue;
+
+            // Conservar: el que tenga fotos, o el más reciente
+            group.sort((a, b) => {
+                const aFotos = (a.photos || []).length;
+                const bFotos = (b.photos || []).length;
+                if (aFotos > 0 && bFotos === 0) return -1;
+                if (bFotos > 0 && aFotos === 0) return 1;
+                return new Date(b.created_at) - new Date(a.created_at);
+            });
+
+            const toDelete = group.slice(1); // Todos menos el primero
+            for (const v of toDelete) {
+                await supabaseClient.from('photos').delete().eq('vehicle_id', v.id);
+                await supabaseClient.from('vehicles').delete().eq('id', v.id);
+                deletedCount++;
+            }
+        }
+
+        await addChange(`Purga de Supabase: ${deletedCount} registros eliminados`);
+        alert(`✓ Purga completada: ${deletedCount} registros eliminados`);
+        pendientesFilterActive = false;
+        await renderVehiclesEditor();
+        refreshVehiclesTable();
+    } catch (err) {
+        console.error('Purge failed:', err);
+        alert('❌ Error durante la purga: ' + (err.message || 'Error desconocido'));
     } finally {
         if (btn) { btn.textContent = originalText; btn.disabled = false; }
     }

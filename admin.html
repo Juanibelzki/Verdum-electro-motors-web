@@ -437,6 +437,7 @@
                             <button type="button" class="btn-update" onclick="refreshVehiclesTable()">🔄 Refrescar datos desde Supabase</button>
                             <button type="button" class="btn-update" onclick="showAddVehicleForm()">➕ Agregar Vehículo</button>
                             <button type="button" class="btn-secondary-outline" onclick="massPublishVehicles()">🚀 Publicar todo el stock</button>
+                            <button type="button" class="btn-reset" onclick="purgeSupabaseVehicles()" style="margin-left:8px">🧹 Purgar duplicados</button>
                             <span id="vehiclesCount" style="color:var(--text-secondary);font-size:0.9rem"></span>
                         </div>
                         <div id="vehiclesTableContainer" style="overflow-x:auto"></div>
@@ -616,6 +617,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-    <script src="admin.js?v=22"></script>
+    <script src="admin.js?v=23"></script>
 </body>
 </html>
