@@ -15,6 +15,40 @@ const SUPABASE_URL = 'https://ymiakfjhgndqhdtoubkr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltaWFrZmpoZ25kcWhkdG91YmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwMjkyNTIsImV4cCI6MjEwMDYwNTI1Mn0.Q0opccAEYWgkuyV1unwnpNu0OiWbio3E1pAURi8GPaI';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ============================================
+// SESIÓN ADMIN
+// ============================================
+let adminSessionToken = localStorage.getItem('verdun_admin_token') || null;
+
+function setAdminToken(token) {
+    adminSessionToken = token;
+    if (token) {
+        localStorage.setItem('verdun_admin_token', token);
+    } else {
+        localStorage.removeItem('verdun_admin_token');
+    }
+}
+
+function isAdminLoggedIn() {
+    return !!adminSessionToken;
+}
+
+// Interceptor: inyectar token en headers de cada petición Supabase
+const _originalFetch = window.fetch;
+window.fetch = function(...args) {
+    const [url, options] = args;
+    if (typeof url === 'string' && url.includes(SUPABASE_URL) && adminSessionToken) {
+        options = options || {};
+        options.headers = options.headers || {};
+        if (typeof options.headers.set === 'function') {
+            options.headers.set('x-admin-token', adminSessionToken);
+        } else {
+            options.headers['x-admin-token'] = adminSessionToken;
+        }
+    }
+    return _originalFetch.apply(this, [url, options]);
+};
+
 const CATEGORY_TEXT_TO_SLUG = {
     'Autos 0KM': 'autos-0km',
     'Autos Usados': 'autos-usados',
@@ -129,6 +163,24 @@ document.addEventListener('DOMContentLoaded', () => initAdmin());
 async function initAdmin() {
     const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
 
+    if (isAuthenticated && adminSessionToken) {
+        // Verificar que el token sigue siendo válido
+        try {
+            const { data } = await supabaseClient.rpc('admin_verify_session', { token: adminSessionToken });
+            if (!data) {
+                // Token expirado
+                setAdminToken(null);
+                localStorage.removeItem('adminAuthenticated');
+                showLoginScreen();
+                document.getElementById('loginForm').addEventListener('submit', handleLogin);
+                document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+                return;
+            }
+        } catch (e) {
+            console.warn('Session verify failed:', e);
+        }
+    }
+
     if (isAuthenticated) {
         showAdminPanel();
         await loadAllData();
@@ -174,6 +226,21 @@ async function handleLogin(e) {
     const errorDiv = document.getElementById('loginError');
 
     if (password === ADMIN_PASSWORD) {
+        // Intentar obtener token de sesión de Supabase
+        try {
+            const { data, error } = await supabaseClient.rpc('admin_login', { password: password });
+            if (error) {
+                console.warn('Supabase login failed, using local auth:', error.message);
+                // Fallback: login local sin token Supabase
+                setAdminToken(null);
+            } else {
+                setAdminToken(data);
+            }
+        } catch (e) {
+            console.warn('Supabase login error, using local auth:', e);
+            setAdminToken(null);
+        }
+
         localStorage.setItem('adminAuthenticated', 'true');
         errorDiv.style.display = 'none';
         showAdminPanel();
@@ -188,6 +255,7 @@ async function handleLogin(e) {
 function handleLogout() {
     if (confirm('¿Deseas cerrar sesión?')) {
         localStorage.removeItem('adminAuthenticated');
+        setAdminToken(null);
         showLoginScreen();
         document.getElementById('loginForm').reset();
     }
