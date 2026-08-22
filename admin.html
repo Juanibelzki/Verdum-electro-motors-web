@@ -437,6 +437,7 @@
                             <button type="button" class="btn-update" onclick="refreshVehiclesTable()">🔄 Refrescar datos desde Supabase</button>
                             <button type="button" class="btn-update" onclick="showAddVehicleForm()">➕ Agregar Vehículo</button>
                             <button type="button" class="btn-secondary-outline" onclick="massPublishVehicles()">🚀 Publicar todo el stock</button>
+                            <button type="button" class="btn-reset" onclick="purgeSupabaseVehicles()" style="margin-left:8px">🧹 Purgar duplicados</button>
                             <span id="vehiclesCount" style="color:var(--text-secondary);font-size:0.9rem"></span>
                         </div>
                         <div id="vehiclesTableContainer" style="overflow-x:auto"></div>
@@ -498,6 +499,22 @@
                                 <button type="button" class="btn-update" onclick="saveNewVehicle()">✓ Guardar</button>
                                 <button type="button" class="btn-secondary-outline" onclick="closeAddVehicleForm()">Cancelar</button>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Carga Rápida de Fotos -->
+                    <div id="quickPhotoModal" class="admin-modal" style="display:none">
+                        <div class="admin-modal-content" style="max-width:720px;max-height:85vh;display:flex;flex-direction:column">
+                            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
+                                <h3 id="quickPhotoTitle" style="margin:0">Carga Rápida de Fotos</h3>
+                                <button type="button" class="btn-secondary-outline" onclick="closeQuickPhotoModal()" title="Cerrar">✕</button>
+                            </div>
+                            <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+                                <button type="button" class="btn-update" id="qpFilterPendingBtn" onclick="setQuickPhotoFilter(true)">⚠ Solo pendientes de foto</button>
+                                <button type="button" class="btn-secondary-outline" id="qpFilterAllBtn" onclick="setQuickPhotoFilter(false)">Ver todos</button>
+                                <span id="qpCount" style="color:var(--text-secondary);font-size:0.9rem;margin-left:auto"></span>
+                            </div>
+                            <div id="quickPhotoList" style="overflow-y:auto;flex:1;padding-right:4px"></div>
                         </div>
                     </div>
                 </div>
@@ -600,6 +617,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-    <script src="admin.js?v=23"></script>
+    <script src="admin.js?v=24"></script>
 </body>
 </html>

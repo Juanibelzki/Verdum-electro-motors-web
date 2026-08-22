@@ -57,8 +57,20 @@ async function loadStockFromSupabase() {
         const firstPhoto = fotos[0];
         const photoUrl = (firstPhoto && firstPhoto.url) ? firstPhoto.url : PLACEHOLDER_IMG;
         const fotosConUrl = fotos.filter(p => p.url);
-        const kmNum = parseFloat(String(v.km).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
-        const esCeroKm = kmNum <= 100;
+        const kmRaw = String(v.km || '').trim();
+        let kmCleaned = kmRaw.replace(/[^0-9.,]/g, '');
+        if (kmCleaned.includes('.') && kmCleaned.includes(',')) {
+            kmCleaned = kmCleaned.replace(/\./g, '');
+        }
+        if (kmCleaned.includes('.') && !kmCleaned.includes(',')) {
+            const parts = kmCleaned.split('.');
+            if (parts.length === 2 && parts[1].length === 3) {
+                kmCleaned = parts[0] + parts[1];
+            }
+        }
+        const kmNum = parseFloat(kmCleaned.replace(',', '.')) || 0;
+        const esCeroKm = (v.seccion === '0km')
+            || (v.seccion !== 'usados' && kmNum === 0);
         const tipo = v.tipo || 'auto';
         const esMoto = tipo === 'moto';
 
@@ -88,29 +100,50 @@ async function loadStockFromSupabase() {
     });
 
     // 4) Clasificar: prioridad SECCIÓN MANUAL > auto-detect por tipo/km
-    const autos0km = allVehicles.filter(v => {
+    console.group("🔍 [Auditoría Stock Supabase]");
+    console.log("Total registros crudos recibidos:", allVehicles.length);
+
+    const seenIds = new Set();
+    const seenKeys = new Set();
+    const uniques = [];
+
+    for (const v of allVehicles) {
+        const canonicalKey = `${(v.marca||'').trim().toLowerCase()}|${(v.modelo||'').trim().toLowerCase()}|${v.año||v.anio}`;
+        if (!seenIds.has(v.uuid) && !seenKeys.has(canonicalKey)) {
+            seenIds.add(v.uuid);
+            seenKeys.add(canonicalKey);
+            uniques.push(v);
+        } else {
+            console.warn("⚠️ Registro duplicado filtrado en frontend:", v.uuid, canonicalKey);
+        }
+    }
+
+    console.log("Total vehículos únicos renderizados:", uniques.length);
+    console.groupEnd();
+
+    const autos0km = uniques.filter(v => {
         if (v.seccion === '0km') return true;
         if (v.seccion && v.seccion !== '0km') return false;
         return !v.esMoto && v.esCeroKm;
     });
-    const autosUsados = allVehicles.filter(v => {
+    const autosUsados = uniques.filter(v => {
         if (v.seccion === 'usados') return true;
         if (v.seccion && v.seccion !== 'usados') return false;
         return !v.esMoto && !v.esCeroKm;
     });
-    const motos = allVehicles.filter(v => {
+    const motos = uniques.filter(v => {
         if (v.seccion === 'motos') return true;
         if (v.seccion && v.seccion !== 'motos') return false;
         return v.esMoto;
     });
-    const especiales = allVehicles.filter(v => {
+    const especiales = uniques.filter(v => {
         if (v.seccion === 'especiales') return true;
         if (v.seccion && v.seccion !== 'especiales') return false;
         return false;
     });
 
     const inventory = {
-        'todos': { title: 'Todos', vehicles: allVehicles },
+        'todos': { title: 'Todos', vehicles: uniques },
         '0km': { title: 'Autos 0KM', vehicles: autos0km },
         'usados': { title: 'Autos Usados', vehicles: autosUsados },
         'motos': { title: 'Motos', vehicles: motos },
@@ -119,8 +152,8 @@ async function loadStockFromSupabase() {
 
     // 5) Log de auditoría
     console.log('═══════════════════════════════════════');
-    console.log('TOTAL VEHÍCULOS:', allVehicles.length);
-    console.log('  Todos:', allVehicles.length);
+    console.log('TOTAL VEHÍCULOS:', uniques.length);
+    console.log('  Todos:', uniques.length);
     console.log('  0 KM:', autos0km.length);
     console.log('  Usados:', autosUsados.length);
     console.log('  Motos:', motos.length);
