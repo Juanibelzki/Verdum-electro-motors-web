@@ -784,6 +784,38 @@ async function deleteVehiclePhoto(adminId, index) {
     addChange(`Foto ${index + 1} eliminada del vehículo #${adminId}`);
 }
 
+async function reorderVehiclePhotos(adminId, fromIndex, toIndex) {
+    const fotos = getVehiclePhotos(adminId);
+    if (fromIndex < 0 || fromIndex >= fotos.length) return;
+    if (toIndex < 0 || toIndex >= fotos.length) return;
+
+    const [moved] = fotos.splice(fromIndex, 1);
+    fotos.splice(toIndex, 0, moved);
+    setVehiclePhotos(adminId, fotos);
+
+    const idMap = loadStoredData('supabase_vehicle_map', {});
+    const supabaseId = idMap[adminId];
+    if (supabaseId) {
+        try {
+            for (let i = 0; i < fotos.length; i++) {
+                const f = fotos[i];
+                if (typeof f === 'string' && f.startsWith('http')) {
+                    await supabaseClient
+                        .from('photos')
+                        .update({ posicion: i })
+                        .eq('vehicle_id', supabaseId)
+                        .eq('url', f);
+                }
+            }
+        } catch (err) {
+            console.warn('Supabase reorder failed:', err.message);
+        }
+    }
+
+    renderVehiclesEditor();
+    addChange(`Fotos del vehículo #${adminId} reordenadas`);
+}
+
 const VEHICLE_CATEGORY_NAMES = {
     'autos-0km': 'Autos 0KM',
     'autos-usados': 'Autos Usados',
@@ -1069,14 +1101,22 @@ function initImagesSection() {
                     const err = validateImageFile(file, 5);
                     if (err) { alert('❌ ' + err); continue; }
                     const result = await resizeImage(file, 900, 1200, 0.85);
-                    newPhotos.push(await blobToBase64(result.blob));
+                    newPhotos.push(result.blob);
                 }
                 if (!newPhotos.length) { e.target.value = ''; return; }
 
                 const uploadedUrls = await uploadVehicleImageToSupabase(id, newPhotos);
 
-                const finalPhotos = uploadedUrls.length ? uploadedUrls : newPhotos;
-                setVehiclePhotos(id, currentFotos.concat(finalPhotos));
+                const finalPhotos = uploadedUrls.length ? uploadedUrls : [];
+                if (!uploadedUrls.length) {
+                    const fallbackBlobs = [];
+                    for (const blob of newPhotos) {
+                        fallbackBlobs.push(await blobToBase64(blob));
+                    }
+                    setVehiclePhotos(id, currentFotos.concat(fallbackBlobs));
+                } else {
+                    setVehiclePhotos(id, currentFotos.concat(finalPhotos));
+                }
 
                 setVehicleStatusLocal(id, 'publicado');
 
@@ -1095,6 +1135,56 @@ function initImagesSection() {
             }
         });
     }
+
+    let dragSrcId = null;
+    let dragSrcIndex = null;
+
+    vehiclesEditor.addEventListener('dragstart', (e) => {
+        const thumb = e.target.closest('.thumb-item');
+        if (!thumb) return;
+        dragSrcId = thumb.dataset.id;
+        dragSrcIndex = parseInt(thumb.dataset.index, 10);
+        thumb.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', `${dragSrcId}:${dragSrcIndex}`);
+    });
+
+    vehiclesEditor.addEventListener('dragend', (e) => {
+        const thumb = e.target.closest('.thumb-item');
+        if (thumb) thumb.classList.remove('dragging');
+        vehiclesEditor.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('drag-over'));
+        dragSrcId = null;
+        dragSrcIndex = null;
+    });
+
+    vehiclesEditor.addEventListener('dragover', (e) => {
+        const thumb = e.target.closest('.thumb-item');
+        if (!thumb) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        thumb.classList.add('drag-over');
+    });
+
+    vehiclesEditor.addEventListener('dragleave', (e) => {
+        const thumb = e.target.closest('.thumb-item');
+        if (thumb) thumb.classList.remove('drag-over');
+    });
+
+    vehiclesEditor.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        const thumb = e.target.closest('.thumb-item');
+        if (!thumb) return;
+        thumb.classList.remove('drag-over');
+
+        const targetId = thumb.dataset.id;
+        const targetIndex = parseInt(thumb.dataset.index, 10);
+
+        if (dragSrcId === null || dragSrcIndex === null) return;
+        if (String(dragSrcId) !== String(targetId)) return;
+        if (dragSrcIndex === targetIndex) return;
+
+        await reorderVehiclePhotos(parseInt(dragSrcId, 10), dragSrcIndex, targetIndex);
+    });
 
     imagesUiInitialized = true;
 }
@@ -1231,7 +1321,7 @@ async function ensureVehicleInSupabase(adminId) {
     }
 }
 
-async function uploadVehicleImageToSupabase(adminId, photoFilesArray) {
+async function uploadVehicleImageToSupabase(adminId, photoItems) {
     const uploadedUrls = [];
     try {
         let supabaseVehicleId = loadStoredData('supabase_vehicle_map', {})[adminId];
@@ -1240,7 +1330,7 @@ async function uploadVehicleImageToSupabase(adminId, photoFilesArray) {
         }
         if (!supabaseVehicleId) return uploadedUrls;
 
-        const items = Array.isArray(photoFilesArray) ? photoFilesArray : [photoFilesArray];
+        const items = Array.isArray(photoItems) ? photoItems : [photoItems];
         if (!items.length) return uploadedUrls;
 
         const { data: existing } = await supabaseClient
@@ -1251,9 +1341,16 @@ async function uploadVehicleImageToSupabase(adminId, photoFilesArray) {
             ? Math.max(...existing.map(p => p.posicion), -1) + 1
             : 0;
 
-        for (const base64 of items) {
+        for (const item of items) {
             if (nextPos >= 5) break;
-            const blob = await (await fetch(base64)).blob();
+            let blob;
+            if (item instanceof Blob) {
+                blob = item;
+            } else if (typeof item === 'string' && item.startsWith('data:')) {
+                blob = await (await fetch(item)).blob();
+            } else {
+                continue;
+            }
             const fileName = `${nextPos}_${Date.now()}.webp`;
             const storagePath = `vehicles/${supabaseVehicleId}/${fileName}`;
 
@@ -1277,14 +1374,12 @@ async function uploadVehicleImageToSupabase(adminId, photoFilesArray) {
         console.warn('Supabase image upload failed:', err.message);
     }
 
-    // Si se subió al menos 1 foto, cambiar status a 'publicado'
     if (uploadedUrls.length > 0) {
         try {
             const idMap = loadStoredData('supabase_vehicle_map', {});
             const supabaseVehicleId = idMap[adminId];
             if (supabaseVehicleId) {
                 await supabaseClient.from('vehicles').update({ status: 'publicado' }).eq('id', supabaseVehicleId);
-                // Actualizar status en localStorage también
                 const overrides = getVehicleOverrides();
                 if (overrides[adminId]) {
                     overrides[adminId].status = 'publicado';
@@ -1350,8 +1445,12 @@ function getVehicleDefaultName(v) {
     return `${v.marca} ${v.modelo}`;
 }
 
+function getDeletedDefaultsLocal() {
+    return loadStoredData(DELETED_DEFAULT_VEHICLES_KEY, []);
+}
+
 async function getDeletedDefaults() {
-    const local = loadStoredData(DELETED_DEFAULT_VEHICLES_KEY, []);
+    const local = getDeletedDefaultsLocal();
     const remote = await sbGetContent('deleted_default_vehicles');
     const merged = [...new Set([...(Array.isArray(remote) ? remote : []), ...local])];
     return merged;
@@ -1366,9 +1465,13 @@ function vehicleThumbsHtml(adminId, fotos) {
     const list = fotos || [];
     const thumbs = list.map((f, i) => {
         const src = typeof f === 'string' ? f : (f.url || '');
+        const isPending = typeof src === 'string' && src.startsWith('data:');
+        const imgHtml = isPending
+            ? `<div class="thumb-item-pending" title="Sincronizando...">⏳</div>`
+            : `<img src="${src}" alt="Foto ${i + 1}" loading="lazy">`;
         return `
-            <div class="thumb-item" data-id="${adminId}" data-index="${i}">
-                <img src="${src}" alt="Foto ${i + 1}" loading="lazy">
+            <div class="thumb-item" draggable="true" data-id="${adminId}" data-index="${i}">
+                ${imgHtml}
                 <button type="button" class="btn-delete-thumb" data-id="${adminId}" data-index="${i}" title="Eliminar foto">✕</button>
             </div>`;
     }).join('');
@@ -1620,11 +1723,9 @@ async function renderVehiclesEditor() {
     const container = document.getElementById('vehiclesEditor');
     if (!container) return;
 
-    await syncVehiclesFromSupabase();
-
-    const overrides = await getVehicleOverrides();
+    const overrides = getVehicleOverrides();
     const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
-    const deletedDefaults = await getDeletedDefaults();
+    const deletedDefaults = getDeletedDefaultsLocal();
     let nextCustomId = 100;
 
     const idMap = loadStoredData('supabase_vehicle_map', {});
@@ -1929,6 +2030,7 @@ function closeAddVehicleForm() {
     const preview = document.getElementById('newVehiclePhotoPreview');
     if (preview) preview.style.display = 'none';
     window._newVehiclePhotoData = null;
+    window._newVehiclePhotoBlob = null;
 }
 
 function previewNewVehiclePhoto(event) {
@@ -1938,11 +2040,13 @@ function previewNewVehiclePhoto(event) {
         alert('❌ ' + err);
         event.target.value = '';
         window._newVehiclePhotoData = null;
+        window._newVehiclePhotoBlob = null;
         const preview = document.getElementById('newVehiclePhotoPreview');
         if (preview) preview.style.display = 'none';
         return;
     }
     resizeImage(file, 900, 1200, 0.85).then(async (result) => {
+        window._newVehiclePhotoBlob = result.blob;
         const base64 = await blobToBase64(result.blob);
         window._newVehiclePhotoData = base64;
         const preview = document.getElementById('newVehiclePhotoPreview');
@@ -2029,6 +2133,7 @@ async function saveNewVehicle() {
 
     // --- localStorage fallback ---
     const photoData = window._newVehiclePhotoData || null;
+    const photoBlob = window._newVehiclePhotoBlob || null;
     const vehicleData = {
         id: newId,
         uuid: supabaseId,
@@ -2053,9 +2158,12 @@ async function saveNewVehicle() {
     saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
     closeAddVehicleForm();
     await renderVehiclesEditor();
-    if (photoData) {
+    if (photoBlob) {
         try {
-            await uploadVehicleImageToSupabase(newId, photoData);
+            const uploadedUrls = await uploadVehicleImageToSupabase(newId, [photoBlob]);
+            if (uploadedUrls.length) {
+                setVehiclePhotos(newId, uploadedUrls);
+            }
         } catch (err) {
             console.warn('Photo upload failed for new vehicle:', err.message);
             alert('⚠️ Vehículo creado, pero la foto no se pudo subir. Se reintentará al sincronizar.');
@@ -2458,6 +2566,7 @@ function normalizeKm(km) {
 
 async function loadImagesSection() {
     await loadLogoPreview();
+    await syncVehiclesFromSupabase();
     refreshVehiclesTable();
     await renderVehiclesEditor();
 }
