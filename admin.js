@@ -105,11 +105,11 @@ async function sbGetContent(key) {
 }
 
 async function sbSaveContent(key, data) {
-    contentCache[key] = data;
     const { error } = await supabaseClient
         .from('admin_content')
         .upsert({ key, data, updated_at: new Date().toISOString() }, { onConflict: 'key' });
     if (error) throw error;
+    contentCache[key] = data;
 }
 
 async function sbUploadImage(folder, filename, blob, contentType) {
@@ -245,8 +245,16 @@ async function handleLogin(e) {
 
         localStorage.setItem('adminAuthenticated', 'true');
         errorDiv.style.display = 'none';
-        showAdminPanel();
-        await loadAllData();
+        try {
+            await loadAllData();
+            showAdminPanel();
+        } catch (err) {
+            console.error('loadAllData failed:', err);
+            showLoginScreen();
+            errorDiv.textContent = '❌ Error al cargar los datos: ' + err.message;
+            errorDiv.style.display = 'block';
+            localStorage.removeItem('adminAuthenticated');
+        }
     } else {
         errorDiv.textContent = '❌ Contraseña incorrecta';
         errorDiv.style.display = 'block';
@@ -502,18 +510,23 @@ async function updateMetric(index) {
         return;
     }
 
-    document.getElementById(`metricIcon${index}`).textContent = icon;
-    document.getElementById(`metricText${index}`).textContent = text;
+    try {
+        const metrics = await sbGetContent('metrics') || [];
+        if (!metrics[index]) metrics[index] = {};
+        metrics[index].icon = icon;
+        metrics[index].text = text;
+        await sbSaveContent('metrics', metrics);
+        try { saveStoredData('metrics', metrics); } catch {}
 
-    const metrics = await sbGetContent('metrics') || [];
-    if (!metrics[index]) metrics[index] = {};
-    metrics[index].icon = icon;
-    metrics[index].text = text;
-    await sbSaveContent('metrics', metrics);
-    try { saveStoredData('metrics', metrics); } catch {}
+        document.getElementById(`metricIcon${index}`).textContent = icon;
+        document.getElementById(`metricText${index}`).textContent = text;
 
-    await addChange(`Métrica ${index + 1} actualizada: "${text}"`);
-    alert('✓ Métrica guardada correctamente');
+        await addChange(`Métrica ${index + 1} actualizada: "${text}"`);
+        alert('✓ Métrica guardada correctamente');
+    } catch (err) {
+        console.error('updateMetric failed:', err);
+        alert('❌ Error al guardar la métrica: ' + err.message);
+    }
 }
 
 async function updateService(index) {
@@ -525,16 +538,21 @@ async function updateService(index) {
         return;
     }
 
-    const features = featuresStr.split(',').map((f) => f.trim());
-    const services = await sbGetContent('services') || [];
-    if (!services[index]) services[index] = {};
-    services[index].desc = desc;
-    services[index].features = features;
-    await sbSaveContent('services', services);
-    try { saveStoredData('services', services); } catch {}
+    try {
+        const features = featuresStr.split(',').map((f) => f.trim());
+        const services = await sbGetContent('services') || [];
+        if (!services[index]) services[index] = {};
+        services[index].desc = desc;
+        services[index].features = features;
+        await sbSaveContent('services', services);
+        try { saveStoredData('services', services); } catch {}
 
-    await addChange(`Servicio ${index + 1} actualizado`);
-    alert('✓ Servicio guardado correctamente');
+        await addChange(`Servicio ${index + 1} actualizado`);
+        alert('✓ Servicio guardado correctamente');
+    } catch (err) {
+        console.error('updateService failed:', err);
+        alert('❌ Error al guardar el servicio: ' + err.message);
+    }
 }
 
 async function updateContent() {
@@ -551,10 +569,15 @@ async function updateContent() {
         return;
     }
 
-    await sbSaveContent('content', content);
-    try { saveStoredData('content', content); } catch {}
-    await addChange('Contenido principal actualizado');
-    alert('✓ Contenido guardado correctamente');
+    try {
+        await sbSaveContent('content', content);
+        try { saveStoredData('content', content); } catch {}
+        await addChange('Contenido principal actualizado');
+        alert('✓ Contenido guardado correctamente');
+    } catch (err) {
+        console.error('updateContent failed:', err);
+        alert('❌ Error al guardar el contenido: ' + err.message);
+    }
 }
 
 async function loadTestimonios() {
@@ -585,16 +608,21 @@ async function updateTestimonio(index) {
         return;
     }
 
-    const testimonios = await sbGetContent('testimonios') || [];
-    if (!testimonios[index]) testimonios[index] = {};
-    testimonios[index].text = text;
-    testimonios[index].author = author;
-    testimonios[index].role = role;
-    await sbSaveContent('testimonios', testimonios);
-    try { saveStoredData('testimonios', testimonios); } catch {}
+    try {
+        const testimonios = await sbGetContent('testimonios') || [];
+        if (!testimonios[index]) testimonios[index] = {};
+        testimonios[index].text = text;
+        testimonios[index].author = author;
+        testimonios[index].role = role;
+        await sbSaveContent('testimonios', testimonios);
+        try { saveStoredData('testimonios', testimonios); } catch {}
 
-    await addChange(`Testimonio ${index + 1} actualizado`);
-    alert('✓ Testimonio guardado correctamente');
+        await addChange(`Testimonio ${index + 1} actualizado`);
+        alert('✓ Testimonio guardado correctamente');
+    } catch (err) {
+        console.error('updateTestimonio failed:', err);
+        alert('❌ Error al guardar el testimonio: ' + err.message);
+    }
 }
 
 async function addChange(message) {
@@ -642,6 +670,7 @@ async function loadChangesList() {
 
 async function clearChangesLog() {
     localStorage.removeItem('changes');
+    delete dataCache.changes;
     const stats = { count: 0, lastEdit: null };
     saveStoredData('editStats', stats);
     await loadChangeStats();
@@ -731,7 +760,6 @@ async function deleteVehiclePhoto(adminId, index) {
     if (index < 0 || index >= fotos.length) return;
     const removed = fotos[index];
     const remaining = fotos.filter((_, i) => i !== index);
-    setVehiclePhotos(adminId, remaining);
 
     try {
         const idMap = loadStoredData('supabase_vehicle_map', {});
@@ -747,8 +775,11 @@ async function deleteVehiclePhoto(adminId, index) {
         }
     } catch (err) {
         console.warn('Supabase photo delete failed:', err.message);
+        alert('⚠️ Error al borrar la foto de la base de datos. La foto se mantiene en el servidor.');
+        return;
     }
 
+    setVehiclePhotos(adminId, remaining);
     renderVehiclesEditor();
     addChange(`Foto ${index + 1} eliminada del vehículo #${adminId}`);
 }
@@ -997,67 +1028,71 @@ function initImagesSection() {
                 saveVehicle(parseInt(saveBtn.dataset.id, 10));
             }
             if (deleteBtn) {
-                deleteVehicle(parseInt(deleteBtn.dataset.id, 10));
+                const card = deleteBtn.closest('.vehicle-edit-card');
+                const dbId = card ? card.getAttribute('data-db-id') : null;
+                deleteVehicle(parseInt(deleteBtn.dataset.id, 10), dbId);
             }
         });
 
         vehiclesEditor.addEventListener('change', async (e) => {
             if (!e.target.classList.contains('vehicle-image-input')) return;
-            const id = parseInt(e.target.dataset.id, 10);
-            const files = Array.from(e.target.files || []);
-            if (!files.length) return;
+            try {
+                const id = parseInt(e.target.dataset.id, 10);
+                const files = Array.from(e.target.files || []);
+                if (!files.length) return;
 
-            const card = e.target.closest('.vehicle-edit-card');
+                const card = e.target.closest('.vehicle-edit-card');
 
-            // Vista previa inmediata con la primera imagen seleccionada
-            const previewImg = card ? card.querySelector('.vehicle-preview-img') : null;
-            const placeholder = card ? card.querySelector('.preview-placeholder') : null;
-            if (previewImg && files[0]) {
-                previewImg.src = URL.createObjectURL(files[0]);
-                previewImg.style.display = 'block';
-                if (placeholder) placeholder.style.display = 'none';
-            }
+                const previewImg = card ? card.querySelector('.vehicle-preview-img') : null;
+                const placeholder = card ? card.querySelector('.preview-placeholder') : null;
+                if (previewImg && files[0]) {
+                    previewImg.src = URL.createObjectURL(files[0]);
+                    previewImg.style.display = 'block';
+                    if (placeholder) placeholder.style.display = 'none';
+                }
 
-            const currentFotos = getVehiclePhotos(id);
-            const availableSlots = 5 - currentFotos.length;
-            if (availableSlots <= 0) {
-                alert('⚠️ Máximo 5 fotos por vehículo');
+                const currentFotos = getVehiclePhotos(id);
+                const availableSlots = 5 - currentFotos.length;
+                if (availableSlots <= 0) {
+                    alert('⚠️ Máximo 5 fotos por vehículo');
+                    e.target.value = '';
+                    return;
+                }
+
+                const toProcess = files.slice(0, availableSlots);
+                if (files.length > availableSlots) {
+                    alert(`⚠️ Máximo 5 fotos por vehículo. Se subieron ${availableSlots} de ${files.length} seleccionadas.`);
+                }
+
+                const newPhotos = [];
+                for (const file of toProcess) {
+                    const err = validateImageFile(file, 5);
+                    if (err) { alert('❌ ' + err); continue; }
+                    const result = await resizeImage(file, 900, 1200, 0.85);
+                    newPhotos.push(await blobToBase64(result.blob));
+                }
+                if (!newPhotos.length) { e.target.value = ''; return; }
+
+                const uploadedUrls = await uploadVehicleImageToSupabase(id, newPhotos);
+
+                const finalPhotos = uploadedUrls.length ? uploadedUrls : newPhotos;
+                setVehiclePhotos(id, currentFotos.concat(finalPhotos));
+
+                setVehicleStatusLocal(id, 'publicado');
+
+                renderVehiclesEditor();
+
+                if (uploadedUrls.length > 0) {
+                    addChange(`Fotos del vehículo #${id} actualizadas → Publicado`);
+                } else {
+                    addChange(`Fotos del vehículo #${id} actualizadas`);
+                }
                 e.target.value = '';
-                return;
+            } catch (err) {
+                console.error('Vehicle photo upload failed:', err);
+                alert('❌ Error al subir las fotos: ' + err.message);
+                e.target.value = '';
             }
-
-            const toProcess = files.slice(0, availableSlots);
-            if (files.length > availableSlots) {
-                alert(`⚠️ Máximo 5 fotos por vehículo. Se subieron ${availableSlots} de ${files.length} seleccionadas.`);
-            }
-
-            const newPhotos = [];
-            for (const file of toProcess) {
-                const err = validateImageFile(file, 5);
-                if (err) { alert('❌ ' + err); continue; }
-                const result = await resizeImage(file, 900, 1200, 0.85);
-                newPhotos.push(await blobToBase64(result.blob));
-            }
-            if (!newPhotos.length) { e.target.value = ''; return; }
-
-            // Subir a Supabase Storage (las fotos ya vienen procesadas como base64)
-            const uploadedUrls = await uploadVehicleImageToSupabase(id, newPhotos);
-
-            // Si el upload fue exitoso, guardamos las URLs (evita duplicar base64 en el próximo sync)
-            const finalPhotos = uploadedUrls.length ? uploadedUrls : newPhotos;
-            setVehiclePhotos(id, currentFotos.concat(finalPhotos));
-
-            // Actualizar status local a 'publicado' si hay fotos subidas o pendientes
-            setVehicleStatusLocal(id, 'publicado');
-
-            renderVehiclesEditor();
-
-            if (uploadedUrls.length > 0) {
-                addChange(`Fotos del vehículo #${id} actualizadas → Publicado`);
-            } else {
-                addChange(`Fotos del vehículo #${id} actualizadas`);
-            }
-            e.target.value = '';
         });
     }
 
@@ -1275,30 +1310,40 @@ async function saveLogo() {
         alert('Subí un logo antes de guardar');
         return;
     }
-    const images = await getSiteImages();
-    if (pendingLogoUrl) {
-        images.logo = { url: pendingLogoUrl, timestamp: new Date().toLocaleString('es-AR') };
-    } else {
-        images.logo = { data: pendingLogoData, timestamp: new Date().toLocaleString('es-AR') };
+    try {
+        const images = await getSiteImages();
+        if (pendingLogoUrl) {
+            images.logo = { url: pendingLogoUrl, timestamp: new Date().toLocaleString('es-AR') };
+        } else {
+            images.logo = { data: pendingLogoData, timestamp: new Date().toLocaleString('es-AR') };
+        }
+        await setSiteImages(images);
+        await addChange('Logo de empresa actualizado');
+        alert('✓ Logo guardado correctamente');
+    } catch (err) {
+        console.error('saveLogo failed:', err);
+        alert('❌ Error al guardar el logo: ' + err.message);
     }
-    await setSiteImages(images);
-    await addChange('Logo de empresa actualizado');
-    alert('✓ Logo guardado correctamente');
 }
 
 async function removeSiteImage(key) {
-    const images = await getSiteImages();
-    delete images[key];
-    await setSiteImages(images);
+    try {
+        const images = await getSiteImages();
+        delete images[key];
+        await setSiteImages(images);
 
-    if (key === 'logo') {
-        pendingLogoData = null;
-        pendingLogoUrl = null;
-        updateLogoPreview(null);
+        if (key === 'logo') {
+            pendingLogoData = null;
+            pendingLogoUrl = null;
+            updateLogoPreview(null);
+        }
+
+        await addChange(`Imagen "${key}" eliminada`);
+        alert('✓ Imagen eliminada');
+    } catch (err) {
+        console.error('removeSiteImage failed:', err);
+        alert('❌ Error al eliminar la imagen: ' + err.message);
     }
-
-    await addChange(`Imagen "${key}" eliminada`);
-    alert('✓ Imagen eliminada');
 }
 
 function getVehicleDefaultName(v) {
@@ -1370,6 +1415,54 @@ let pendientesFilterActive = false;
 function togglePendientesFilter() {
     pendientesFilterActive = !pendientesFilterActive;
     renderVehiclesEditor();
+}
+
+let vehicleSearchQuery = '';
+
+function filterVehicleCards(query) {
+    vehicleSearchQuery = query.toLowerCase().trim();
+    applyVehicleFilter();
+}
+
+function applyVehicleFilter() {
+    const container = document.getElementById('vehiclesEditor');
+    const countEl = document.getElementById('vehicleSearchCount');
+    if (!container) return;
+
+    const cards = container.querySelectorAll('.vehicle-edit-card');
+    let visible = 0;
+
+    cards.forEach(card => {
+        if (!vehicleSearchQuery) {
+            card.style.display = '';
+            visible++;
+            return;
+        }
+        const nombre = (card.querySelector('.vehicle-nombre')?.value || '').toLowerCase();
+        const anio = (card.querySelector('.vehicle-anio')?.value || '').toLowerCase();
+        const km = (card.querySelector('.vehicle-km')?.value || '').toLowerCase();
+        const color = (card.querySelector('.vehicle-color')?.value || '').toLowerCase();
+        const desc = (card.querySelector('.vehicle-descripcion')?.value || '').toLowerCase();
+        const cat = (card.querySelector('.vehicle-category-tag')?.textContent || '').toLowerCase();
+        const id = (card.dataset.id || '').toLowerCase();
+
+        const match = nombre.includes(vehicleSearchQuery)
+            || anio.includes(vehicleSearchQuery)
+            || km.includes(vehicleSearchQuery)
+            || color.includes(vehicleSearchQuery)
+            || desc.includes(vehicleSearchQuery)
+            || cat.includes(vehicleSearchQuery)
+            || id.includes(vehicleSearchQuery);
+
+        card.style.display = match ? '' : 'none';
+        if (match) visible++;
+    });
+
+    if (countEl) {
+        countEl.textContent = vehicleSearchQuery
+            ? `${visible} resultado${visible !== 1 ? 's' : ''}`
+            : '';
+    }
 }
 
 async function refreshVehiclesTable() {
@@ -1534,6 +1627,8 @@ async function renderVehiclesEditor() {
     const deletedDefaults = await getDeletedDefaults();
     let nextCustomId = 100;
 
+    const idMap = loadStoredData('supabase_vehicle_map', {});
+
     const pendingCount = getPendingPhotosCount(overrides, customVehicles, deletedDefaults);
     let html = renderPendientesBanner(pendingCount, pendientesFilterActive);
 
@@ -1551,11 +1646,12 @@ async function renderVehiclesEditor() {
         const status = o.status || 'publicado';
         const tipo = o.tipo || 'auto';
         const tipoBadge = tipo === 'moto' ? '<span class="vehicle-type-tag" style="background:#f59e0b;color:#111">Moto</span>' : '';
+        const dbId = idMap[v.id] || '';
 
         if (pendientesFilterActive && status !== 'pendiente_fotos' && defaultFotos.length > 0) return;
 
         html += `
-            <div class="vehicle-edit-card" data-id="${v.id}">
+            <div class="vehicle-edit-card" data-id="${v.id}" data-db-id="${dbId}">
                 <div class="vehicle-edit-header">
                     <span class="vehicle-category-tag">${v.category}</span>
                     ${tipoBadge}
@@ -1604,11 +1700,12 @@ async function renderVehiclesEditor() {
         const status = cv.status || 'publicado';
         const tipo = cv.tipo || 'auto';
         const tipoBadge = tipo === 'moto' ? '<span class="vehicle-type-tag" style="background:#f59e0b;color:#111">Moto</span>' : '';
+        const dbId = cv.uuid || idMap[cv.id] || '';
 
         if (pendientesFilterActive && status !== 'pendiente_fotos' && customFotos.length > 0) return;
 
         html += `
-            <div class="vehicle-edit-card vehicle-custom" data-id="${cv.id}">
+            <div class="vehicle-edit-card vehicle-custom" data-id="${cv.id}" data-db-id="${dbId}">
                 <div class="vehicle-edit-header">
                     <span class="vehicle-category-tag">${cv.categoryText || cv.category}</span>
                     ${tipoBadge}
@@ -1650,167 +1747,175 @@ async function renderVehiclesEditor() {
     });
 
     container.innerHTML = html;
+
+    const searchInput = document.getElementById('vehicleSearchInput');
+    if (searchInput) searchInput.value = vehicleSearchQuery;
+    applyVehicleFilter();
 }
 
 async function saveVehicle(id) {
     const card = document.querySelector(`.vehicle-edit-card[data-id="${id}"]`);
     if (!card) return;
 
-    const nombre = card.querySelector('.vehicle-nombre').value.trim();
-    const anio = parseInt(card.querySelector('.vehicle-anio').value, 10);
-    const km = card.querySelector('.vehicle-km').value.trim();
-    const color = card.querySelector('.vehicle-color').value.trim();
-    const descripcion = card.querySelector('.vehicle-descripcion').value.trim();
-    const seccionEl = card.querySelector('.vehicle-seccion');
-    const seccion = seccionEl ? seccionEl.value || null : null;
+    const saveBtn = card.querySelector('.vehicle-save-btn');
+    if (saveBtn) saveBtn.disabled = true;
 
-    if (!nombre || isNaN(anio)) {
-        alert('Completá nombre y año');
-        return;
-    }
-
-    // Custom vehicle?
-    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
-    const isCustom = customVehicles.some(v => v.id === id);
-
-    // --- SUPABASE: guardar vehículo ---
-    let categorySlug = 'autos-usados';
-    let marca = 'Generica';
-    let modelo = nombre;
-    let tipo = 'auto';
-    let whatsapp_msg = `¡Hola! Quiero consultar el precio y disponibilidad del ${nombre} que vi en su web.`;
-
-    if (isCustom) {
-        const cv = customVehicles.find(v => v.id === id);
-        if (cv) {
-            categorySlug = cv.category;
-            marca = cv.marca;
-            modelo = cv.modelo;
-            tipo = cv.tipo || 'auto';
-        }
-    } else {
-        const dv = DEFAULT_VEHICLES.find(v => v.id === id);
-        if (dv) {
-            categorySlug = CATEGORY_TEXT_TO_SLUG[dv.category] || 'autos-usados';
-            const parts = nombre.split(' ');
-            marca = parts[0] || dv.marca;
-            modelo = parts.slice(1).join(' ') || dv.modelo;
-            tipo = dv.tipo || 'auto';
-        }
-    }
-
-    whatsapp_msg = tipo === 'moto'
-        ? `¡Hola! Quiero consultar el precio y disponibilidad de la moto ${marca} ${modelo} (${anio || ''}) que vi en su web.`
-        : `¡Hola! Quiero consultar el precio y disponibilidad del ${marca} ${modelo} (${anio || ''}) que vi en su web.`;
-
-    const catId = await resolveCategoryId(categorySlug);
-    const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
-
-
-    // Upsert en Supabase — SIEMPRE UPDATE si ya existe, INSERT solo si es nuevo
-    let supabaseVehicleId = null;
     try {
-        const payload = {
-            category_id: catId,
-            slug,
-            nombre,
-            marca,
-            modelo,
-            año: anio,
-            km,
-            color,
-            descripcion,
-            tipo,
-            seccion,
-            whatsapp_msg,
-            activo: true,
-            status: 'pendiente_fotos'
-        };
+        const nombre = card.querySelector('.vehicle-nombre').value.trim();
+        const anio = parseInt(card.querySelector('.vehicle-anio').value, 10);
+        const km = card.querySelector('.vehicle-km').value.trim();
+        const color = card.querySelector('.vehicle-color').value.trim();
+        const descripcion = card.querySelector('.vehicle-descripcion').value.trim();
+        const seccionEl = card.querySelector('.vehicle-seccion');
+        const seccion = seccionEl ? seccionEl.value || null : null;
 
-        // Buscar el UUID real por el mapa local ANTES de decidir update vs insert
-        const idMap = loadStoredData('supabase_vehicle_map', {});
-        let supabaseId = idMap[id] || null;
-
-        // Si no está en el mapa, buscar por slug como fallback
-        if (!supabaseId) {
-            const { data: bySlug } = await supabaseClient
-                .from('vehicles')
-                .select('id')
-                .eq('slug', slug)
-                .maybeSingle();
-            if (bySlug) supabaseId = bySlug.id;
+        if (!nombre || isNaN(anio)) {
+            alert('Completá nombre y año');
+            return;
         }
 
-        let result;
-        if (supabaseId) {
-            // SIEMPRE UPDATE si ya existe un registro — evita duplicados
-            result = await supabaseClient.from('vehicles').update(payload).eq('id', supabaseId).select().single();
+        // Custom vehicle?
+        const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+        const isCustom = customVehicles.some(v => v.id === id);
+
+        // --- SUPABASE: guardar vehículo ---
+        let categorySlug = 'autos-usados';
+        let marca = 'Generica';
+        let modelo = nombre;
+        let tipo = 'auto';
+        let whatsapp_msg = `¡Hola! Quiero consultar el precio y disponibilidad del ${nombre} que vi en su web.`;
+
+        if (isCustom) {
+            const cv = customVehicles.find(v => v.id === id);
+            if (cv) {
+                categorySlug = cv.category;
+                marca = cv.marca;
+                modelo = cv.modelo;
+                tipo = cv.tipo || 'auto';
+            }
         } else {
-            // Solo INSERT si realmente es un vehículo nuevo en Supabase
-            result = await supabaseClient.from('vehicles').insert([payload]).select().single();
-        }
-        if (result.error) throw result.error;
-        supabaseVehicleId = result.data.id;
-
-        // Actualizar el mapa admin_id -> supabase_id
-        idMap[id] = supabaseVehicleId;
-        saveStoredData('supabase_vehicle_map', idMap);
-
-        // Subir TODAS las fotos base64 pendientes que aún no estén en Supabase
-        const fotosLocales = getVehiclePhotos(id);
-        const pendingBase64 = (fotosLocales || []).filter(f => typeof f === 'string' && f.startsWith('data:'));
-        if (pendingBase64.length) {
-            const uploadedUrls = await uploadVehicleImageToSupabase(id, pendingBase64);
-            if (uploadedUrls.length) {
-                // Reemplazar las base64 subidas por sus URLs públicas en el estado local
-                let i = 0;
-                const finalFotos = (fotosLocales || []).map(f => {
-                    if (typeof f === 'string' && f.startsWith('data:') && i < uploadedUrls.length) {
-                        return uploadedUrls[i++];
-                    }
-                    return f;
-                });
-                setVehiclePhotos(id, finalFotos);
+            const dv = DEFAULT_VEHICLES.find(v => v.id === id);
+            if (dv) {
+                categorySlug = CATEGORY_TEXT_TO_SLUG[dv.category] || 'autos-usados';
+                const parts = nombre.split(' ');
+                marca = parts[0] || dv.marca;
+                modelo = parts.slice(1).join(' ') || dv.modelo;
+                tipo = dv.tipo || 'auto';
             }
         }
 
-    } catch (sbErr) {
-        console.warn('Supabase save failed, falling back to localStorage:', sbErr.message);
-    }
+        whatsapp_msg = tipo === 'moto'
+            ? `¡Hola! Quiero consultar el precio y disponibilidad de la moto ${marca} ${modelo} (${anio || ''}) que vi en su web.`
+            : `¡Hola! Quiero consultar el precio y disponibilidad del ${marca} ${modelo} (${anio || ''}) que vi en su web.`;
 
-    // --- localStorage fallback ---
-    if (isCustom) {
-        const updated = customVehicles.map(v => {
-            if (v.id !== id) return v;
-            const parts = nombre.split(' ');
-            return {
-                ...v,
-                tipo: tipo,
-                seccion: seccion,
-                marca: parts[0] || v.marca,
-                modelo: parts.slice(1).join(' ') || v.modelo,
-                anio: anio,
-                km: km,
-                color: color,
-                descripcion: descripcion
+        const catId = await resolveCategoryId(categorySlug);
+        const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
+        // Upsert en Supabase — SIEMPRE UPDATE si ya existe, INSERT solo si es nuevo
+        let supabaseVehicleId = null;
+        try {
+            const payload = {
+                category_id: catId,
+                slug,
+                nombre,
+                marca,
+                modelo,
+                año: anio,
+                km,
+                color,
+                descripcion,
+                tipo,
+                seccion,
+                whatsapp_msg,
+                activo: true,
+                status: 'pendiente_fotos'
             };
-        });
-        saveStoredData(CUSTOM_VEHICLES_KEY, updated);
-    } else {
-        const overrides = await getVehicleOverrides();
-        if (!overrides[id]) overrides[id] = {};
-        overrides[id].nombre = nombre;
-        overrides[id].anio = anio;
-        overrides[id].km = km;
-        overrides[id].color = color;
-        overrides[id].descripcion = descripcion;
-        overrides[id].tipo = tipo;
-        overrides[id].seccion = seccion;
-        await setVehicleOverrides(overrides);
-    }
 
-    await addChange(`Vehículo #${id} actualizado: ${nombre}`);
-    alert('✓ Vehículo guardado');
+            // Usar data-db-id del card como fuente primaria del UUID de Supabase
+            const dbIdFromCard = card.getAttribute('data-db-id');
+            const idMap = loadStoredData('supabase_vehicle_map', {});
+            let supabaseId = dbIdFromCard || idMap[id] || null;
+
+            // Si no está en el mapa ni en el card, buscar por slug como fallback
+            if (!supabaseId) {
+                const { data: bySlug } = await supabaseClient
+                    .from('vehicles')
+                    .select('id')
+                    .eq('slug', slug)
+                    .maybeSingle();
+                if (bySlug) supabaseId = bySlug.id;
+            }
+
+            let result;
+            if (supabaseId) {
+                result = await supabaseClient.from('vehicles').update(payload).eq('id', supabaseId).select().single();
+            } else {
+                result = await supabaseClient.from('vehicles').insert([payload]).select().single();
+            }
+            if (result.error) throw result.error;
+            supabaseVehicleId = result.data.id;
+
+            idMap[id] = supabaseVehicleId;
+            saveStoredData('supabase_vehicle_map', idMap);
+
+            const fotosLocales = getVehiclePhotos(id);
+            const pendingBase64 = (fotosLocales || []).filter(f => typeof f === 'string' && f.startsWith('data:'));
+            if (pendingBase64.length) {
+                const uploadedUrls = await uploadVehicleImageToSupabase(id, pendingBase64);
+                if (uploadedUrls.length) {
+                    let i = 0;
+                    const finalFotos = (fotosLocales || []).map(f => {
+                        if (typeof f === 'string' && f.startsWith('data:') && i < uploadedUrls.length) {
+                            return uploadedUrls[i++];
+                        }
+                        return f;
+                    });
+                    setVehiclePhotos(id, finalFotos);
+                }
+            }
+
+        } catch (sbErr) {
+            console.warn('Supabase save failed, falling back to localStorage:', sbErr.message);
+        }
+
+        // --- localStorage fallback ---
+        if (isCustom) {
+            const updated = customVehicles.map(v => {
+                if (v.id !== id) return v;
+                const parts = nombre.split(' ');
+                return {
+                    ...v,
+                    uuid: supabaseVehicleId || v.uuid,
+                    tipo: tipo,
+                    seccion: seccion,
+                    marca: parts[0] || v.marca,
+                    modelo: parts.slice(1).join(' ') || v.modelo,
+                    anio: anio,
+                    km: km,
+                    color: color,
+                    descripcion: descripcion
+                };
+            });
+            saveStoredData(CUSTOM_VEHICLES_KEY, updated);
+        } else {
+            const overrides = await getVehicleOverrides();
+            if (!overrides[id]) overrides[id] = {};
+            overrides[id].nombre = nombre;
+            overrides[id].anio = anio;
+            overrides[id].km = km;
+            overrides[id].color = color;
+            overrides[id].descripcion = descripcion;
+            overrides[id].tipo = tipo;
+            overrides[id].seccion = seccion;
+            await setVehicleOverrides(overrides);
+        }
+
+        await addChange(`Vehículo #${id} actualizado: ${nombre}`);
+        alert('✓ Vehículo guardado');
+        await renderVehiclesEditor();
+    } finally {
+        if (saveBtn) saveBtn.disabled = false;
+    }
 }
 
 function showAddVehicleForm() {
@@ -1880,7 +1985,17 @@ async function saveNewVehicle() {
     const catId = await resolveCategoryId(category);
     const slug = `${marca}-${modelo}-${anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
+    const CATEGORY_TO_SECCION = {
+        'autos-0km': '0km',
+        'autos-usados': 'usados',
+        'motos-electricas': 'motos',
+        'patinetas-electricas': 'motos',
+        'vehiculos-especiales': 'especiales'
+    };
+    const seccion = CATEGORY_TO_SECCION[category] || 'usados';
+
     // --- SUPABASE ---
+    let supabaseId = null;
     try {
         const payload = {
             category_id: catId,
@@ -1893,6 +2008,8 @@ async function saveNewVehicle() {
             color: color || '—',
             descripcion,
             tipo,
+            seccion,
+            status: 'pendiente_fotos',
             whatsapp_msg: tipo === 'moto'
                 ? `¡Hola! Quiero consultar el precio y disponibilidad de la moto ${marca} ${modelo} (${anio || ''}) que vi en su web.`
                 : `¡Hola! Quiero consultar el precio y disponibilidad del ${marca} ${modelo} (${anio || ''}) que vi en su web.`,
@@ -1901,6 +2018,7 @@ async function saveNewVehicle() {
 
         const { data, error } = await supabaseClient.from('vehicles').insert([payload]).select().single();
         if (error) throw error;
+        supabaseId = data.id;
 
         const idMap = loadStoredData('supabase_vehicle_map', {});
         idMap[newId] = data.id;
@@ -1913,6 +2031,7 @@ async function saveNewVehicle() {
     const photoData = window._newVehiclePhotoData || null;
     const vehicleData = {
         id: newId,
+        uuid: supabaseId,
         category: category,
         categoryText: categoryTexts[category] || category,
         tipo: tipo,
@@ -1921,7 +2040,9 @@ async function saveNewVehicle() {
         anio: anio,
         km: km || '0 KM',
         color: color || '—',
-        descripcion: descripcion
+        descripcion: descripcion,
+        seccion: seccion,
+        status: 'pendiente_fotos'
     };
     if (photoData) {
         vehicleData.image = photoData;
@@ -1933,7 +2054,12 @@ async function saveNewVehicle() {
     closeAddVehicleForm();
     await renderVehiclesEditor();
     if (photoData) {
-        uploadVehicleImageToSupabase(newId, photoData);
+        try {
+            await uploadVehicleImageToSupabase(newId, photoData);
+        } catch (err) {
+            console.warn('Photo upload failed for new vehicle:', err.message);
+            alert('⚠️ Vehículo creado, pero la foto no se pudo subir. Se reintentará al sincronizar.');
+        }
     }
     await addChange(`Vehículo agregado: ${marca} ${modelo} (#${newId})`);
     alert('✓ Vehículo agregado correctamente');
@@ -1967,161 +2093,168 @@ async function deleteVehicleFromTable(supabaseId, displayName) {
     }
 }
 
-async function deleteCustomVehicle(id) {
+async function deleteCustomVehicle(id, dbIdFromCard) {
     if (!confirm('¿Eliminar este vehículo personalizado?')) return;
 
-    // Cargar datos ANTES de usarlos
-    let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
-    const removed = customVehicles.find(v => v.id === id);
+    const card = document.querySelector(`.vehicle-edit-card[data-id="${id}"]`);
+    const deleteBtn = card ? card.querySelector('.vehicle-delete-btn') : null;
+    if (deleteBtn) deleteBtn.disabled = true;
 
-    // --- SUPABASE ---
-    let deletedSupabase = false;
     try {
-        const idMap = loadStoredData('supabase_vehicle_map', {});
-        const supabaseId = idMap[id] || (removed && removed.uuid) || null;
-        if (supabaseId) {
-            await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
-            const { error } = await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
-            if (error) throw error;
-            deletedSupabase = true;
-            delete idMap[id];
-            saveStoredData('supabase_vehicle_map', idMap);
-        } else {
-            // Fallback: buscar por marca+modelo en Supabase
-            if (removed) {
-                const { data: matches } = await supabaseClient
-                    .from('vehicles')
-                    .select('id')
-                    .ilike('nombre', `%${removed.modelo || ''}%`);
-                const target = (matches || []).find(v =>
-                    String(v.nombre || '').toLowerCase().includes(String(removed.marca || '').toLowerCase())
-                );
-                if (target) {
-                    await supabaseClient.from('photos').delete().eq('vehicle_id', target.id);
-                    const { error } = await supabaseClient.from('vehicles').delete().eq('id', target.id);
-                    if (error) throw error;
-                    deletedSupabase = true;
+        let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+        const removed = customVehicles.find(v => v.id === id);
+
+        let deletedSupabase = false;
+        try {
+            const idMap = loadStoredData('supabase_vehicle_map', {});
+            const supabaseId = dbIdFromCard || idMap[id] || (removed && removed.uuid) || null;
+            if (supabaseId) {
+                await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
+                const { error } = await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
+                if (error) throw error;
+                deletedSupabase = true;
+                delete idMap[id];
+                saveStoredData('supabase_vehicle_map', idMap);
+            } else {
+                if (removed) {
+                    const { data: matches } = await supabaseClient
+                        .from('vehicles')
+                        .select('id')
+                        .ilike('nombre', `%${removed.modelo || ''}%`);
+                    const target = (matches || []).find(v =>
+                        String(v.nombre || '').toLowerCase().includes(String(removed.marca || '').toLowerCase())
+                    );
+                    if (target) {
+                        await supabaseClient.from('photos').delete().eq('vehicle_id', target.id);
+                        const { error } = await supabaseClient.from('vehicles').delete().eq('id', target.id);
+                        if (error) throw error;
+                        deletedSupabase = true;
+                    }
                 }
             }
+        } catch (sbErr) {
+            console.warn('Supabase delete failed:', sbErr.message);
         }
-    } catch (sbErr) {
-        console.warn('Supabase delete failed:', sbErr.message);
-    }
 
-    // --- localStorage ---
-    customVehicles = customVehicles.filter(v => v.id !== id);
-    saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+        customVehicles = customVehicles.filter(v => v.id !== id);
+        saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
 
-    const overrides = await getVehicleOverrides();
-    if (overrides[id]) { delete overrides[id]; await setVehicleOverrides(overrides); }
-    const idMapLocal = loadStoredData('supabase_vehicle_map', {});
-    if (idMapLocal[id]) { delete idMapLocal[id]; saveStoredData('supabase_vehicle_map', idMapLocal); }
+        const overrides = await getVehicleOverrides();
+        if (overrides[id]) { delete overrides[id]; await setVehicleOverrides(overrides); }
+        const idMapLocal = loadStoredData('supabase_vehicle_map', {});
+        if (idMapLocal[id]) { delete idMapLocal[id]; saveStoredData('supabase_vehicle_map', idMapLocal); }
 
-    await renderVehiclesEditor();
-    if (removed) {
-        await addChange(`Vehículo eliminado: ${removed.marca} ${removed.modelo} (#${id})`);
-    }
-    if (deletedSupabase) {
-        alert('✓ Vehículo eliminado');
-    } else {
-        alert('⚠ Vehículo eliminado del panel, pero no se encontró su registro en Supabase. Si sigue apareciendo en la web, borralo desde la tabla de inventario.');
+        await renderVehiclesEditor();
+        if (removed) {
+            await addChange(`Vehículo eliminado: ${removed.marca} ${removed.modelo} (#${id})`);
+        }
+        if (deletedSupabase) {
+            alert('✓ Vehículo eliminado');
+        } else {
+            alert('⚠ Vehículo eliminado del panel, pero no se encontró su registro en Supabase. Si sigue apareciendo en la web, borralo desde la tabla de inventario.');
+        }
+    } finally {
+        if (deleteBtn) deleteBtn.disabled = false;
     }
 }
 
-async function deleteVehicle(id) {
+async function deleteVehicle(id, dbIdFromCard) {
     let customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
     const isCustom = customVehicles.some(v => v.id === id);
-    if (isCustom) return deleteCustomVehicle(id);
+    if (isCustom) return deleteCustomVehicle(id, dbIdFromCard);
 
     const dv = DEFAULT_VEHICLES.find(v => v.id === id);
     if (!dv) return;
     if (!confirm(`¿Eliminar "${dv.marca} ${dv.modelo}" del stock?\n\nPodés volver a agregarlo desde "➕ Agregar Vehículo".`)) return;
 
-    // --- SUPABASE: borrar el vehículo por defecto si fue guardado ---
-    const idMap = loadStoredData('supabase_vehicle_map', {});
-    const supabaseId = idMap[id];
-    let deletedSupabase = false;
-    if (supabaseId) {
-        try {
-            await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
-            const { error } = await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
-            if (error) throw error;
-            deletedSupabase = true;
-        } catch (sbErr) {
-            console.warn('Supabase delete failed:', sbErr.message);
-        }
-    }
+    const card = document.querySelector(`.vehicle-edit-card[data-id="${id}"]`);
+    const deleteBtn = card ? card.querySelector('.vehicle-delete-btn') : null;
+    if (deleteBtn) deleteBtn.disabled = true;
 
-    if (!deletedSupabase) {
-        // Fallback: buscar por slug y por marca+modelo (los slugs reales incluyen sufijos tipo "-fila-N")
-        try {
-            const slugBase = `${dv.marca}-${dv.modelo}-${dv.anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
-            const { data: matches } = await supabaseClient
-                .from('vehicles')
-                .select('id')
-                .or(`slug.eq.${slugBase},slug.like.${slugBase}-%`);
-            for (const m of matches || []) {
-                await supabaseClient.from('photos').delete().eq('vehicle_id', m.id);
-                await supabaseClient.from('vehicles').delete().eq('id', m.id);
+    try {
+        const idMap = loadStoredData('supabase_vehicle_map', {});
+        const supabaseId = dbIdFromCard || idMap[id];
+        let deletedSupabase = false;
+        if (supabaseId) {
+            try {
+                await supabaseClient.from('photos').delete().eq('vehicle_id', supabaseId);
+                const { error } = await supabaseClient.from('vehicles').delete().eq('id', supabaseId);
+                if (error) throw error;
+                deletedSupabase = true;
+            } catch (sbErr) {
+                console.warn('Supabase delete failed:', sbErr.message);
             }
-            if (matches && matches.length > 0) deletedSupabase = true;
-        } catch (sbErr) {
-            console.warn('Supabase slug delete failed:', sbErr.message);
         }
-    }
 
-    if (!deletedSupabase) {
-        // Fallback final: buscar por marca+modelo+año en Supabase
-        try {
-            const { data: byName } = await supabaseClient
-                .from('vehicles')
-                .select('id, nombre, marca, modelo')
-                .or(`marca.ilike.%${dv.marca}%,modelo.ilike.%${dv.modelo}%`);
-            for (const v of byName || []) {
-                const matchMarca = String(v.marca || '').toLowerCase() === String(dv.marca).toLowerCase();
-                const matchModelo = String(v.modelo || '').toLowerCase() === String(dv.modelo).toLowerCase();
-                if (matchMarca && matchModelo) {
-                    await supabaseClient.from('photos').delete().eq('vehicle_id', v.id);
-                    await supabaseClient.from('vehicles').delete().eq('id', v.id);
-                    deletedSupabase = true;
+        if (!deletedSupabase) {
+            try {
+                const slugBase = `${dv.marca}-${dv.modelo}-${dv.anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                const { data: matches } = await supabaseClient
+                    .from('vehicles')
+                    .select('id')
+                    .or(`slug.eq.${slugBase},slug.like.${slugBase}-%`);
+                for (const m of matches || []) {
+                    await supabaseClient.from('photos').delete().eq('vehicle_id', m.id);
+                    await supabaseClient.from('vehicles').delete().eq('id', m.id);
                 }
+                if (matches && matches.length > 0) deletedSupabase = true;
+            } catch (sbErr) {
+                console.warn('Supabase slug delete failed:', sbErr.message);
             }
-        } catch (sbErr) {
-            console.warn('Supabase name search delete failed:', sbErr.message);
         }
-    }
 
-    // --- localStorage + Supabase: marcar como eliminado ---
-    const deletedDefaults = await getDeletedDefaults();
-    if (!deletedDefaults.includes(id)) {
-        deletedDefaults.push(id);
-        await setDeletedDefaults(deletedDefaults);
-    }
+        if (!deletedSupabase) {
+            try {
+                const { data: byName } = await supabaseClient
+                    .from('vehicles')
+                    .select('id, nombre, marca, modelo')
+                    .or(`marca.ilike.%${dv.marca}%,modelo.ilike.%${dv.modelo}%`);
+                for (const v of byName || []) {
+                    const matchMarca = String(v.marca || '').toLowerCase() === String(dv.marca).toLowerCase();
+                    const matchModelo = String(v.modelo || '').toLowerCase() === String(dv.modelo).toLowerCase();
+                    if (matchMarca && matchModelo) {
+                        await supabaseClient.from('photos').delete().eq('vehicle_id', v.id);
+                        await supabaseClient.from('vehicles').delete().eq('id', v.id);
+                        deletedSupabase = true;
+                    }
+                }
+            } catch (sbErr) {
+                console.warn('Supabase name search delete failed:', sbErr.message);
+            }
+        }
 
-    if (idMap[id]) {
-        delete idMap[id];
-        saveStoredData('supabase_vehicle_map', idMap);
-    }
-    const overrides = await getVehicleOverrides();
-    if (overrides[id]) {
-        delete overrides[id];
-        await setVehicleOverrides(overrides);
-    }
+        const deletedDefaults = await getDeletedDefaults();
+        if (!deletedDefaults.includes(id)) {
+            deletedDefaults.push(id);
+            await setDeletedDefaults(deletedDefaults);
+        }
 
-    // Limpiar customVehicles si por algún motivo contiene este id
-    customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
-    const before = customVehicles.length;
-    customVehicles = customVehicles.filter(v => v.id !== id);
-    if (customVehicles.length !== before) {
-        saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
-    }
+        if (idMap[id]) {
+            delete idMap[id];
+            saveStoredData('supabase_vehicle_map', idMap);
+        }
+        const overrides = await getVehicleOverrides();
+        if (overrides[id]) {
+            delete overrides[id];
+            await setVehicleOverrides(overrides);
+        }
 
-    await renderVehiclesEditor();
-    await addChange(`Vehículo eliminado del stock: ${dv.marca} ${dv.modelo}`);
-    if (deletedSupabase) {
-        alert('✓ Vehículo eliminado');
-    } else {
-        alert('⚠ Vehículo oculto localmente, pero no se encontró en Supabase para borrarlo. Si sigue apareciendo en la web, borralo desde "Agregar vehículos" o la tabla de inventario.');
+        customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+        const before = customVehicles.length;
+        customVehicles = customVehicles.filter(v => v.id !== id);
+        if (customVehicles.length !== before) {
+            saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+        }
+
+        await renderVehiclesEditor();
+        await addChange(`Vehículo eliminado del stock: ${dv.marca} ${dv.modelo}`);
+        if (deletedSupabase) {
+            alert('✓ Vehículo eliminado');
+        } else {
+            alert('⚠ Vehículo oculto localmente, pero no se encontró en Supabase para borrarlo. Si sigue apareciendo en la web, borralo desde "Agregar vehículos" o la tabla de inventario.');
+        }
+    } finally {
+        if (deleteBtn) deleteBtn.disabled = false;
     }
 }
 
@@ -2254,7 +2387,7 @@ async function purgeSupabaseVehicles() {
         await addChange(`Purga de Supabase: ${deletedCount} duplicados eliminados, ${normalizedCount} KM normalizados`);
 
         // Limpiar referencias residuales en localStorage
-        localStorage.removeItem('customVehicles');
+        localStorage.removeItem(CUSTOM_VEHICLES_KEY);
         localStorage.removeItem('supabase_vehicle_map');
         localStorage.removeItem(VEHICLES_STORAGE_KEY);
 

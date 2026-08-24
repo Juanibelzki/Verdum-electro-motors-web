@@ -303,7 +303,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Imagen PNG (máx 500KB)</label>
-                                <input type="file" accept="image/png" class="financing-file-input" data-financing-type="financing_own">
+                                <input type="file" accept="image/*" class="financing-file-input" data-financing-type="financing_own">
                             </div>
                             <div class="form-group">
                                 <label>Título</label>
@@ -329,7 +329,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Imagen PNG (máx 500KB)</label>
-                                <input type="file" accept="image/png" class="financing-file-input" data-financing-type="financing_bank">
+                                <input type="file" accept="image/*" class="financing-file-input" data-financing-type="financing_bank">
                             </div>
                             <div class="form-group">
                                 <label>Título</label>
@@ -355,7 +355,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Imagen PNG (máx 500KB)</label>
-                                <input type="file" accept="image/png" class="financing-file-input" data-financing-type="financing_permuta">
+                                <input type="file" accept="image/*" class="financing-file-input" data-financing-type="financing_permuta">
                             </div>
                             <div class="form-group">
                                 <label>Título</label>
@@ -441,7 +441,14 @@
                             <span id="vehiclesCount" style="color:var(--text-secondary);font-size:0.9rem"></span>
                         </div>
                         <div id="vehiclesTableContainer" style="overflow-x:auto"></div>
-                        <div id="vehiclesEditor" class="vehicles-editor" style="margin-top:24px"></div>
+                        <div style="display:flex;gap:10px;margin:16px 0 12px;align-items:center;flex-wrap:wrap">
+                            <input type="text" id="vehicleSearchInput" placeholder="🔍 Buscar por marca, modelo, año, color..."
+                                style="flex:1;min-width:200px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);
+                                       background:var(--surface);color:var(--text);font-size:0.9rem"
+                                oninput="filterVehicleCards(this.value)">
+                            <span id="vehicleSearchCount" style="color:var(--text-secondary);font-size:0.85rem"></span>
+                        </div>
+                        <div id="vehiclesEditor" class="vehicles-editor"></div>
                     </div>
 
                     <!-- Modal para agregar vehículo -->

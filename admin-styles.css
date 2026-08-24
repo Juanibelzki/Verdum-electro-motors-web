@@ -1083,3 +1083,16 @@ body {
         padding: 20px;
     }
 }
+
+/* Safety: re-habilitar botones e inputs tras operaciones async */
+.vehicle-edit-card .vehicle-save-btn:disabled,
+.vehicle-edit-card .vehicle-delete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#vehicleSearchInput:focus {
+    outline: none;
+    border-color: var(--primary-400);
+    box-shadow: 0 0 0 2px rgba(45, 107, 228, 0.2);
+}
