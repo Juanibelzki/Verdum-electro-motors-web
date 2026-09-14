@@ -28,8 +28,8 @@ function sanitizeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
-async function loadStockFromSupabase() {
-    stockCache = null;
+async function loadStockFromSupabase(forceRefresh = false) {
+    if (stockCache && !forceRefresh) return stockCache;
 
     // 1) Traer TODOS los vehículos de golpe, sin filtro de categoría
     const { data: vehicles, error } = await supabaseClient
@@ -110,9 +110,6 @@ async function loadStockFromSupabase() {
     });
 
     // 4) Clasificar: prioridad SECCIÓN MANUAL > auto-detect por tipo/km
-    console.group("🔍 [Auditoría Stock Supabase]");
-    console.log("Total registros crudos recibidos:", allVehicles.length);
-
     const seenIds = new Set();
     const seenKeys = new Set();
     const uniques = [];
@@ -123,13 +120,8 @@ async function loadStockFromSupabase() {
             seenIds.add(v.uuid);
             seenKeys.add(canonicalKey);
             uniques.push(v);
-        } else {
-            console.warn("⚠️ Registro duplicado filtrado en frontend:", v.uuid, canonicalKey);
         }
     }
-
-    console.log("Total vehículos únicos renderizados:", uniques.length);
-    console.groupEnd();
 
     const autos0km = uniques.filter(v => {
         if (v.seccion === '0km') return true;
@@ -316,6 +308,7 @@ function renderVehicles(vehicles, category) {
                     class="vehicle-image carousel-img"
                     data-index="0"
                     loading="lazy"
+                    decoding="async"
                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%231a1d21%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%22200%22 y=%22140%22 text-anchor=%22middle%22 fill=%22%236b7280%22 font-family=%22system-ui%22 font-size=%2214%22%3EFotos disponibles%3Cbr/%3Ea la brevedad%3C/text%3E%3C/svg%3E'"
                 >
                 ${carouselControls}
@@ -536,14 +529,14 @@ function applyContentData(content, services, testimonios) {
 // ============================================
 // 1. NAVBAR STICKY CON SCROLL
 // ============================================
+const navbar = document.querySelector('.navbar');
 window.addEventListener('scroll', () => {
-    const navbar = document.querySelector('.navbar');
     if (window.scrollY > 50) {
         navbar.classList.add('scrolled');
     } else {
         navbar.classList.remove('scrolled');
     }
-});
+}, { passive: true });
 
 // ============================================
 // 2. SMOOTH SCROLL PARA LINKS
@@ -747,14 +740,24 @@ function enviarWA(event) {
 // ============================================
 // 8. BOTONES CTA (GENERAL)
 // ============================================
+// Pre-create ripple style once
+if (!document.querySelector('style[data-ripple]')) {
+    const rippleStyle = document.createElement('style');
+    rippleStyle.setAttribute('data-ripple', 'true');
+    rippleStyle.textContent = `
+        @keyframes ripple {
+            to { width: 300px; height: 300px; opacity: 0; }
+        }
+    `;
+    document.head.appendChild(rippleStyle);
+}
+
 document.querySelectorAll('.nav-cta, .btn-primary, .btn-secondary').forEach(btn => {
-    // Agregar efecto ripple al hacer clic
     btn.addEventListener('mousedown', function(e) {
         const rect = this.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
-        // Crear efecto ripple
         const ripple = document.createElement('span');
         ripple.style.cssText = `
             position: absolute;
@@ -768,27 +771,10 @@ document.querySelectorAll('.nav-cta, .btn-primary, .btn-secondary').forEach(btn 
             pointer-events: none;
         `;
         
-        // Agregar animación ripple si no existe
-        if (!document.querySelector('style[data-ripple]')) {
-            const rippleStyle = document.createElement('style');
-            rippleStyle.setAttribute('data-ripple', 'true');
-            rippleStyle.innerHTML = `
-                @keyframes ripple {
-                    to {
-                        width: 100px;
-                        height: 100px;
-                        opacity: 0;
-                    }
-                }
-            `;
-            document.head.appendChild(rippleStyle);
-        }
-        
         this.style.position = 'relative';
         this.style.overflow = 'hidden';
         this.appendChild(ripple);
         
-        // Remover ripple después de animación
         setTimeout(() => ripple.remove(), 600);
     });
 });
@@ -876,48 +862,8 @@ if (document.readyState === 'loading') {
 }
 
 // ============================================
-// 12. DETECT DARK/LIGHT MODE PREFERENCE
+// 13. INICIALIZACIÓN GENERAL
 // ============================================
-function detectColorScheme() {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark-mode');
-    }
-}
-
-detectColorScheme();
-
-// ============================================
-// 13. PERFORMANCE: Lazy Loading de imágenes
-// ============================================
-if ('IntersectionObserver' in window) {
-    const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src || img.src;
-                img.classList.add('loaded');
-                imageObserver.unobserve(img);
-            }
-        });
-    });
-    
-    document.querySelectorAll('img[data-src]').forEach(img => {
-        imageObserver.observe(img);
-    });
-}
-
-// ============================================
-// 16. INICIALIZACIÓN GENERAL
-// ============================================
-console.log('✅ Verdun Automotores - Script cargado correctamente');
-
-// Log de información
-console.log(`
-╔════════════════════════════════════╗
-║  VERDUN AUTOMOTORES - LANDING PAGE║
-║  Dark Mode Premium - 2024          ║
-╚════════════════════════════════════╝
-`);
 
 // ============================================
 // 17. EVENT LISTENERS ADICIONALES
