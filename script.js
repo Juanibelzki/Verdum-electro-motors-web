@@ -18,6 +18,16 @@ const PLACEHOLDER_IMG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000
 
 let stockCache = null;
 
+function sanitizeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 async function loadStockFromSupabase() {
     stockCache = null;
 
@@ -172,7 +182,7 @@ function getVehicleDisplayName(vehicle) {
     return vehicle.nombre || `${vehicle.marca} ${vehicle.modelo}`;
 }
 
-const WHATSAPP_NUMBER = '543795300020';
+const WHATSAPP_NUMBER = '5493795300020';
 
 function consultarWhatsApp(vehicleName, año, customMsg) {
     const mensaje = customMsg || `¡Hola! Quiero consultar el precio y disponibilidad del ${vehicleName}${año ? ' (' + año + ')' : ''} que vi en su web.`;
@@ -272,7 +282,7 @@ function renderVehicles(vehicles, category) {
 
         const displayName = getVehicleDisplayName(vehicle);
         const descripcionEl = vehicle.descripcion
-            ? `<p class="vehicle-description">${vehicle.descripcion}</p>`
+            ? `<p class="vehicle-description">${sanitizeHtml(vehicle.descripcion)}</p>`
             : '';
         const safeName = String(displayName).replace(/'/g, "\\'");
         const imageSrc = vehicle.image;
@@ -302,7 +312,7 @@ function renderVehicles(vehicles, category) {
                 ${tipoBadge}
                 <img 
                     src="${imageSrc}" 
-                    alt="${displayName}" 
+                    alt="${sanitizeHtml(displayName)}" 
                     class="vehicle-image carousel-img"
                     data-index="0"
                     loading="lazy"
@@ -311,17 +321,17 @@ function renderVehicles(vehicles, category) {
                 ${carouselControls}
             </div>
             <div class="vehicle-info">
-                <h4 class="vehicle-title">${displayName}</h4>
+                <h4 class="vehicle-title">${sanitizeHtml(displayName)}</h4>
                 ${descripcionEl}
                 <div class="vehicle-details">
                     <span class="detail-item">
-                        <strong>Año:</strong> ${vehicle.año}
+                        <strong>Año:</strong> ${sanitizeHtml(String(vehicle.año))}
                     </span>
                     <span class="detail-item">
-                        <strong>KM:</strong> ${vehicle.km || '—'}
+                        <strong>KM:</strong> ${sanitizeHtml(vehicle.km || '—')}
                     </span>
                     <span class="detail-item">
-                        <strong>Color:</strong> ${vehicle.color}
+                        <strong>Color:</strong> ${sanitizeHtml(vehicle.color)}
                     </span>
                 </div>
                 <button 
@@ -360,14 +370,6 @@ function changeVehiclePhoto(cardId, dir) {
 
 window.prevVehiclePhoto = (cardId) => changeVehiclePhoto(cardId, -1);
 window.nextVehiclePhoto = (cardId) => changeVehiclePhoto(cardId, 1);
-
-
-/**
- * Formatea el precio en pesos argentinos
- */
-function formatPrice(price) {
-    return `$${price.toLocaleString('es-AR')}`;
-}
 
 // ============================================
 // EVENT LISTENERS PARA MODAL
@@ -529,12 +531,6 @@ function applyContentData(content, services, testimonios) {
             if (roleEl) roleEl.textContent = t.role;
         });
     }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadAdminContent);
-} else {
-    loadAdminContent();
 }
 
 // ============================================
@@ -800,53 +796,6 @@ document.querySelectorAll('.nav-cta, .btn-primary, .btn-secondary').forEach(btn 
 // ============================================
 // 9. BOTÓN WHATSAPP FLOTANTE (OPCIONAL)
 // ============================================
-function createFloatingWhatsAppButton() {
-    // Verificar si ya existe
-    if (document.querySelector('.whatsapp-floating')) return;
-    
-    const button = document.createElement('a');
-    button.href = `https://wa.me/${WHATSAPP_NUMBER}`;
-    button.target = '_blank';
-    button.className = 'whatsapp-floating';
-    button.innerHTML = '💬';
-    button.style.cssText = `
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #a8873d 0%, #c9a84c 30%, #f0c96b 60%, #c9a84c 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        box-shadow: 0 4px 24px rgba(201,168,76,0.4);
-        z-index: 999;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    `;
-    
-    // Hover effect
-    button.addEventListener('mouseenter', function() {
-        this.style.transform = 'scale(1.1)';
-        this.style.boxShadow = '0 8px 40px rgba(201,168,76,0.6)';
-    });
-    
-    button.addEventListener('mouseleave', function() {
-        this.style.transform = 'scale(1)';
-        this.style.boxShadow = '0 4px 24px rgba(201,168,76,0.4)';
-    });
-    
-    document.body.appendChild(button);
-}
-
-// Crear botón flotante después de cargar
-window.addEventListener('load', () => {
-    // createFloatingWhatsAppButton();
-});
-
-// ============================================
 // 10. MANEJO DE FORMULARIO DE CONTACTO
 // ============================================
 function setupContactForm() {
@@ -872,11 +821,6 @@ function setupContactForm() {
             }
         });
     });
-    
-    // Submit
-    form.addEventListener('submit', function(e) {
-        // La función enviarWA ya maneja esto
-    });
 }
 
 if (document.readyState === 'loading') {
@@ -892,9 +836,9 @@ function setupMobileMenu() {
     const hamburger = document.querySelector('.hamburger');
     if (!hamburger) return;
     
+    const navLinks = document.querySelector('.nav-links');
+
     hamburger.addEventListener('click', function() {
-        const navLinks = document.querySelector('.nav-links');
-        
         if (navLinks.style.display === 'flex') {
             navLinks.style.display = 'none';
         } else {
@@ -960,43 +904,6 @@ if ('IntersectionObserver' in window) {
     document.querySelectorAll('img[data-src]').forEach(img => {
         imageObserver.observe(img);
     });
-}
-
-// ============================================
-// 14. ANIMACIÓN DE SCROLL SUAVE
-// ============================================
-document.addEventListener('wheel', (e) => {
-    // Este evento se dispara pero no interrumpimos el scroll
-    // Solo para tracking si es necesario
-}, { passive: true });
-
-// ============================================
-// 15. UTILIDADES Y HELPERS
-// ============================================
-
-// Función para animar números
-function animateValue(element, start, end, duration) {
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        element.innerHTML = Math.floor(progress * (end - start) + start);
-        if (progress < 1) {
-            window.requestAnimationFrame(step);
-        }
-    };
-    window.requestAnimationFrame(step);
-}
-
-// Función para verificar si un elemento está en viewport
-function isInViewport(element) {
-    const rect = element.getBoundingClientRect();
-    return (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    );
 }
 
 // ============================================

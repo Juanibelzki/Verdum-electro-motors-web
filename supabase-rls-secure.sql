@@ -201,9 +201,11 @@ CREATE POLICY "categories_delete_admin" ON categories
 -- 8) NUEVAS POLÍTICAS SEGURAS - ADMIN_CONTENT
 -- ============================================
 
--- Público: solo lectura (para financiación, etc.)
+-- Público: solo lectura de keys específicas (NO password ni sesiones)
 CREATE POLICY "admin_content_select_public" ON admin_content
-    FOR SELECT USING (true);
+    FOR SELECT USING (
+        key NOT LIKE 'admin_password%' AND key NOT LIKE 'session_%'
+    );
 
 -- Admin: INSERT/UPDATE (requiere sesión)
 CREATE POLICY "admin_content_insert_admin" ON admin_content
