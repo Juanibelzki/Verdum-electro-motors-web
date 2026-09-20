@@ -153,7 +153,7 @@ const SECTION_TITLES = {
     servicios: 'Editar Servicios',
     financiacion: 'Editar Financiación',
     contenido: 'Editar Contenido',
-    imagenes: 'Gestionar Imágenes',
+    imagenes: 'Stocks',
     testimonios: 'Editar Testimonios',
     estadisticas: 'Cambios Realizados'
 };
@@ -183,6 +183,7 @@ async function initAdmin() {
 
     if (isAuthenticated) {
         showAdminPanel();
+        await loadImagesSection();
         await loadAllData();
     } else {
         showLoginScreen();
@@ -246,8 +247,9 @@ async function handleLogin(e) {
         localStorage.setItem('adminAuthenticated', 'true');
         errorDiv.style.display = 'none';
         try {
-            await loadAllData();
             showAdminPanel();
+            await loadImagesSection();
+            await loadAllData();
         } catch (err) {
             console.error('loadAllData failed:', err);
             showLoginScreen();
