@@ -390,30 +390,14 @@
                 </div>
             </section>
 
-            <!-- Sección: Imágenes -->
+            <!-- Sección: Stocks -->
             <section id="imagenes-section" class="admin-section active">
                 <div class="admin-content">
-                    <h2>Gestionar Imágenes</h2>
-                    <p class="section-description">Logo, imágenes del sitio y fotos del stock de vehículos</p>
+                    <h2>Stocks</h2>
+                    <p class="section-description">Gestión del inventario de vehículos</p>
 
                     <div class="images-subsection">
-                        <h3 class="subsection-title">A) Logo de la empresa</h3>
-                        <div class="logo-upload-block">
-                            <div class="image-preview-box" id="logoPreviewBox">
-                                <img id="logoPreview" src="" alt="Logo actual" class="preview-img" style="display: none;">
-                                <span class="preview-placeholder" id="logoPlaceholder">Sin logo personalizado</span>
-                            </div>
-                            <div class="upload-controls">
-                                <input type="file" id="logoFileInput" accept="image/*" hidden>
-                                <button type="button" class="btn-update" id="logoUploadBtn">📤 Subir logo</button>
-                                <button type="button" class="btn-secondary-outline" id="logoRemoveBtn">🗑️ Eliminar</button>
-                                <button type="button" class="btn-update" id="logoSaveBtn">✓ Guardar logo</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="images-subsection">
-                        <h3 class="subsection-title">B) Inventario completo (Supabase)</h3>
+                        <h3 class="subsection-title">Inventario completo (Supabase)</h3>
                         <p class="subsection-hint">Todos los vehículos sincronizados desde la base de datos</p>
                         <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
                             <button type="button" class="btn-update" onclick="refreshVehiclesTable()">🔄 Refrescar datos desde Supabase</button>
