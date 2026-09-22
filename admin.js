@@ -220,6 +220,79 @@ function bindGlobalActions() {
     window.deleteVehicle = deleteVehicle;
     window.deleteVehicleFromTable = deleteVehicleFromTable;
     window.purgeSupabaseVehicles = purgeSupabaseVehicles;
+    window.retryPendingSyncs = retryPendingSyncs;
+    window.refreshVehiclesTable = refreshVehiclesTable;
+    window.massPublishVehicles = massPublishVehicles;
+    window.filterVehicleCards = filterVehicleCards;
+    window.closeQuickPhotoModal = closeQuickPhotoModal;
+    window.setQuickPhotoFilter = setQuickPhotoFilter;
+    window.updateVehicleSeccion = updateVehicleSeccion;
+}
+
+async function retryPendingSyncs() {
+    const customVehicles = loadStoredData(CUSTOM_VEHICLES_KEY, []);
+    const idMap = loadStoredData('supabase_vehicle_map', {});
+    const pending = customVehicles.filter(v => !v.uuid && !idMap[v.id]);
+
+    if (pending.length === 0) {
+        alert('✅ No hay vehículos pendientes de sincronizar.');
+        return;
+    }
+
+    let ok = 0, fail = 0;
+    const errors = [];
+
+    for (const v of pending) {
+        try {
+            const catSlug = v.category || 'autos-usados';
+            const catId = await resolveCategoryId(catSlug);
+            const slugBase = `${v.marca}-${v.modelo}-${v.anio}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+            let finalSlug = slugBase;
+            const { data: existing } = await supabaseClient.from('vehicles').select('id').eq('category_id', catId).eq('slug', finalSlug).maybeSingle();
+            if (existing) {
+                let n = 2;
+                while (true) {
+                    finalSlug = `${slugBase}-${n}`;
+                    const { data: chk } = await supabaseClient.from('vehicles').select('id').eq('category_id', catId).eq('slug', finalSlug).maybeSingle();
+                    if (!chk) break;
+                    n++;
+                }
+            }
+            const payload = {
+                category_id: catId,
+                slug: finalSlug,
+                nombre: v.nombre || `${v.marca} ${v.modelo}`,
+                marca: v.marca,
+                modelo: v.modelo,
+                año: v.anio,
+                km: v.km || '0 KM',
+                color: v.color || '—',
+                descripcion: v.descripcion || '',
+                tipo: v.tipo || 'auto',
+                seccion: v.seccion || 'usados',
+                status: 'pendiente_fotos',
+                whatsapp_msg: v.whatsapp_msg || `¡Hola! Quiero consultar el precio y disponibilidad del ${v.marca} ${v.modelo} (${v.anio || ''}) que vi en su web.`,
+                activo: true
+            };
+            const { data, error } = await supabaseClient.from('vehicles').insert([payload]).select().single();
+            if (error) throw error;
+            idMap[v.id] = data.id;
+            v.uuid = data.id;
+            saveStoredData('supabase_vehicle_map', idMap);
+            ok++;
+        } catch (e) {
+            fail++;
+            errors.push(`${v.marca} ${v.modelo}: ${e.message}`);
+        }
+    }
+
+    saveStoredData(CUSTOM_VEHICLES_KEY, customVehicles);
+
+    let msg = `✅ Sincronizados: ${ok}\n`;
+    if (fail > 0) msg += `❌ Fallaron: ${fail}\n\n${errors.join('\n')}`;
+    alert(msg);
+    await renderVehiclesEditor();
+    await refreshVehiclesTable();
 }
 
 async function handleLogin(e) {
@@ -2151,7 +2224,8 @@ async function saveNewVehicle() {
         idMap[newId] = data.id;
         saveStoredData('supabase_vehicle_map', idMap);
     } catch (sbErr) {
-        console.warn('Supabase insert failed:', sbErr.message);
+        console.error('Supabase insert failed:', sbErr);
+        alert('⚠️ No se pudo guardar en Supabase:\n\n' + sbErr.message + '\n\nEl vehículo quedó guardado localmente. Usá "🔄 Reintentar sync" para volver a intentar.');
     }
 
     // --- localStorage fallback ---
