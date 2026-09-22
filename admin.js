@@ -2103,30 +2103,9 @@ async function saveNewVehicle() {
     // --- SUPABASE ---
     let supabaseId = null;
     try {
-        let finalSlug = slug;
-        const { data: existing } = await supabaseClient
-            .from('vehicles')
-            .select('id')
-            .eq('category_id', catId)
-            .eq('slug', finalSlug)
-            .maybeSingle();
-        if (existing) {
-            let n = 2;
-            while (true) {
-                finalSlug = `${slug}-${n}`;
-                const { data: check } = await supabaseClient
-                    .from('vehicles')
-                    .select('id')
-                    .eq('category_id', catId)
-                    .eq('slug', finalSlug)
-                    .maybeSingle();
-                if (!check) break;
-                n++;
-            }
-        }
         const payload = {
             category_id: catId,
-            slug: finalSlug,
+            slug,
             nombre,
             marca,
             modelo,
