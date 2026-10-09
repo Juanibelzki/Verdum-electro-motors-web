@@ -261,27 +261,27 @@ function closeStockModal() {
  */
 function renderVehicles(vehicles, category) {
     const container = document.getElementById('stockVehiclesContainer');
-    container.innerHTML = '';
 
     if (!vehicles || vehicles.length === 0) {
         container.innerHTML = '<p class="empty-stock">No hay vehículos disponibles en esta categoría</p>';
         return;
     }
 
-    vehicles.forEach(vehicle => {
-        const vehicleCard = document.createElement('div');
-        vehicleCard.className = 'vehicle-card';
-
+    // Acumular todo el HTML en un solo string para un único reflow
+    let html = '';
+    for (let i = 0; i < vehicles.length; i++) {
+        const vehicle = vehicles[i];
         const displayName = getVehicleDisplayName(vehicle);
+        const fotos = vehicle.fotos || [];
+        const firstPhoto = fotos[0];
         const descripcionEl = vehicle.descripcion
             ? `<p class="vehicle-description">${sanitizeHtml(vehicle.descripcion)}</p>`
             : '';
         const safeName = String(displayName).replace(/'/g, "\\'");
-        const imageSrc = vehicle.image;
+        const imageSrc = (firstPhoto && firstPhoto.url_thumb) || vehicle.image;
         const whatsappMsg = vehicle.whatsappMsg
             ? String(vehicle.whatsappMsg).replace(/'/g, "\\'")
             : '';
-        const fotos = vehicle.fotos || [];
         const cardId = vehicle.id;
         const carouselControls = fotos.length > 1 ? `
             <button class="carousel-btn prev" onclick="event.stopPropagation(); prevVehiclePhoto(${cardId})">&#10094;</button>
@@ -298,45 +298,53 @@ function renderVehicles(vehicles, category) {
             ? '<span class="vehicle-badge badge-moto">Moto</span>'
             : '';
 
-        vehicleCard.innerHTML = `
-            <div class="vehicle-image-wrapper" data-card-id="${cardId}">
-                ${condicionBadge}
-                ${tipoBadge}
-                <img 
-                    src="${imageSrc}" 
-                    alt="${sanitizeHtml(displayName)}" 
-                    class="vehicle-image carousel-img"
-                    data-index="0"
-                    loading="lazy"
-                    decoding="async"
-                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%231a1d21%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%22200%22 y=%22140%22 text-anchor=%22middle%22 fill=%22%236b7280%22 font-family=%22system-ui%22 font-size=%2214%22%3EFotos disponibles%3Cbr/%3Ea la brevedad%3C/text%3E%3C/svg%3E'"
-                >
-                ${carouselControls}
-            </div>
-            <div class="vehicle-info">
-                <h4 class="vehicle-title">${sanitizeHtml(displayName)}</h4>
-                ${descripcionEl}
-                <div class="vehicle-details">
-                    <span class="detail-item">
-                        <strong>Año:</strong> ${sanitizeHtml(String(vehicle.año))}
-                    </span>
-                    <span class="detail-item">
-                        <strong>KM:</strong> ${sanitizeHtml(vehicle.km || '—')}
-                    </span>
-                    <span class="detail-item">
-                        <strong>Color:</strong> ${sanitizeHtml(vehicle.color)}
-                    </span>
+        html += `
+            <div class="vehicle-card">
+                <div class="vehicle-image-wrapper" data-card-id="${cardId}">
+                    ${condicionBadge}
+                    ${tipoBadge}
+                    <img
+                        src="${imageSrc}"
+                        alt="${sanitizeHtml(displayName)}"
+                        class="vehicle-image carousel-img"
+                        data-index="0"
+                        fetchpriority="${i === 0 ? 'high' : 'auto'}"
+                        loading="${i === 0 ? 'eager' : 'lazy'}"
+                        decoding="async"
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%231a1d21%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%22200%22 y=%22140%22 text-anchor=%22middle%22 fill=%22%236b7280%22 font-family=%22system-ui%22 font-size=%2214%22%3EFotos disponibles%3Cbr/%3Ea la brevedad%3C/text%3E%3C/svg%3E'"
+                    >
+                    ${carouselControls}
                 </div>
-                <button 
-                    class="btn-consultar" 
-                    onclick="consultarWhatsApp('${safeName}', ${vehicle.año || 0}, '${whatsappMsg}')"
-                >
-                    Consultar por WhatsApp
-                </button>
+                <div class="vehicle-info">
+                    <h4 class="vehicle-title">${sanitizeHtml(displayName)}</h4>
+                    ${descripcionEl}
+                    <div class="vehicle-details">
+                        <span class="detail-item">
+                            <strong>Año:</strong> ${sanitizeHtml(String(vehicle.año))}
+                        </span>
+                        <span class="detail-item">
+                            <strong>KM:</strong> ${sanitizeHtml(vehicle.km || '—')}
+                        </span>
+                        <span class="detail-item">
+                            <strong>Color:</strong> ${sanitizeHtml(vehicle.color)}
+                        </span>
+                    </div>
+                    <button
+                        class="btn-consultar"
+                        onclick="consultarWhatsApp('${safeName}', ${vehicle.año || 0}, '${whatsappMsg}')"
+                    >
+                        Consultar por WhatsApp
+                    </button>
+                </div>
             </div>
         `;
+    }
 
-        container.appendChild(vehicleCard);
+    // Un solo reflow: insertar todo el HTML de golpe
+    requestAnimationFrame(() => {
+        container.innerHTML = html;
+        // Si hay inicializaciones de observers o animaciones, agregarlas aquí
+        // setupCardAnimations();
     });
 }
 
@@ -481,49 +489,57 @@ function applyFinancingData(financing) {
 }
 
 function applyContentData(content, services, testimonios) {
-    if (content && Object.keys(content).length > 0) {
-        const heroTitle = document.querySelector('.hero-title');
-        const heroSubtitle = document.querySelector('.hero-subtitle');
-        const statNumbers = document.querySelectorAll('.stat-number');
-        if (heroTitle) {
-            heroTitle.innerHTML = `${content.heroTitle}<br><span class="highlight">${content.heroHighlight}</span>`;
-        }
-        if (heroSubtitle) heroSubtitle.textContent = content.heroSubtitle;
-        if (statNumbers[0]) statNumbers[0].textContent = content.statYears;
-        if (statNumbers[1]) statNumbers[1].textContent = content.statVehicles;
-    }
+    const hasContent = content && Object.keys(content).length > 0;
+    const hasServices = services && services.length > 0;
+    const hasTestimonios = testimonios && testimonios.length > 0;
+    if (!hasContent && !hasServices && !hasTestimonios) return;
 
-    if (services && services.length > 0) {
-        const serviceCards = document.querySelectorAll('.service-card-flip');
-        serviceCards.forEach((card, index) => {
-            const service = services[index];
-            if (!service || !card) return;
-            const backCard = card.querySelector('.service-card-back');
-            if (!backCard) return;
-            const p = backCard.querySelector('p');
-            const featuresDiv = backCard.querySelector('.service-features');
-            if (p) p.textContent = service.desc;
-            if (featuresDiv && service.features) {
-                featuresDiv.innerHTML = service.features.map(f =>
-                    `<span class="feature-tag">${f}</span>`
-                ).join('');
+    // Agrupar todas las escrituras DOM en un solo frame para evitar reflows
+    requestAnimationFrame(() => {
+        if (hasContent) {
+            const heroTitle = document.querySelector('.hero-title');
+            const heroSubtitle = document.querySelector('.hero-subtitle');
+            const statNumbers = document.querySelectorAll('.stat-number');
+            if (heroTitle) {
+                heroTitle.innerHTML = `${content.heroTitle}<br><span class="highlight">${content.heroHighlight}</span>`;
             }
-        });
-    }
+            if (heroSubtitle) heroSubtitle.textContent = content.heroSubtitle;
+            if (statNumbers[0]) statNumbers[0].textContent = content.statYears;
+            if (statNumbers[1]) statNumbers[1].textContent = content.statVehicles;
+        }
 
-    if (testimonios && testimonios.length > 0) {
-        const testimonioCards = document.querySelectorAll('.testimonio-card');
-        testimonioCards.forEach((card, index) => {
-            const t = testimonios[index];
-            if (!t || !card) return;
-            const textEl = card.querySelector('.testimonio-text');
-            const nameEl = card.querySelector('.author-name');
-            const roleEl = card.querySelector('.author-role');
-            if (textEl) textEl.textContent = t.text;
-            if (nameEl) nameEl.textContent = t.author;
-            if (roleEl) roleEl.textContent = t.role;
-        });
-    }
+        if (hasServices) {
+            const serviceCards = document.querySelectorAll('.service-card-flip');
+            serviceCards.forEach((card, index) => {
+                const service = services[index];
+                if (!service || !card) return;
+                const backCard = card.querySelector('.service-card-back');
+                if (!backCard) return;
+                const p = backCard.querySelector('p');
+                const featuresDiv = backCard.querySelector('.service-features');
+                if (p) p.textContent = service.desc;
+                if (featuresDiv && service.features) {
+                    featuresDiv.innerHTML = service.features.map(f =>
+                        `<span class="feature-tag">${f}</span>`
+                    ).join('');
+                }
+            });
+        }
+
+        if (hasTestimonios) {
+            const testimonioCards = document.querySelectorAll('.testimonio-card');
+            testimonioCards.forEach((card, index) => {
+                const t = testimonios[index];
+                if (!t || !card) return;
+                const textEl = card.querySelector('.testimonio-text');
+                const nameEl = card.querySelector('.author-name');
+                const roleEl = card.querySelector('.author-role');
+                if (textEl) textEl.textContent = t.text;
+                if (nameEl) nameEl.textContent = t.author;
+                if (roleEl) roleEl.textContent = t.role;
+            });
+        }
+    });
 }
 
 // ============================================
@@ -578,22 +594,10 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
-// Observar todos los elementos con fade-in
+// Observar todos los elementos con fade-in (sin writes al DOM, CSS maneja el estado inicial)
 document.querySelectorAll('.fade-in').forEach(el => {
-    // Agregar estilo inicial
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(40px)';
     observer.observe(el);
 });
-
-// Estilo para visible
-const style = document.createElement('style');
-style.innerHTML = `
-    .fade-in.visible {
-        animation: fade-in-up 0.6s ease forwards !important;
-    }
-`;
-document.head.appendChild(style);
 
 // ============================================
 // 4. FLIP CARDS EN MOBILE (TAP)
@@ -665,30 +669,31 @@ document.querySelectorAll('.stat-number').forEach(el => {
 function createParticles() {
     const container = document.getElementById('particles');
     if (!container) return;
-    
-    // Limpiar partículas previas
+
     container.innerHTML = '';
-    
-    // Crear 50 partículas
+
+    // Usar DocumentFragment para un único reflow al insertar 50 partículas
+    const fragment = document.createDocumentFragment();
     for (let i = 0; i < 50; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
-        
-        // Posición aleatoria
+
         const randomX = Math.random() * 100;
         const randomY = Math.random() * 100;
         const randomDelay = Math.random() * 20;
         const randomDuration = 15 + Math.random() * 10;
-        
+
         particle.style.cssText = `
             left: ${randomX}%;
             top: ${randomY}%;
             animation-delay: ${randomDelay}s;
             animation-duration: ${randomDuration}s;
         `;
-        
-        container.appendChild(particle);
+
+        fragment.appendChild(particle);
     }
+
+    container.appendChild(fragment);
 }
 
 // Crear partículas al cargar
@@ -757,25 +762,28 @@ document.querySelectorAll('.nav-cta, .btn-primary, .btn-secondary').forEach(btn 
         const rect = this.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        
-        const ripple = document.createElement('span');
-        ripple.style.cssText = `
-            position: absolute;
-            left: ${x}px;
-            top: ${y}px;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            animation: ripple 0.6s ease-out;
-            pointer-events: none;
-        `;
-        
-        this.style.position = 'relative';
-        this.style.overflow = 'hidden';
-        this.appendChild(ripple);
-        
-        setTimeout(() => ripple.remove(), 600);
+
+        // Diferir escrituras DOM al siguiente frame para evitar forced reflow
+        requestAnimationFrame(() => {
+            const ripple = document.createElement('span');
+            ripple.style.cssText = `
+                position: absolute;
+                left: ${x}px;
+                top: ${y}px;
+                width: 0;
+                height: 0;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.5);
+                animation: ripple 0.6s ease-out;
+                pointer-events: none;
+            `;
+
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+
+            setTimeout(() => ripple.remove(), 600);
+        });
     });
 });
 

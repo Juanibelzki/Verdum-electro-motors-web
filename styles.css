@@ -315,9 +315,13 @@ h1, h2, h3, h4, h5, h6 {
                  0 0 40px rgba(37,211,102,0.15);
 }
 
-/* Fade in animation */
+/* Fade in animation — estado inicial manejado por CSS, sin writes en JS */
 .fade-in {
     opacity: 0;
+    transform: translateY(40px);
+}
+
+.fade-in.visible {
     animation: fade-in-up 0.6s ease forwards;
 }
 
