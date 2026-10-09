@@ -916,5 +916,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
+// 20. INICIALIZACIÓN DE MODAL DE FICHA TÉCNICA
+// ============================================
+
+// Delegación de clicks en cards del modal stock para abrir ficha técnica
+document.addEventListener('DOMContentLoaded', initVehicleModalFromStock);
+
+/* También exponemos la función openVehicleModal para uso externo (admin, etc.) */
+window.openVehicleModal = openVehicleModal;
+
+// ============================================
 // FIN DEL SCRIPT
 // ============================================
