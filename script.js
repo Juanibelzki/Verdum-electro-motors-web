@@ -299,7 +299,7 @@ function renderVehicles(vehicles, category) {
             : '';
 
         html += `
-            <div class="vehicle-card">
+            <div class="vehicle-card" data-vehicle-id="${cardId}">
                 <div class="vehicle-image-wrapper" data-card-id="${cardId}">
                     ${condicionBadge}
                     ${tipoBadge}
@@ -329,12 +329,20 @@ function renderVehicles(vehicles, category) {
                             <strong>Color:</strong> ${sanitizeHtml(vehicle.color)}
                         </span>
                     </div>
-                    <button
-                        class="btn-consultar"
-                        onclick="consultarWhatsApp('${safeName}', ${vehicle.año || 0}, '${whatsappMsg}')"
-                    >
-                        Consultar por WhatsApp
-                    </button>
+                    <div class="vehicle-actions">
+                        <button
+                            class="btn-detalle"
+                            onclick="event.stopPropagation(); openVehicleModal(${cardId})"
+                        >
+                            Ver detalles / Fotos
+                        </button>
+                        <button
+                            class="btn-consultar"
+                            onclick="event.stopPropagation(); consultarWhatsApp('${safeName}', ${vehicle.año || 0}, '${whatsappMsg}')"
+                        >
+                            Consultar por WhatsApp
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -388,9 +396,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Cerrar modal con tecla Escape
+    // Cerrar modal con tecla Escape (no cierra el stock si el detalle esta abierto)
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+        if (e.key !== 'Escape') return;
+        const vehicleModal = document.getElementById('vehicle-modal');
+        if (vehicleModal && vehicleModal.style.display === 'flex') return;
+        if (modal && modal.style.display === 'flex') {
             closeStockModal();
         }
     });
@@ -916,14 +927,157 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// 20. INICIALIZACIÓN DE MODAL DE FICHA TÉCNICA
+// 20. MODAL DETALLE / GALERÍA DE VEHÍCULO
 // ============================================
 
-// Delegación de clicks en cards del modal stock para abrir ficha técnica
-document.addEventListener('DOMContentLoaded', initVehicleModalFromStock);
+let currentModalFotos = [];
 
-/* También exponemos la función openVehicleModal para uso externo (admin, etc.) */
+/**
+ * Busca un vehículo por id en la lista activa y, si no está, en todo el inventario
+ */
+function findVehicleById(vehicleId) {
+    let vehicle = currentStockVehicles.find(v => v.id === Number(vehicleId));
+    if (vehicle) return vehicle;
+
+    try {
+        const inventory = stockCache;
+        if (inventory) {
+            for (const key of Object.keys(inventory)) {
+                const found = (inventory[key].vehicles || []).find(v => v.id === Number(vehicleId));
+                if (found) return found;
+            }
+        }
+    } catch { /* inventario no disponible */ }
+    return null;
+}
+
+/**
+ * Abre el modal de detalle con galería y ficha del vehículo
+ */
+function openVehicleModal(vehicleId) {
+    const modal = document.getElementById('vehicle-modal');
+    const vehicle = findVehicleById(vehicleId);
+    if (!modal || !vehicle) return;
+
+    const displayName = getVehicleDisplayName(vehicle);
+    const fotos = (vehicle.fotos || []).filter(f => f && f.url);
+    currentModalFotos = fotos;
+
+    // Galeria: imagen principal + miniaturas (un solo innerHTML = un reflow)
+    const mainImage = document.getElementById('vmMainImage');
+    mainImage.src = (fotos[0] && fotos[0].url) || vehicle.image || PLACEHOLDER_IMG;
+    mainImage.alt = displayName;
+
+    const thumbs = document.getElementById('vmThumbs');
+    if (fotos.length > 1) {
+        thumbs.innerHTML = fotos.map((f, i) => `
+            <img
+                class="vm-thumb${i === 0 ? ' active' : ''}"
+                src="${f.url_thumb || f.url}"
+                alt="Foto ${i + 1} de ${sanitizeHtml(displayName)}"
+                loading="lazy"
+                onclick="switchVehicleThumb(${i})"
+            >
+        `).join('');
+        thumbs.style.display = 'flex';
+    } else {
+        thumbs.innerHTML = '';
+        thumbs.style.display = 'none';
+    }
+
+    // Badges de condicion / tipo
+    const badges = document.getElementById('vmBadges');
+    const condicionBadge = vehicle.esCeroKm
+        ? '<span class="vehicle-badge badge-0km">0 KM</span>'
+        : '<span class="vehicle-badge badge-usado">Usado</span>';
+    const tipoBadge = vehicle.esMoto ? '<span class="vehicle-badge badge-moto">Moto</span>' : '';
+    badges.innerHTML = condicionBadge + tipoBadge;
+
+    // Titulo y ficha tecnica
+    document.getElementById('vmTitle').textContent = displayName;
+    document.getElementById('vmDetails').innerHTML = `
+        <span class="vm-detail-item"><strong>Año:</strong> ${sanitizeHtml(String(vehicle.año || '—'))}</span>
+        <span class="vm-detail-item"><strong>KM:</strong> ${sanitizeHtml(vehicle.km || '—')}</span>
+        <span class="vm-detail-item"><strong>Color:</strong> ${sanitizeHtml(vehicle.color || '—')}</span>
+        <span class="vm-detail-item"><strong>Tipo:</strong> ${sanitizeHtml(vehicle.tipo || 'auto')}</span>
+    `;
+
+    const desc = document.getElementById('vmDescription');
+    desc.innerHTML = vehicle.descripcion ? sanitizeHtml(vehicle.descripcion) : '';
+    desc.style.display = vehicle.descripcion ? 'block' : 'none';
+
+    // Enlace WhatsApp directo con el nombre del vehiculo
+    const whatsappBtn = document.getElementById('vmWhatsappBtn');
+    const whatsappText = `Hola, me interesa el vehículo: ${displayName}${vehicle.año ? ' (' + vehicle.año + ')' : ''}`;
+    whatsappBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText)}`;
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Cambia la imagen principal del modal por la miniatura clickeada
+ */
+function switchVehicleThumb(index) {
+    if (!currentModalFotos.length) return;
+    const safeIndex = Math.max(0, Math.min(index, currentModalFotos.length - 1));
+    const foto = currentModalFotos[safeIndex];
+
+    document.getElementById('vmMainImage').src = foto.url;
+    document.querySelectorAll('#vmThumbs .vm-thumb').forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === safeIndex);
+    });
+}
+
+/**
+ * Cierra el modal de detalle. Restaura el scroll solo si el modal de stock tambien esta cerrado.
+ */
+function closeVehicleModal() {
+    const modal = document.getElementById('vehicle-modal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    currentModalFotos = [];
+
+    const stockModal = document.getElementById('stockModal');
+    if (!stockModal || stockModal.style.display !== 'flex') {
+        document.body.style.overflow = 'auto';
+    }
+}
+
 window.openVehicleModal = openVehicleModal;
+window.switchVehicleThumb = switchVehicleThumb;
+window.closeVehicleModal = closeVehicleModal;
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Clic en la card (toda el area) abre el detalle; flechas del carrusel y
+    // botones usan stopPropagation en renderVehicles y no llegan aca
+    const container = document.getElementById('stockVehiclesContainer');
+    if (container) {
+        container.addEventListener('click', (e) => {
+            if (e.target.closest('button, a')) return;
+            const card = e.target.closest('.vehicle-card');
+            if (!card || !card.dataset.vehicleId) return;
+            openVehicleModal(card.dataset.vehicleId);
+        });
+    }
+
+    // Clic en el fondo oscuro cierra el modal de detalle
+    const vehicleModal = document.getElementById('vehicle-modal');
+    if (vehicleModal) {
+        vehicleModal.addEventListener('click', (e) => {
+            if (e.target === vehicleModal) closeVehicleModal();
+        });
+    }
+
+    // Escape: primero el detalle, luego el stock
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        if (vehicleModal && vehicleModal.style.display === 'flex') {
+            e.stopPropagation();
+            closeVehicleModal();
+        }
+    }, true);
+});
 
 // ============================================
 // FIN DEL SCRIPT

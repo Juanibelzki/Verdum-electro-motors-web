@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=53">
+    <link rel="stylesheet" href="styles.css?v=54">
 </head>
 <body>
     <!-- ============================================
@@ -527,8 +527,28 @@
         </div>
     </footer>
 
+    <!-- ============================================
+         MODAL DETALLE / GALERÍA DE VEHÍCULO
+    ============================================ -->
+    <div id="vehicle-modal" class="vm-overlay" style="display: none;">
+        <div class="vm-card" role="dialog" aria-modal="true" aria-labelledby="vmTitle">
+            <button class="vm-close" onclick="closeVehicleModal()" aria-label="Cerrar detalle">&times;</button>
+            <div class="vm-gallery">
+                <img id="vmMainImage" class="vm-main-image" src="" alt="">
+                <div class="vm-thumbs" id="vmThumbs"></div>
+            </div>
+            <div class="vm-info">
+                <div class="vm-badges" id="vmBadges"></div>
+                <h2 class="vm-title" id="vmTitle"></h2>
+                <div class="vm-details" id="vmDetails"></div>
+                <p class="vm-description" id="vmDescription"></p>
+                <a id="vmWhatsappBtn" class="btn-vm-whatsapp" href="#" target="_blank" rel="noopener noreferrer">Consultar por WhatsApp</a>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
-    <script src="script.js?v=33" defer></script>
+    <script src="script.js?v=34" defer></script>
 </body>
 </html>

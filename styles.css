@@ -1,9 +1,9 @@
-/* ============================================
+﻿/* ============================================
    VERDUN AUTOMOTORES - ESTILOS CSS PREMIUM
    ============================================ */
 
 /* ============================================
-   VARIABLES Y CONFIGURACIÓN GLOBAL
+   VARIABLES Y CONFIGURACIÃ“N GLOBAL
    PALETA INSTITUCIONAL CALIBRADA
 ============================================ */
 :root {
@@ -21,7 +21,7 @@
     --glass-blur:         blur(16px);
     --glass-shadow:       0 12px 32px 0 rgba(0, 0, 0, 0.45);
 
-    /* Tipografía (Modo Oscuro) */
+    /* TipografÃ­a (Modo Oscuro) */
     --text-primary:       #FFFFFF;
     --text-secondary:     #9CA3AF;
     --text-muted:         #6B7280;
@@ -32,7 +32,7 @@
     --brand-green-glow:   0 0 20px rgba(16, 200, 99, 0.35);
     --brand-green-accent: #4ADE80;
 
-    /* Sustitución de Magenta por Grises Claros y Verde Corporativo */
+    /* SustituciÃ³n de Magenta por Grises Claros y Verde Corporativo */
     --brand-magenta:      #9CA3AF;
     --brand-magenta-soft: rgba(156, 163, 175, 0.15);
     --brand-magenta-hover:#E5E7EB;
@@ -42,12 +42,12 @@
     --brand-magenta-glow:   0 0 25px rgba(255, 255, 255, 0.15);
     --brand-magenta-border: rgba(255, 255, 255, 0.2);
 
-    /* Verde Conversión / WhatsApp */
+    /* Verde ConversiÃ³n / WhatsApp */
     --cta-green:            #10C863;
     --cta-green-hover:      #0EB357;
     --cta-green-shadow:     0 6px 20px rgba(16, 200, 99, 0.35);
 
-    /* Tipografía Hero */
+    /* TipografÃ­a Hero */
     --text-pure-white:      #FFFFFF;
     --text-subtle-gray:     #A1A7B3;
     --text-stat-label:      #7E8695;
@@ -60,14 +60,14 @@
     --surface-card:       var(--bg-surface-elevated);
     --surface-border:     #2A2E33;
 
-    /* Tipografía y Superficies (UI/UX) */
+    /* TipografÃ­a y Superficies (UI/UX) */
     --color-text-title:   var(--text-primary);
     --color-text-body:    var(--text-secondary);
     --color-brand-wine:   var(--brand-magenta);
     --color-brand-green:  var(--brand-green);
     --color-brand-green-hv: var(--brand-green-hover);
 
-    /* Badges Gradientes de Métricas */
+    /* Badges Gradientes de MÃ©tricas */
     --badge-grad-green: linear-gradient(135deg, #5FD4A4 0%, #2F9E76 100%);
     --badge-grad-rose:  linear-gradient(135deg, #E883A5 0%, #C05A80 100%);
     --badge-grad-wine:  linear-gradient(135deg, #D06A92 0%, #A94469 100%);
@@ -76,12 +76,12 @@
     --glass-bg:         var(--glass-nav-bg);
     --btn-green-shadow: var(--cta-green-shadow);
 
-    /* Sombras Modernas (Elevación) */
+    /* Sombras Modernas (ElevaciÃ³n) */
     --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
     --shadow-md:  0 8px 24px -4px rgba(0,0,0,0.5);
     --shadow-btn: var(--btn-green-shadow);
 
-    /* Alias de compatibilidad (variables previas → tokens dark) */
+    /* Alias de compatibilidad (variables previas â†’ tokens dark) */
     --bg-primary:    var(--surface-base);
     --bg-secondary:  var(--surface-base);
     --bg-tertiary:   var(--brand-slate-dark);
@@ -187,7 +187,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ============================================
-   SISTEMA DE PARTÍCULAS
+   SISTEMA DE PARTÃCULAS
 ============================================ */
 .particles {
     position: fixed;
@@ -315,7 +315,7 @@ h1, h2, h3, h4, h5, h6 {
                  0 0 40px rgba(37,211,102,0.15);
 }
 
-/* Fade in animation — estado inicial manejado por CSS, sin writes en JS */
+/* Fade in animation â€” estado inicial manejado por CSS, sin writes en JS */
 .fade-in {
     opacity: 0;
     transform: translateY(40px);
@@ -328,7 +328,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================================
    NAVBAR STICKY
 ============================================ */
-/* Contenedor Cápsula Flotante */
+/* Contenedor CÃ¡psula Flotante */
 .navbar {
     position: fixed;
     top: 1.8rem;
@@ -486,8 +486,8 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================================
    HERO SECTION
 ============================================ */
-/* Contenedor Principal del Hero — Fondo Full-Bleed con Fundido Progresivo.
-   Gradiente suave: 0-32% negro sólido para los textos; 32-68% transición gradual;
+/* Contenedor Principal del Hero â€” Fondo Full-Bleed con Fundido Progresivo.
+   Gradiente suave: 0-32% negro sÃ³lido para los textos; 32-68% transiciÃ³n gradual;
    68%+ imagen visible sin bordes rectos ni cortes cuadrados. */
 .hero,
 section#inicio,
@@ -649,11 +649,11 @@ section#inicio,
     display: none !important;
 }
 
-/* Imagen del Vehículo: Máxima Presencia y Asentamiento */
+/* Imagen del VehÃ­culo: MÃ¡xima Presencia y Asentamiento */
 .hero-image,
 .hero-visual img,
 .hero-image-container img,
-.hero img[alt*="Vehículo"] {
+.hero img[alt*="VehÃ­culo"] {
     display: block !important;
     width: 100% !important;
     max-width: clamp(620px, 58vw, 920px) !important;
@@ -698,7 +698,7 @@ section#inicio,
 }
 
 /* ============================================
-   MÉTRICAS STRIP — Barra de Beneficios Glassmorphism Flotante
+   MÃ‰TRICAS STRIP â€” Barra de Beneficios Glassmorphism Flotante
 ============================================ */
 .metrics-strip {
     background: rgba(18, 20, 24, 0.82) !important;
@@ -757,7 +757,7 @@ section#inicio,
 }
 
 /* ============================================
-   SECCIÓN SERVICIOS - FLIP CARDS
+   SECCIÃ“N SERVICIOS - FLIP CARDS
 ============================================ */
 .servicios {
     padding: 120px 40px;
@@ -869,7 +869,7 @@ section#inicio,
     transform: scale(1.08); /* Zoom elegante a la foto */
 }
 
-/* Etiqueta del título que se ve inicialmente sobre la foto */
+/* Etiqueta del tÃ­tulo que se ve inicialmente sobre la foto */
 .service-card-front .service-overlay {
     position: absolute;
     bottom: 0;
@@ -891,7 +891,7 @@ section#inicio,
     color: var(--text-inverse);
 }
 
-/* Menú interno desplegable (Sube suave desde abajo tipo vidrio) */
+/* MenÃº interno desplegable (Sube suave desde abajo tipo vidrio) */
 .service-card-back {
     position: absolute;
     inset: 0;
@@ -947,7 +947,7 @@ section#inicio,
 }
 
 /* ============================================
-   SECCIÓN STOCK/VEHÍCULOS
+   SECCIÃ“N STOCK/VEHÃCULOS
 ============================================ */
 .stock {
     padding: 120px 40px;
@@ -968,7 +968,7 @@ section#inicio,
 }
 
 /* ============================================
-   SECCIÓN NOSOTROS
+   SECCIÃ“N NOSOTROS
 ============================================ */
 .nosotros {
     padding: 120px 40px;
@@ -1081,7 +1081,7 @@ section#inicio,
 }
 
 /* ============================================
-   SECCIÓN CRÉDITOS/FINANCIACIÓN
+   SECCIÃ“N CRÃ‰DITOS/FINANCIACIÃ“N
 ============================================ */
 .creditos {
     padding: 120px 40px;
@@ -1101,7 +1101,7 @@ section#inicio,
 }
 
 /* ============================================
-    SECCIÓN TESTIMONIOS
+    SECCIÃ“N TESTIMONIOS
 ============================================ */
 .testimonios {
     padding: 120px 40px;
@@ -1182,7 +1182,7 @@ section#inicio,
 }
 
 /* ============================================
-   SECCIÓN CTA FINAL
+   SECCIÃ“N CTA FINAL
 ============================================ */
 .cta-final {
     padding: 120px 40px;
@@ -1613,7 +1613,7 @@ section#inicio,
 }
 
 /* ============================================
-   MODAL DE STOCK DE VEHÍCULOS
+   MODAL DE STOCK DE VEHÃCULOS
 ============================================ */
 
 /* Overlay del modal */
@@ -1677,7 +1677,7 @@ section#inicio,
     }
 }
 
-/* Botón cerrar modal */
+/* BotÃ³n cerrar modal */
 .modal-close {
     position: sticky;
     top: 0;
@@ -1710,7 +1710,7 @@ section#inicio,
     transform: scale(0.95) rotate(90deg);
 }
 
-/* Título del modal */
+/* TÃ­tulo del modal */
 .modal-title {
     font-size: 32px;
     font-weight: 700;
@@ -1751,7 +1751,7 @@ section#inicio,
     color: var(--text-muted);
 }
 
-/* Contenedor de vehículos */
+/* Contenedor de vehÃ­culos */
 .stock-vehicles-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -1759,7 +1759,7 @@ section#inicio,
     margin-bottom: 20px;
 }
 
-/* Card de vehículo en modal */
+/* Card de vehÃ­culo en modal */
 .vehicle-card {
     background: var(--surface-card);
     border: 1px solid var(--surface-border);
@@ -1779,7 +1779,7 @@ section#inicio,
     background: var(--surface-card);
 }
 
-/* Imagen del vehículo */
+/* Imagen del vehÃ­culo */
 .vehicle-image-wrapper {
     width: 100%;
     aspect-ratio: 4 / 3;
@@ -1802,7 +1802,7 @@ section#inicio,
     transform: scale(1.04);
 }
 
-/* Badges de condición (0 KM / Usado) */
+/* Badges de condiciÃ³n (0 KM / Usado) */
 .vehicle-badge {
     position: absolute;
     top: 12px;
@@ -1897,7 +1897,7 @@ section#inicio,
     background: var(--brand-green);
 }
 
-/* Información del vehículo */
+/* InformaciÃ³n del vehÃ­culo */
 .vehicle-info {
     padding: 20px;
     display: flex;
@@ -1913,7 +1913,7 @@ section#inicio,
     margin: 0;
 }
 
-/* Detalles del vehículo */
+/* Detalles del vehÃ­culo */
 .vehicle-details {
     display: flex;
     flex-direction: column;
@@ -1935,7 +1935,7 @@ section#inicio,
     font-weight: 600;
 }
 
-/* Precio del vehículo */
+/* Precio del vehÃ­culo */
 .vehicle-price {
     font-size: 24px;
     font-weight: 800;
@@ -1946,7 +1946,7 @@ section#inicio,
     margin: 12px 0;
 }
 
-/* Descripción del vehículo */
+/* DescripciÃ³n del vehÃ­culo */
 .vehicle-description {
     font-size: 13px;
     line-height: 1.55;
@@ -1958,7 +1958,7 @@ section#inicio,
     overflow: hidden;
 }
 
-/* Botón de consulta */
+/* BotÃ³n de consulta */
 .btn-consultar {
     background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-hover) 100%);
     color: #FFFFFF;
@@ -2276,329 +2276,268 @@ section#inicio,
 }
 
 /* ============================================
-   VEHICLE MODAL
-   ============================================ */
+   MODAL DETALLE / GALERÍA DE VEHÍCULO
+============================================ */
 
-.vehicle-modal-overlay {
-    display: none;
+.vm-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(8px);
-    z-index: 9999;
-    justify-content: center;
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
     align-items: center;
+    justify-content: center;
+    z-index: 3000;
     padding: 20px;
+    overflow-y: auto;
+    animation: fadeInOverlay 0.3s ease forwards;
 }
 
-.vehicle-modal-content {
-    background: var(--bg-surface-elevated);
+.vm-card {
+    position: relative;
+    background: linear-gradient(135deg, var(--bg-surface-elevated) 0%, var(--bg-surface) 100%);
+    border: var(--glass-border-light);
     border-radius: 24px;
+    box-shadow: var(--glass-shadow), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    max-width: 1100px;
     width: 100%;
-    max-width: 1200px;
     max-height: 90vh;
     overflow-y: auto;
-    padding: 40px 32px;
-    position: relative;
-    animation: slideInModal 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 0;
+    animation: vmSlideUp 0.3s ease forwards;
 }
 
-.vehicle-modal-content .modal-close {
+@keyframes vmSlideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.vm-close {
     position: absolute;
-    top: 20px;
-    right: 24px;
-    width: 32px;
-    height: 32px;
-    background: transparent;
-    border: none;
-    font-size: 24px;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    z-index: 10;
-    padding: 0;
+    top: 14px;
+    right: 16px;
+    z-index: 2;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: var(--glass-border);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
     line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.vehicle-modal-content .modal-close:hover {
-    color: var(--text-primary);
+.vm-close:hover {
+    background: var(--brand-green);
+    color: var(--bg-app);
+    border-color: var(--brand-green);
 }
 
-.vehicle-modal-header {
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(-- divider, #e5e7eb);
-}
-
-.vehicle-brand-model {
-    display: inline-flex;
+/* Galeria */
+.vm-gallery {
+    padding: 24px;
+    display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 16px;
+    gap: 12px;
+    min-width: 0;
 }
 
-.vehicle-brand {
-    font-size: 28px;
+.vm-main-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 16px;
+    border: var(--glass-border);
+    background: var(--bg-surface-elevated);
+}
+
+.vm-thumbs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+}
+
+.vm-thumb {
+    flex: 0 0 auto;
+    width: 84px;
+    height: 63px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    opacity: 0.65;
+    transition: all 0.2s ease;
+    background: var(--bg-surface-elevated);
+}
+
+.vm-thumb:hover {
+    opacity: 1;
+}
+
+.vm-thumb.active {
+    border-color: var(--brand-green);
+    opacity: 1;
+    box-shadow: var(--brand-green-glow);
+}
+
+/* Info */
+.vm-info {
+    padding: 40px 32px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    border-left: var(--glass-border);
+}
+
+.vm-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vm-title {
+    margin: 0;
+    font-size: 1.6rem;
     font-weight: 800;
     color: var(--text-primary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    line-height: 1.2;
 }
 
-.vehicle-model {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--secondary-500);
+.vm-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    padding: 16px;
+    background: var(--glass-card-bg);
+    border: var(--glass-border);
+    border-radius: 12px;
 }
 
-.vehicle-version {
-    margin-top: 8px;
-    font-size: 14px;
-    color: var(--text-tertiary);
+.vm-detail-item {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
-.vehicle-price {
-    margin-top: 16px;
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-}
-
-.vehicle-price-usd {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--primary-600);
-}
-
-.vehicle-cuotas-ref {
-    font-size: 13px;
-    color: var(--text-tertiary);
-    font-weight: 500;
-}
-
-/* Badges Superiores */
-.vehicle-badges {
-    position: absolute;
-    top: 16px;
-    right: 24px;
-    display: flex;
-    gap: 8px;
-    z-index: 5;
-}
-
-.vehicle-badge {
-    position: relative;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-}
-
-.badge-0km {
-    background: #22c55e;
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
-}
-
-.badge-usado {
-    background: rgba(30, 34, 38, 0.85);
-    color: #d1d5db;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(4px);
-}
-
-.badge-demo {
-    background: rgba(245, 158, 11, 0.85);
-    color: #111;
-    border: 1px solid rgba(245, 158, 11, 0.5);
-}
-
-.badge-suv {
-    background: rgba(59, 130, 246, 0.2);
-    color: var(--primary-600);
-    border: 1px solid rgba(59, 130, 246, 0.4);
-}
-
-.badge-service {
-    background: #f59e0b;
-    color: #111;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
-}
-
-.badge-owner {
-    background: #ec4899;
-    color: #fff;
-}
-
-/* Specs Grid */
-.vehicle-specs-grid {
-    margin: 32px 0;
-}
-
-.specs-col {
-    flex: 1;
-}
-
-@media (max-width: 768px) {
-    .specs-col {
-        flex: 100%;
-    }
-}
-
-.specs-col .spec-item {
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.spec-item .spec-label {
-    font-size: 13px;
-    color: var(--text-tertiary);
-    font-weight: 500;
-}
-
-.spec-item .spec-value {
-    font-size: 14px;
+.vm-detail-item strong {
     color: var(--text-primary);
     font-weight: 600;
 }
 
-/* Description */
-.vehicle-modal-description {
-    margin: 24px 0;
-}
-
-.description-origin {
-    font-size: 12px;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-}
-
-.description-text {
-    font-size: 14px;
+.vm-description {
+    margin: 0;
+    font-size: 0.95rem;
     line-height: 1.6;
     color: var(--text-secondary);
+    white-space: pre-line;
 }
 
-/* Equipment */
-.vehicle-modal-equipment {
-    margin: 24px 0;
-}
-
-.equipment-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.equipment-label {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--primary-600);
-}
-
-.equipment-count {
-    font-size: 11px;
-    color: var(--text-tertiary);
-    background: var(--bg-tertiary);
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-left: auto;
-}
-
-.equipment-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.equipment-list li {
-    font-size: 13px;
-    color: var(--text-secondary);
-    padding: 6px 0;
-    border-bottom: 1px solid var(-- divider, #e5e7eb);
-}
-
-.equipment-list li:last-child {
-    border-bottom: none;
-}
-
-/* Stock Metadata */
-.vehicle-modal-stock {
-    margin-top: 24px;
-    padding-top: 24px;
-    border-top: 1px solid var(-- divider, #e5e7eb);
-    display: flex;
-    gap: 24px;
-    font-size: 13px;
-    color: var(--text-tertiary);
-}
-
-.vehicle-modal-stock .stock-id {
-    color: var(--primary-600);
-    font-weight: 600;
-}
-
-/* CTA Principal */
-.vehicle-modal-cta {
-    margin-top: 32px;
+.btn-vm-whatsapp {
+    margin-top: auto;
+    display: block;
     text-align: center;
-}
-
-.btn-consultar-modal {
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%);
-    color: #fff;
-    border: none;
-    padding: 16px 32px;
+    padding: 14px 20px;
     border-radius: 12px;
-    font-size: 16px;
+    background: var(--cta-green);
+    color: #fff;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 20px rgba(37,211,102,0.3);
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    box-shadow: var(--cta-green-shadow);
 }
 
-.btn-consultar-modal:hover {
+.btn-vm-whatsapp:hover {
+    background: var(--cta-green-hover);
     transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(37,211,102,0.4);
-    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-400) 100%);
 }
 
-@keyframes slideInModal {
-    from {
-        opacity: 0;
-        transform: scale(0.95) translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+/* Boton "Ver detalles" en las cards del stock */
+.btn-detalle {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: var(--glass-border-light);
+    background: var(--glass-card-bg);
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-detalle:hover {
+    border-color: var(--brand-green);
+    color: var(--brand-green);
+}
+
+.vehicle-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.vehicle-actions .btn-consultar {
+    flex: 1;
+    margin-top: 0;
 }
 
 /* Responsive */
-@media (max-width: 480px) {
-    .vehicle-modal-content {
-        margin: 20px;
+@media (max-width: 900px) {
+    .vm-card {
+        grid-template-columns: 1fr;
+        max-height: 92vh;
+    }
+
+    .vm-info {
+        border-left: none;
+        border-top: var(--glass-border);
         padding: 24px 20px;
     }
 
-    .vehicle-badges {
-        top: 12px;
-        right: 16px;
+    .vm-gallery {
+        padding: 16px 16px 8px;
     }
 
-    .vehicle-modal-cta {
-        margin-top: 24px;
+    .vm-thumbs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .vm-details {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .vm-title {
+        font-size: 1.3rem;
     }
 }
+
+@media (max-width: 480px) {
+    .vm-overlay {
+        padding: 10px;
+    }
+
+    .vm-card {
+        border-radius: 16px;
+    }
+
+    .vm-thumb {
+        width: 68px;
+        height: 51px;
+    }
+
+    .vehicle-actions {
+        flex-direction: column;
+    }
+}
+
