@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    VERDUN AUTOMOTORES - ESTILOS CSS PREMIUM
    ============================================ */
 
@@ -2305,7 +2305,7 @@ section#inicio,
     max-width: 1100px;
     width: 100%;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: hidden;
     display: grid;
     grid-template-columns: 1.1fr 1fr;
     gap: 0;
@@ -2389,38 +2389,43 @@ section#inicio,
     box-shadow: var(--brand-green-glow);
 }
 
-/* Info */
+/* Info - Header fijo arriba, botón fijo abajo, descripción scrollable */
 .vm-info {
-    padding: 40px 32px 32px;
+    padding: 32px 32px 28px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     min-width: 0;
     border-left: var(--glass-border);
+    max-height: 90vh;
+    overflow: hidden;
 }
 
 .vm-badges {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .vm-title {
     margin: 0;
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: var(--text-primary);
-    line-height: 1.2;
+    line-height: 1.25;
+    flex-shrink: 0;
 }
 
 .vm-details {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px 16px;
-    padding: 16px;
+    padding: 14px 16px;
     background: var(--glass-card-bg);
     border: var(--glass-border);
     border-radius: 12px;
+    flex-shrink: 0;
 }
 
 .vm-detail-item {
@@ -2433,16 +2438,102 @@ section#inicio,
     font-weight: 600;
 }
 
+/* Scroll interno de la descripción */
 .vm-description {
     margin: 0;
     font-size: 0.95rem;
     line-height: 1.6;
     color: var(--text-secondary);
-    white-space: pre-line;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-green) rgba(255, 255, 255, 0.04);
+}
+
+.vm-description::-webkit-scrollbar {
+    width: 6px;
+}
+
+.vm-description::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 4px;
+}
+
+.vm-description::-webkit-scrollbar-thumb {
+    background: var(--brand-green);
+    border-radius: 4px;
+}
+
+.vm-description::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-green-accent);
+}
+
+/* Summary box para párrafos intro / resumen */
+.vm-summary-box {
+    background: rgba(37, 211, 102, 0.06);
+    border: 1px solid rgba(37, 211, 102, 0.2);
+    border-left: 4px solid var(--brand-green);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.vm-summary-box p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.vm-summary-extra {
+    margin: 8px 0 12px 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+/* Lista de equipamiento destacado */
+.vm-features-title {
+    margin: 14px 0 8px 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--brand-green-accent);
+}
+
+.vm-features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vm-feature-item {
+    position: relative;
+    padding-left: 20px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.vm-feature-item::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--brand-green);
+    font-weight: 700;
+    font-size: 0.85rem;
 }
 
 .btn-vm-whatsapp {
     margin-top: auto;
+    flex-shrink: 0;
     display: block;
     text-align: center;
     padding: 14px 20px;
@@ -2496,12 +2587,19 @@ section#inicio,
     .vm-card {
         grid-template-columns: 1fr;
         max-height: 92vh;
+        overflow-y: auto;
     }
 
     .vm-info {
         border-left: none;
         border-top: var(--glass-border);
         padding: 24px 20px;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .vm-description {
+        max-height: 280px;
     }
 
     .vm-gallery {
