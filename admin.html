@@ -43,7 +43,7 @@
             color: var(--text-primary);
         }
     </style>
-    <link rel="stylesheet" href="admin-styles.css?v=18">
+    <link rel="stylesheet" href="admin-styles.css?v=19">
 </head>
 <body>
     <!-- ============================================
@@ -461,8 +461,22 @@
                                 <input type="text" id="newVehicleColor" placeholder="Ej: Blanco">
                             </div>
                             <div class="form-group">
-                                <label>Descripción (opcional)</label>
-                                <textarea id="newVehicleDesc" rows="2"></textarea>
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:6px">
+                                    <label style="margin:0">Descripción y Equipamiento</label>
+                                    <button type="button" class="btn-ig-split" onclick="autoSeparateInstagramPrompt('new')">📋 Pegar post de Instagram y auto-separar</button>
+                                </div>
+                                <div class="split-desc-container">
+                                    <div>
+                                        <label style="font-size:11px;color:#93c5fd;display:block;margin-bottom:3px">📝 Resumen Comercial / Presentación</label>
+                                        <textarea id="newVehicleResumen" rows="3" placeholder="Párrafo comercial o presentación general del vehículo..." onpaste="handleDescriptionPaste(event, 'new')"></textarea>
+                                        <span class="field-hint">Se verá como preview en las tarjetas del catálogo y arriba en el modal.</span>
+                                    </div>
+                                    <div style="margin-top:8px">
+                                        <label style="font-size:11px;color:#4ade80;display:block;margin-bottom:3px">⚙️ Equipamiento / Características (un ítem por línea)</label>
+                                        <textarea id="newVehicleEquipamiento" rows="6" placeholder="Climatizador automático&#10;Tapizado de cuero&#10;Cámara de retroceso&#10;Llantas de aleación 17&quot;" onpaste="handleDescriptionPaste(event, 'new')"></textarea>
+                                        <span class="field-hint">Cada línea será una viñeta con tilde verde en el modal.</span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>Foto del vehículo</label>
@@ -593,6 +607,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
-    <script src="admin.js?v=24" defer></script>
+    <script src="admin.js?v=25" defer></script>
 </body>
 </html>

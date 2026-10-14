@@ -1442,3 +1442,51 @@ mark.search-highlight {
     border-color: var(--primary-400);
     box-shadow: 0 0 0 2px rgba(45, 107, 228, 0.2);
 }
+
+/* Apartados de Resumen Comercial y Equipamiento */
+.split-desc-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+    padding: 12px;
+    background: rgba(13, 13, 13, 0.4);
+    border: 1px solid rgba(45, 107, 228, 0.25);
+    border-radius: 8px;
+}
+
+.split-desc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.btn-ig-split {
+    background: linear-gradient(135deg, rgba(225, 48, 108, 0.2), rgba(253, 29, 29, 0.2));
+    border: 1px solid rgba(225, 48, 108, 0.5);
+    color: #f472b6;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-ig-split:hover {
+    background: linear-gradient(135deg, rgba(225, 48, 108, 0.4), rgba(253, 29, 29, 0.4));
+    color: #ffffff;
+    border-color: rgba(225, 48, 108, 0.8);
+    transform: translateY(-1px);
+}
+
+.field-hint {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+    display: block;
+}

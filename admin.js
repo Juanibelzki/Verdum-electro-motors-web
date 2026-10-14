@@ -1880,6 +1880,148 @@ async function updateVehicleSeccion(vehicleId, newSeccion) {
     }
 }
 
+const BULLET_REGEX = /^[•●▪\-\*\✓\✔➤👉·]\s*/;
+
+function isInstagramHeaderNoise(line) {
+    const trimmed = (line || '').trim();
+    if (!trimmed) return true;
+    const lower = trimmed.toLowerCase();
+    if (/^@?verdun(_automotores)?$/i.test(lower)) return true;
+    if (/^\d+[\d.,]*\s*km$/i.test(trimmed)) return true;
+    if (trimmed.includes('|') && /\|\s*20\d\d/i.test(trimmed)) return true;
+    return false;
+}
+
+/**
+ * Separa una descripción en Resumen Comercial y Equipamiento punto por punto.
+ */
+function splitVehicleDescription(rawText) {
+    if (!rawText || !rawText.trim()) {
+        return { resumen: '', equipamiento: '' };
+    }
+    const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    const paragraphs = [];
+    const features = [];
+
+    lines.forEach((line, index) => {
+        if (index < 3 && isInstagramHeaderNoise(line)) return;
+
+        if (line.includes('•')) {
+            const parts = line.split('•').map(p => p.trim()).filter(p => p.length > 0);
+            for (const part of parts) {
+                const cleaned = part.replace(BULLET_REGEX, '').trim();
+                if (cleaned && !isInstagramHeaderNoise(cleaned)) {
+                    features.push(cleaned);
+                }
+            }
+        } else if (BULLET_REGEX.test(line)) {
+            const cleaned = line.replace(BULLET_REGEX, '').trim();
+            if (cleaned && !isInstagramHeaderNoise(cleaned)) {
+                features.push(cleaned);
+            }
+        } else {
+            paragraphs.push(line);
+        }
+    });
+
+    return {
+        resumen: paragraphs.join('\n\n'),
+        equipamiento: features.join('\n')
+    };
+}
+
+/**
+ * Unifica Resumen Comercial y Equipamiento en un solo texto con viñetas estandarizadas.
+ */
+function unifyVehicleDescription(resumenText, equipamientoText) {
+    const resumen = (resumenText || '').trim();
+    const equipLines = (equipamientoText || '')
+        .split(/\r?\n/)
+        .map(l => l.trim())
+        .filter(l => l.length > 0);
+
+    const formattedFeatures = equipLines.map(line => {
+        const cleaned = line.replace(BULLET_REGEX, '').trim();
+        return `• ${cleaned}`;
+    });
+
+    const parts = [];
+    if (resumen) parts.push(resumen);
+    if (formattedFeatures.length > 0) parts.push(formattedFeatures.join('\n'));
+
+    return parts.join('\n\n').trim();
+}
+
+/**
+ * Auto-separa un post de Instagram pegado desde el portapapeles o mediante prompt.
+ */
+async function autoSeparateInstagramPrompt(scopeId) {
+    let clipText = '';
+    try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            clipText = await navigator.clipboard.readText();
+        }
+    } catch {}
+
+    if (!clipText) {
+        clipText = prompt('Pegá acá el texto completo copiado de Instagram:');
+    }
+
+    if (!clipText || !clipText.trim()) return;
+
+    const { resumen, equipamiento } = splitVehicleDescription(clipText);
+
+    if (scopeId === 'new') {
+        const rEl = document.getElementById('newVehicleResumen');
+        const eEl = document.getElementById('newVehicleEquipamiento');
+        if (rEl) rEl.value = resumen;
+        if (eEl) eEl.value = equipamiento;
+    } else {
+        const card = document.querySelector(`.vehicle-edit-card[data-id="${scopeId}"]`);
+        if (card) {
+            const rEl = card.querySelector('.vehicle-resumen');
+            const eEl = card.querySelector('.vehicle-equipamiento');
+            if (rEl) rEl.value = resumen;
+            if (eEl) eEl.value = equipamiento;
+        }
+    }
+
+    showToast('✓ Post de Instagram auto-separado en Resumen y Equipamiento', 'success');
+}
+
+/**
+ * Detecta automáticamente cuando se pega un texto de Instagram en los textareas.
+ */
+function handleDescriptionPaste(e, scopeId) {
+    const pasted = (e.clipboardData || window.clipboardData).getData('text');
+    if (!pasted) return;
+
+    if (pasted.includes('•') || isInstagramHeaderNoise(pasted.split('\n')[0])) {
+        e.preventDefault();
+        const { resumen, equipamiento } = splitVehicleDescription(pasted);
+        if (scopeId === 'new') {
+            const rEl = document.getElementById('newVehicleResumen');
+            const eEl = document.getElementById('newVehicleEquipamiento');
+            if (rEl) rEl.value = resumen;
+            if (eEl) eEl.value = equipamiento;
+        } else {
+            const card = document.querySelector(`.vehicle-edit-card[data-id="${scopeId}"]`);
+            if (card) {
+                const rEl = card.querySelector('.vehicle-resumen');
+                const eEl = card.querySelector('.vehicle-equipamiento');
+                if (rEl) rEl.value = resumen;
+                if (eEl) eEl.value = equipamiento;
+            }
+        }
+        showToast('✓ Post de Instagram detectado y auto-separado', 'success');
+    }
+}
+
+window.splitVehicleDescription = splitVehicleDescription;
+window.unifyVehicleDescription = unifyVehicleDescription;
+window.autoSeparateInstagramPrompt = autoSeparateInstagramPrompt;
+window.handleDescriptionPaste = handleDescriptionPaste;
+
 async function renderVehiclesEditor() {
     const container = document.getElementById('vehiclesEditor');
     if (!container) return;
@@ -1944,8 +2086,20 @@ async function renderVehiclesEditor() {
                         </select>
                         <label>Color</label>
                         <input type="text" class="vehicle-color" data-id="${v.id}" value="${escapeHtml(color)}">
-                        <label>Descripción</label>
-                        <textarea class="vehicle-descripcion" data-id="${v.id}" rows="2">${escapeHtml(descripcion)}</textarea>
+                        
+                        <div class="split-desc-container">
+                            <div class="split-desc-header">
+                                <label style="margin:0;font-size:11px;color:#93c5fd">📝 Resumen Comercial / Presentación</label>
+                                <button type="button" class="btn-ig-split" onclick="autoSeparateInstagramPrompt('${v.id}')" title="Pegar post de Instagram y auto-separar">📋 Auto-separar Instagram</button>
+                            </div>
+                            <textarea class="vehicle-resumen" data-id="${v.id}" rows="3" placeholder="Párrafo comercial de presentación..." onpaste="handleDescriptionPaste(event, '${v.id}')">${escapeHtml(splitVehicleDescription(descripcion).resumen)}</textarea>
+                            <span class="field-hint">Preview en catálogo exterior y arriba en el modal.</span>
+
+                            <label style="margin:6px 0 2px;font-size:11px;color:#4ade80">⚙️ Equipamiento / Características (un ítem por línea)</label>
+                            <textarea class="vehicle-equipamiento" data-id="${v.id}" rows="6" placeholder="Climatizador automático&#10;Tapizado de cuero&#10;Cámara de retroceso" onpaste="handleDescriptionPaste(event, '${v.id}')">${escapeHtml(splitVehicleDescription(descripcion).equipamiento)}</textarea>
+                            <span class="field-hint">Cada línea se convierte en una viñeta con tilde verde.</span>
+                        </div>
+
                         <button type="button" class="btn-update vehicle-save-btn" data-id="${v.id}">✓ Guardar vehículo</button>
                         <button type="button" class="btn-reset vehicle-delete-btn" data-id="${v.id}" style="margin-top:8px">🗑️ Eliminar</button>
                     </div>
@@ -1998,8 +2152,20 @@ async function renderVehiclesEditor() {
                         </select>
                         <label>Color</label>
                         <input type="text" class="vehicle-color" data-id="${cv.id}" value="${escapeHtml(cv.color || '—')}">
-                        <label>Descripción</label>
-                        <textarea class="vehicle-descripcion" data-id="${cv.id}" rows="2">${escapeHtml(cv.descripcion || '')}</textarea>
+                        
+                        <div class="split-desc-container">
+                            <div class="split-desc-header">
+                                <label style="margin:0;font-size:11px;color:#93c5fd">📝 Resumen Comercial / Presentación</label>
+                                <button type="button" class="btn-ig-split" onclick="autoSeparateInstagramPrompt('${cv.id}')" title="Pegar post de Instagram y auto-separar">📋 Auto-separar Instagram</button>
+                            </div>
+                            <textarea class="vehicle-resumen" data-id="${cv.id}" rows="3" placeholder="Párrafo comercial de presentación..." onpaste="handleDescriptionPaste(event, '${cv.id}')">${escapeHtml(splitVehicleDescription(cv.descripcion || '').resumen)}</textarea>
+                            <span class="field-hint">Preview en catálogo exterior y arriba en el modal.</span>
+
+                            <label style="margin:6px 0 2px;font-size:11px;color:#4ade80">⚙️ Equipamiento / Características (un ítem por línea)</label>
+                            <textarea class="vehicle-equipamiento" data-id="${cv.id}" rows="6" placeholder="Climatizador automático&#10;Tapizado de cuero&#10;Cámara de retroceso" onpaste="handleDescriptionPaste(event, '${cv.id}')">${escapeHtml(splitVehicleDescription(cv.descripcion || '').equipamiento)}</textarea>
+                            <span class="field-hint">Cada línea se convierte en una viñeta con tilde verde.</span>
+                        </div>
+
                         <button type="button" class="btn-update vehicle-save-btn" data-id="${cv.id}">✓ Guardar</button>
                         <button type="button" class="btn-reset vehicle-delete-btn" data-id="${cv.id}" style="margin-top:8px">🗑️ Eliminar</button>
                     </div>
@@ -2027,7 +2193,14 @@ async function saveVehicle(id) {
         const anio = parseInt(card.querySelector('.vehicle-anio').value, 10);
         const km = card.querySelector('.vehicle-km').value.trim();
         const color = card.querySelector('.vehicle-color').value.trim();
-        const descripcion = card.querySelector('.vehicle-descripcion').value.trim();
+        const resumenEl = card.querySelector('.vehicle-resumen');
+        const equipEl = card.querySelector('.vehicle-equipamiento');
+        const oldDescEl = card.querySelector('.vehicle-descripcion');
+        const resumen = resumenEl ? resumenEl.value.trim() : '';
+        const equipamiento = equipEl ? equipEl.value.trim() : '';
+        const descripcion = (resumenEl || equipEl)
+            ? unifyVehicleDescription(resumen, equipamiento)
+            : (oldDescEl ? oldDescEl.value.trim() : '');
         const seccionEl = card.querySelector('.vehicle-seccion');
         const seccion = seccionEl ? seccionEl.value || null : null;
 
@@ -2188,6 +2361,9 @@ function closeAddVehicleForm() {
     document.getElementById('addVehicleModal').style.display = 'none';
     document.getElementById('newVehiclePhoto').value = '';
     document.getElementById('newVehicleTipo').value = 'auto';
+    if (document.getElementById('newVehicleResumen')) document.getElementById('newVehicleResumen').value = '';
+    if (document.getElementById('newVehicleEquipamiento')) document.getElementById('newVehicleEquipamiento').value = '';
+    if (document.getElementById('newVehicleDesc')) document.getElementById('newVehicleDesc').value = '';
     const preview = document.getElementById('newVehiclePhotoPreview');
     if (preview) preview.style.display = 'none';
     window._newVehiclePhotoData = null;
@@ -2227,7 +2403,14 @@ async function saveNewVehicle() {
     const anio = parseInt(document.getElementById('newVehicleAnio').value, 10);
     const km = document.getElementById('newVehicleKm').value.trim();
     const color = document.getElementById('newVehicleColor').value.trim();
-    const descripcion = document.getElementById('newVehicleDesc').value.trim();
+    const newResumenEl = document.getElementById('newVehicleResumen');
+    const newEquipEl = document.getElementById('newVehicleEquipamiento');
+    const newOldDescEl = document.getElementById('newVehicleDesc');
+    const newResumen = newResumenEl ? newResumenEl.value.trim() : '';
+    const newEquip = newEquipEl ? newEquipEl.value.trim() : '';
+    const descripcion = (newResumenEl || newEquipEl)
+        ? unifyVehicleDescription(newResumen, newEquip)
+        : (newOldDescEl ? newOldDescEl.value.trim() : '');
 
     if (!marca || !modelo || isNaN(anio)) {
         showToast('Completá marca, modelo y año', 'warning');
