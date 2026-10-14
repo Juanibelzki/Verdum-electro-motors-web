@@ -2304,7 +2304,7 @@ section#inicio,
     -webkit-backdrop-filter: var(--glass-blur);
     max-width: 1100px;
     width: 100%;
-    max-height: 90vh;
+    max-height: 85vh;
     overflow: hidden;
     display: grid;
     grid-template-columns: 1.1fr 1fr;
@@ -2391,13 +2391,13 @@ section#inicio,
 
 /* Info - Header fijo arriba, botón fijo abajo, descripción scrollable */
 .vm-info {
-    padding: 32px 32px 28px;
+    padding: 30px 32px 26px;
     display: flex;
     flex-direction: column;
     gap: 14px;
     min-width: 0;
     border-left: var(--glass-border);
-    max-height: 90vh;
+    max-height: 85vh;
     overflow: hidden;
 }
 
@@ -2417,20 +2417,24 @@ section#inicio,
     flex-shrink: 0;
 }
 
+/* Grilla de Datos Técnicos en pills sutiles */
 .vm-details {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 16px;
-    padding: 14px 16px;
-    background: var(--glass-card-bg);
-    border: var(--glass-border);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 12px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     flex-shrink: 0;
 }
 
 .vm-detail-item {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .vm-detail-item strong {
@@ -2449,7 +2453,7 @@ section#inicio,
     overflow-y: auto;
     padding-right: 8px;
     scrollbar-width: thin;
-    scrollbar-color: var(--brand-green) rgba(255, 255, 255, 0.04);
+    scrollbar-color: var(--brand-green, #00e676) rgba(255, 255, 255, 0.04);
 }
 
 .vm-description::-webkit-scrollbar {
@@ -2462,46 +2466,46 @@ section#inicio,
 }
 
 .vm-description::-webkit-scrollbar-thumb {
-    background: var(--brand-green);
+    background: var(--brand-green, #00e676);
     border-radius: 4px;
 }
 
 .vm-description::-webkit-scrollbar-thumb:hover {
-    background: var(--brand-green-accent);
+    background: var(--brand-green-accent, #25d366);
 }
 
-/* Summary box para párrafos intro / resumen */
+/* Summary box para párrafos comerciales de Instagram */
 .vm-summary-box {
-    background: rgba(37, 211, 102, 0.06);
-    border: 1px solid rgba(37, 211, 102, 0.2);
-    border-left: 4px solid var(--brand-green);
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 3px solid var(--brand-green, #10b981);
     padding: 12px 14px;
-    margin-bottom: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: #e5e7eb;
 }
 
 .vm-summary-box p {
-    margin: 0;
-    font-size: 0.92rem;
-    line-height: 1.5;
-    color: var(--text-primary);
+    margin: 0 0 8px 0;
 }
 
-.vm-summary-extra {
-    margin: 8px 0 12px 0;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: var(--text-secondary);
+.vm-summary-box p:last-child {
+    margin-bottom: 0;
 }
 
-/* Lista de equipamiento destacado */
+/* Sección de equipamiento y características */
+.vm-features-section {
+    margin-top: 4px;
+}
+
 .vm-features-title {
-    margin: 14px 0 8px 0;
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--brand-green-accent);
+    color: #9ca3af;
+    margin-bottom: 10px;
+    font-weight: 700;
 }
 
 .vm-features-list {
@@ -2510,31 +2514,30 @@ section#inicio,
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 7px;
 }
 
 .vm-feature-item {
-    position: relative;
-    padding-left: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
     font-size: 0.88rem;
-    line-height: 1.45;
-    color: var(--text-secondary);
+    line-height: 1.4;
+    color: #d1d5db;
 }
 
-.vm-feature-item::before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    top: 0;
-    color: var(--brand-green);
+.vm-feature-bullet {
+    color: var(--brand-green, #00e676);
     font-weight: 700;
-    font-size: 0.85rem;
+    flex-shrink: 0;
+    line-height: 1.4;
 }
 
 .btn-vm-whatsapp {
-    margin-top: auto;
+    margin-top: 14px;
     flex-shrink: 0;
     display: block;
+    width: 100%;
     text-align: center;
     padding: 14px 20px;
     border-radius: 12px;

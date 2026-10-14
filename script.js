@@ -261,55 +261,141 @@ function formatKilometers(kmRaw) {
     return `${formatted} km`;
 }
 
+const BULLET_REGEX = /^[•●▪\-\*\✓\✔➤👉·]\s*/;
+
 /**
- * Parsea descripciones copiadas de Instagram separando viñetas de párrafos
- * y generando HTML estructurado (.vm-summary-box y .vm-features-list).
+ * Detecta si una línea es ruido de encabezado de publicación de Instagram
+ * (handle de la concesionaria, kilometraje suelto o título con año repetido).
  */
-function formatVehicleDescription(rawText) {
-    if (!rawText || !rawText.trim()) return '';
+function isInstagramHeaderNoise(line, vehicle) {
+    const trimmed = (line || '').trim();
+    if (!trimmed) return true;
+
+    const lower = trimmed.toLowerCase();
+
+    // 1. Instagram username / handle suelto
+    if (/^@?verdun(_automotores)?$/i.test(lower)) return true;
+
+    // 2. Kilometraje suelto (ej: "30.000 km", "0 km", "125.000 KM")
+    if (/^\d+[\d.,]*\s*km$/i.test(trimmed)) return true;
+
+    // 3. Encabezados de IG con pipe y año (ej: "Toyota SW4 SRX 2.8 4x4 AT | 2025")
+    if (vehicle) {
+        const marca = (vehicle.marca || '').toLowerCase().trim();
+        const modelo = (vehicle.modelo || '').toLowerCase().trim();
+        if (trimmed.includes('|')) {
+            const beforePipe = trimmed.split('|')[0].toLowerCase();
+            if ((marca && beforePipe.includes(marca)) || (modelo && beforePipe.includes(modelo)) || beforePipe.includes('verdun')) {
+                return true;
+            }
+        }
+        if (marca && modelo) {
+            const combined = `${marca} ${modelo}`.toLowerCase();
+            if (lower === combined || lower === `${combined} | ${vehicle.año || ''}`.trim()) {
+                return true;
+            }
+        }
+    } else if (trimmed.includes('|') && /\|\s*20\d\d/i.test(trimmed)) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Parsea el texto copiado de Instagram clasificando párrafos comerciales y viñetas de equipamiento.
+ */
+function parseVehicleDescription(rawText, vehicle) {
+    if (!rawText || !rawText.trim()) {
+        return { paragraphs: [], features: [] };
+    }
 
     const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-    if (lines.length === 0) return '';
+    const paragraphs = [];
+    const features = [];
 
-    const bulletLines = [];
-    const paragraphLines = [];
+    lines.forEach((line, index) => {
+        // Descartar encabezados redundantes de Instagram en las primeras líneas
+        if (index < 3 && isInstagramHeaderNoise(line, vehicle)) {
+            return;
+        }
 
-    const bulletRegex = /^[•\-\*\·\✓\✔\▫\▪]\s*/;
-
-    for (const line of lines) {
+        // Si la línea contiene múltiples viñetas separadas por • (ej: "• Climatizador • Cuero • Cámara")
         if (line.includes('•')) {
             const parts = line.split('•').map(p => p.trim()).filter(p => p.length > 0);
             for (const part of parts) {
-                const cleaned = part.replace(bulletRegex, '').trim();
-                if (cleaned) bulletLines.push(cleaned);
+                const cleaned = part.replace(BULLET_REGEX, '').trim();
+                if (cleaned && !isInstagramHeaderNoise(cleaned, vehicle)) {
+                    features.push(cleaned);
+                }
             }
-        } else if (bulletRegex.test(line)) {
-            const cleaned = line.replace(bulletRegex, '').trim();
-            if (cleaned) bulletLines.push(cleaned);
+        } else if (BULLET_REGEX.test(line)) {
+            const cleaned = line.replace(BULLET_REGEX, '').trim();
+            if (cleaned && !isInstagramHeaderNoise(cleaned, vehicle)) {
+                features.push(cleaned);
+            }
         } else {
-            paragraphLines.push(line);
+            paragraphs.push(line);
         }
+    });
+
+    return { paragraphs, features };
+}
+
+/**
+ * Genera un resumen limpio para la tarjeta exterior del catálogo:
+ * - Si hay párrafos comerciales, usa el primero como preview.
+ * - Si solo hay viñetas, une los primeros 3 o 4 ítems con " · ".
+ */
+function getCardExcerpt(rawText, vehicle) {
+    const { paragraphs, features } = parseVehicleDescription(rawText, vehicle);
+
+    if (paragraphs.length > 0) {
+        return paragraphs.join(' ');
     }
+
+    if (features.length > 0) {
+        const items = features.slice(0, 4);
+        return items.join(' · ');
+    }
+
+    return '';
+}
+
+/**
+ * Renderiza la descripción estructurada del modal (#vehicle-modal):
+ * - Arriba: Párrafos comerciales dentro de .vm-summary-box
+ * - Abajo: Lista de características dentro de .vm-features-section
+ */
+function formatVehicleDescription(rawText, vehicle) {
+    const { paragraphs, features } = parseVehicleDescription(rawText, vehicle);
 
     let html = '';
 
-    if (paragraphLines.length > 0) {
-        const firstParagraph = sanitizeHtml(paragraphLines[0]);
-        html += `<div class="vm-summary-box"><p>${firstParagraph}</p></div>`;
-        if (paragraphLines.length > 1) {
-            const rest = paragraphLines.slice(1).map(p => `<p class="vm-summary-extra">${sanitizeHtml(p)}</p>`).join('');
-            html += rest;
-        }
+    if (paragraphs.length > 0) {
+        const paragraphsHtml = paragraphs
+            .map(p => `<p>${sanitizeHtml(p)}</p>`)
+            .join('');
+        html += `<div class="vm-summary-box">${paragraphsHtml}</div>`;
     }
 
-    if (bulletLines.length > 0) {
-        html += '<h4 class="vm-features-title">Equipamiento destacado</h4>';
-        html += '<ul class="vm-features-list">';
-        html += bulletLines.map(item => `<li class="vm-feature-item">${sanitizeHtml(item)}</li>`).join('');
-        html += '</ul>';
+    if (features.length > 0) {
+        html += `
+            <div class="vm-features-section">
+                <h4 class="vm-features-title">Equipamiento y Características</h4>
+                <ul class="vm-features-list">
+                    ${features.map(f => `
+                        <li class="vm-feature-item">
+                            <span class="vm-feature-bullet">✓</span>
+                            <span>${sanitizeHtml(f)}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
     }
 
-    return html;
+    return html.trim();
 }
 
 function getVehicleDisplayName(vehicle) {
@@ -416,8 +502,9 @@ function renderVehicles(vehicles, category) {
         const displayName = getVehicleDisplayName(vehicle);
         const fotos = vehicle.fotos || [];
         const firstPhoto = fotos[0];
-        const descripcionEl = vehicle.descripcion
-            ? `<p class="vehicle-description">${sanitizeHtml(vehicle.descripcion)}</p>`
+        const excerpt = getCardExcerpt(vehicle.descripcion, vehicle);
+        const descripcionEl = excerpt
+            ? `<p class="vehicle-description">${sanitizeHtml(excerpt)}</p>`
             : '';
         const safeName = String(displayName).replace(/'/g, "\\'");
         const imageSrc = (firstPhoto && firstPhoto.url_thumb) || vehicle.image;
@@ -1131,15 +1218,17 @@ function openVehicleModal(vehicleId) {
 
     // Titulo y ficha tecnica
     document.getElementById('vmTitle').textContent = displayName;
+    const condicionLabel = vehicle.esCeroKm ? '0 KM' : 'Usado';
+    const tipoLabel = vehicle.esMoto ? 'Moto' : (vehicle.tipo || 'Auto');
     document.getElementById('vmDetails').innerHTML = `
         <span class="vm-detail-item"><strong>Año:</strong> ${sanitizeHtml(String(vehicle.año || '—'))}</span>
         <span class="vm-detail-item"><strong>KM:</strong> ${formatKilometers(vehicle.km)}</span>
         <span class="vm-detail-item"><strong>Color:</strong> ${sanitizeHtml(vehicle.color || '—')}</span>
-        <span class="vm-detail-item"><strong>Tipo:</strong> ${sanitizeHtml(vehicle.tipo || 'auto')}</span>
+        <span class="vm-detail-item"><strong>Condición:</strong> ${sanitizeHtml(condicionLabel)} · ${sanitizeHtml(tipoLabel)}</span>
     `;
 
     const desc = document.getElementById('vmDescription');
-    const descFormatted = formatVehicleDescription(vehicle.descripcion);
+    const descFormatted = formatVehicleDescription(vehicle.descripcion, vehicle);
     desc.innerHTML = descFormatted;
     desc.style.display = descFormatted ? 'block' : 'none';
 
