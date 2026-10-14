@@ -1227,10 +1227,42 @@ function openVehicleModal(vehicleId) {
         <span class="vm-detail-item"><strong>Condición:</strong> ${sanitizeHtml(condicionLabel)} · ${sanitizeHtml(tipoLabel)}</span>
     `;
 
+    // Descripción: Resumen comercial a la izquierda (bajo miniaturas) y equipamiento a la derecha
+    const { paragraphs, features } = parseVehicleDescription(vehicle.descripcion, vehicle);
+
+    const summaryLeft = document.getElementById('vmSummaryLeft');
+    if (summaryLeft) {
+        if (paragraphs.length > 0) {
+            summaryLeft.innerHTML = paragraphs.map(p => `<p>${sanitizeHtml(p)}</p>`).join('');
+            summaryLeft.style.display = 'block';
+        } else {
+            summaryLeft.innerHTML = '';
+            summaryLeft.style.display = 'none';
+        }
+    }
+
     const desc = document.getElementById('vmDescription');
-    const descFormatted = formatVehicleDescription(vehicle.descripcion, vehicle);
-    desc.innerHTML = descFormatted;
-    desc.style.display = descFormatted ? 'block' : 'none';
+    if (desc) {
+        if (features.length > 0) {
+            desc.innerHTML = `
+                <div class="vm-features-section">
+                    <h4 class="vm-features-title">Equipamiento y Características</h4>
+                    <ul class="vm-features-list">
+                        ${features.map(f => `
+                            <li class="vm-feature-item">
+                                <span class="vm-feature-bullet">✓</span>
+                                <span>${sanitizeHtml(f)}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+            desc.style.display = 'block';
+        } else {
+            desc.innerHTML = '';
+            desc.style.display = 'none';
+        }
+    }
 
     // Enlace WhatsApp directo con el nombre del vehiculo
     const whatsappBtn = document.getElementById('vmWhatsappBtn');
@@ -1263,6 +1295,17 @@ function closeVehicleModal() {
     if (!modal) return;
     modal.style.display = 'none';
     currentModalFotos = [];
+
+    const summaryLeft = document.getElementById('vmSummaryLeft');
+    if (summaryLeft) {
+        summaryLeft.innerHTML = '';
+        summaryLeft.style.display = 'none';
+    }
+
+    const desc = document.getElementById('vmDescription');
+    if (desc) {
+        desc.innerHTML = '';
+    }
 
     const stockModal = document.getElementById('stockModal');
     if (!stockModal || stockModal.style.display !== 'flex') {

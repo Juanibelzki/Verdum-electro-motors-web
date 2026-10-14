@@ -2347,6 +2347,8 @@ section#inicio,
     flex-direction: column;
     gap: 12px;
     min-width: 0;
+    max-height: 85vh;
+    overflow: hidden;
 }
 
 .vm-main-image {
@@ -2387,6 +2389,50 @@ section#inicio,
     border-color: var(--brand-green);
     opacity: 1;
     box-shadow: var(--brand-green-glow);
+}
+
+/* Resumen Comercial en columna izquierda (debajo de miniaturas) */
+.vm-summary-left {
+    margin-top: 4px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-left: 3px solid var(--brand-green, #10b981);
+    border-radius: 12px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #e2e8f0;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-green, #00e676) rgba(255, 255, 255, 0.04);
+}
+
+.vm-summary-left::-webkit-scrollbar {
+    width: 5px;
+}
+
+.vm-summary-left::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 3px;
+}
+
+.vm-summary-left::-webkit-scrollbar-thumb {
+    background: var(--brand-green, #00e676);
+    border-radius: 3px;
+}
+
+.vm-summary-left::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-green-accent, #25d366);
+}
+
+.vm-summary-left p {
+    margin: 0 0 8px 0;
+}
+
+.vm-summary-left p:last-child {
+    margin-bottom: 0;
 }
 
 /* Info - Header fijo arriba, botón fijo abajo, descripción scrollable */
@@ -2614,6 +2660,13 @@ section#inicio,
 
     .vm-gallery {
         padding: 16px 16px 8px;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .vm-summary-left {
+        max-height: 160px;
+        margin-top: 6px;
     }
 
     .vm-thumbs {
