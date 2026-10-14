@@ -163,6 +163,12 @@ async function loadStockFromSupabase(forceRefresh = false) {
     console.log('═══════════════════════════════════════');
 
     stockCache = inventory;
+
+    // Renderizar todo el stock activo en la grilla principal automáticamente
+    if (typeof setCategoryFilter === 'function') {
+        setCategoryFilter(currentCategory || 'todos');
+    }
+
     return inventory;
 }
 
@@ -420,67 +426,90 @@ function enviarWhatsApp(mensaje) {
 // ============================================
 
 let currentStockVehicles = [];
+let currentCategory = 'todos';
 
 /**
- * Abre el modal de stock para la categoría especificada
+ * Aplica los filtros combinados (categoría activa + texto de búsqueda)
+ */
+function applyStockFilters() {
+    if (!stockCache) return;
+    const catData = stockCache[currentCategory] || stockCache['todos'];
+    const baseVehicles = (catData && catData.vehicles) ? catData.vehicles : [];
+
+    const filterInput = document.getElementById('stockFilter');
+    const query = filterInput ? filterInput.value.toLowerCase().trim() : '';
+
+    if (!query) {
+        currentStockVehicles = baseVehicles;
+    } else {
+        currentStockVehicles = baseVehicles.filter(v => {
+            const name = getVehicleDisplayName(v).toLowerCase();
+            const desc = (v.descripcion || '').toLowerCase();
+            const marca = (v.marca || '').toLowerCase();
+            const modelo = (v.modelo || '').toLowerCase();
+            return name.includes(query) || desc.includes(query) || marca.includes(query) || modelo.includes(query);
+        });
+    }
+
+    renderVehicles(currentStockVehicles, currentCategory);
+}
+
+/**
+ * Filtrado dinámico por texto de búsqueda
+ */
+function filterStock() {
+    applyStockFilters();
+}
+
+/**
+ * Establece la pastilla (categoría) activa y filtra en memoria sin recargar
+ */
+function setCategoryFilter(category) {
+    const keyMap = {
+        'all': 'todos',
+        'todos': 'todos',
+        'autos-0km': '0km',
+        '0km': '0km',
+        'autos-usados': 'usados',
+        'usados': 'usados',
+        'vehiculos-especiales': 'especiales',
+        'especiales': 'especiales',
+        'motos-electricas': 'motos',
+        'motos': 'motos'
+    };
+    currentCategory = keyMap[category] || category || 'todos';
+
+    // Actualizar estado visual de las pastillas
+    document.querySelectorAll('.catalog-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === currentCategory);
+    });
+
+    applyStockFilters();
+}
+
+/**
+ * Abre el catálogo filtrando por categoría y desplazando suavemente la vista
  */
 async function openStockModal(category) {
-    const modal = document.getElementById('stockModal');
-    const merged = await getMergedVehicleInventory();
-
-    // Mapear slugs del HTML a las keys del inventario
-    const keyMap = {
-        'autos-0km': '0km',
-        'autos-usados': 'usados',
-        'vehiculos-especiales': 'especiales',
-        'motos-electricas': 'motos',
-        'motos': 'motos',
-        'especiales': 'especiales'
-    };
-    const inventoryKey = keyMap[category] || category;
-    const inventory = merged[inventoryKey];
-    
-    if (!inventory) {
-        console.error(`Categoría ${category} no encontrada`);
-        return;
+    if (!stockCache) {
+        await loadStockFromSupabase();
     }
-    
-    // Actualizar título
-    document.getElementById('stockModalTitle').textContent = inventory.title;
-    currentStockVehicles = inventory.vehicles;
-    
-    // Limpiar filtro
-    const filterInput = document.getElementById('stockFilter');
-    if (filterInput) filterInput.value = '';
-    
-    // Renderizar vehículos
-    renderVehicles(currentStockVehicles, category);
-    
-    // Mostrar modal con animación
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Prevenir scroll
-}
+    setCategoryFilter(category);
 
-function filterStock() {
-    const query = document.getElementById('stockFilter').value.toLowerCase().trim();
-    if (!query) {
-        renderVehicles(currentStockVehicles);
-        return;
+    const catalogSection = document.getElementById('servicios') || document.getElementById('stockVehiclesContainer');
+    if (catalogSection) {
+        catalogSection.scrollIntoView({ behavior: 'smooth' });
     }
-    const filtered = currentStockVehicles.filter(v => {
-        const name = getVehicleDisplayName(v).toLowerCase();
-        const desc = (v.descripcion || '').toLowerCase();
-        return name.includes(query) || desc.includes(query);
-    });
-    renderVehicles(filtered);
 }
 
 /**
- * Cierra el modal de stock
+ * Cierra modal de forma segura si estuviera abierto
  */
 function closeStockModal() {
     const modal = document.getElementById('stockModal');
-    modal.style.display = 'none';
+    if (modal) {
+        modal.style.display = 'none';
+    }
     document.body.style.overflow = 'auto'; // Restaurar scroll
 }
 
@@ -1316,8 +1345,22 @@ function closeVehicleModal() {
 window.openVehicleModal = openVehicleModal;
 window.switchVehicleThumb = switchVehicleThumb;
 window.closeVehicleModal = closeVehicleModal;
+window.setCategoryFilter = setCategoryFilter;
+window.filterStock = filterStock;
+window.openStockModal = openStockModal;
+window.closeStockModal = closeStockModal;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Delegación de clics en las pastillas (pills) de categoría
+    const pillsContainer = document.getElementById('catalogPills');
+    if (pillsContainer) {
+        pillsContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.catalog-pill');
+            if (!btn || !btn.dataset.category) return;
+            setCategoryFilter(btn.dataset.category);
+        });
+    }
+
     // Clic en la card (toda el area) abre el detalle; flechas del carrusel y
     // botones usan stopPropagation en renderVehicles y no llegan aca
     const container = document.getElementById('stockVehiclesContainer');
@@ -1347,6 +1390,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, true);
 });
+
+// Cargar todo el stock de Supabase al cargar la página
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStockFromSupabase();
+    });
+} else {
+    loadStockFromSupabase();
+}
 
 // ============================================
 // FIN DEL SCRIPT

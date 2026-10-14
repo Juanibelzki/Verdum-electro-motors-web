@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css?v=64">
+    <link rel="stylesheet" href="styles.css?v=65">
 </head>
 <body>
     <!-- ============================================
@@ -43,7 +43,7 @@
             
             <ul class="nav-links">
                 <li><a href="#inicio">Inicio</a></li>
-                <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#servicios">Catálogo</a></li>
                 <li><a href="#nosotros">Nosotros</a></li>
                 <li><a href="#contacto">Contacto</a></li>
             </ul>
@@ -72,7 +72,7 @@
                 </p>
                 <div class="hero-ctas">
                     <button class="btn-primary btn-lg" onclick="document.getElementById('servicios').scrollIntoView({ behavior: 'smooth' })">
-                        Ver Nuestros Servicios
+                        Ver Catálogo
                     </button>
                     <button class="btn-secondary btn-lg" onclick="document.getElementById('creditos').scrollIntoView({ behavior: 'smooth' })">
                         Ver Financiación
@@ -123,118 +123,38 @@
     </div>
 
     <!-- ============================================
-         SERVICIOS - FLIP CARDS
+         CATÁLOGO DE VEHÍCULOS - STOCK DISPONIBLE
     ============================================ -->
-    <section id="servicios" class="servicios">
+    <section id="servicios" class="servicios catalogo-section">
         <div class="servicios-container">
-            <h2 class="section-title fade-in">Nuestros Servicios</h2>
-            <p class="section-subtitle fade-in">Soluciones completas en movilidad</p>
+            <h2 class="section-title fade-in">Catálogo de Vehículos</h2>
+            <p class="section-subtitle fade-in">Vehículos seleccionados con entrega inmediata y financiación propia</p>
             
-            <div class="services-grid">
-                <!-- Service 1: Autos 0KM -->
-                <div class="service-card-flip fade-in" onclick="openStockModal('autos-0km')" style="cursor: pointer;">
-                    <div class="service-card-inner">
-                        <div class="service-card-front">
-                            <img src="images/service_1.jpg" alt="Autos 0KM" class="service-image" width="400" height="300" loading="lazy">
-                            <div class="service-overlay">
-                                <h3 class="service-title-front">Autos 0KM</h3>
-                            </div>
-                        </div>
-                        <div class="service-card-back glass-card">
-                            <h3>Autos 0KM</h3>
-                            <p>Nacionales e importados. Las mejores marcas con financiación propia.</p>
-                            <div class="service-features">
-                                <span class="feature-tag">VW</span>
-                                <span class="feature-tag">Nissan</span>
-                                <span class="feature-tag">Chevrolet</span>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Barra de Filtros (Pills) y Buscador -->
+            <div class="catalog-toolbar fade-in">
+                <div class="catalog-pills" id="catalogPills">
+                    <button type="button" class="catalog-pill active" data-category="todos">Todos</button>
+                    <button type="button" class="catalog-pill" data-category="usados">Autos Usados</button>
+                    <button type="button" class="catalog-pill" data-category="0km">Autos 0KM</button>
+                    <button type="button" class="catalog-pill" data-category="especiales">Vehículos Especiales</button>
+                    <button type="button" class="catalog-pill" data-category="motos">Motos</button>
                 </div>
-
-                <!-- Service 2: Autos Usados -->
-                <div class="service-card-flip fade-in" onclick="openStockModal('autos-usados')" style="cursor: pointer;">
-                    <div class="service-card-inner">
-                        <div class="service-card-front">
-                            <img src="images/service_2.jpg" alt="Autos Usados" class="service-image" width="400" height="300" loading="lazy">
-                            <div class="service-overlay">
-                                <h3 class="service-title-front">Autos Usados</h3>
-                            </div>
-                        </div>
-                        <div class="service-card-back glass-card">
-                            <h3>Autos Usados</h3>
-                            <p>Revisados y garantizados. Todas las marcas con documentación completa.</p>
-                            <div class="service-features">
-                                <span class="feature-tag">Garantía</span>
-                                <span class="feature-tag">Revisados</span>
-                                <span class="feature-tag">Legales</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="stock-filter">
+                    <input type="text" id="stockFilter" placeholder="Buscar por marca, modelo..." oninput="filterStock()">
                 </div>
+            </div>
 
-                <!-- Service 5: Vehículos Especiales -->
-                <div class="service-card-flip fade-in" onclick="openStockModal('vehiculos-especiales')" style="cursor: pointer;">
-                    <div class="service-card-inner">
-                        <div class="service-card-front">
-                            <img src="images/service_5.jpg" alt="Vehículos Especiales" class="service-image" width="400" height="300" loading="lazy">
-                            <div class="service-overlay">
-                                <h3 class="service-title-front">Vehículos Especiales</h3>
-                            </div>
-                        </div>
-                        <div class="service-card-back glass-card">
-                            <h3>Vehículos Especiales</h3>
-                            <p>Camionetas 4x4, furgones, minibuses y vehículos comerciales. Presupuesto a medida.</p>
-                            <div class="service-features">
-                                <span class="feature-tag">4x4</span>
-                                <span class="feature-tag">Comerciales</span>
-                                <span class="feature-tag">A medida</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Service 6: Motos -->
-                <div class="service-card-flip fade-in" onclick="openStockModal('motos')" style="cursor: pointer;">
-                    <div class="service-card-inner">
-                        <div class="service-card-front">
-                            <img src="images/moto portada.jpg" alt="Motos" class="service-image" width="400" height="300" loading="lazy">
-                            <div class="service-overlay">
-                                <h3 class="service-title-front">Motos</h3>
-                            </div>
-                        </div>
-                        <div class="service-card-back glass-card">
-                            <h3>Motos</h3>
-                            <p>Motos eléctricas y convencionales. Las mejores marcas con financiación propia.</p>
-                            <div class="service-features">
-                                <span class="feature-tag">Eléctricas</span>
-                                <span class="feature-tag">Convencionales</span>
-                                <span class="feature-tag">Financiación</span>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Grilla Directa de Vehículos -->
+            <div class="stock-vehicles-container" id="stockVehiclesContainer">
+                <div class="stock-loading">
+                    <p>Cargando vehículos disponibles...</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ============================================
-         MODAL DE STOCK
-    ============================================ -->
-    <div id="stockModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeStockModal()">&times;</button>
-            <h2 class="modal-title" id="stockModalTitle">Stock Disponible</h2>
-            
-            <div class="stock-filter">
-                <input type="text" id="stockFilter" placeholder="Buscar por marca, modelo..." oninput="filterStock()">
-            </div>
-            <div class="stock-vehicles-container" id="stockVehiclesContainer">
-                <!-- Se llenará dinámicamente con JavaScript -->
-            </div>
-            
-        </div>
-    </div>
+    <!-- Legacy anchor para compatibilidad -->
+    <div id="stockModal" style="display: none;" aria-hidden="true"></div>
 
     <!-- ============================================
          SECCIÓN NOSOTROS
@@ -492,20 +412,20 @@
                 <h4>NAVEGACIÓN</h4>
                 <ul>
                     <li><a href="#inicio">Inicio</a></li>
-                    <li><a href="#servicios">Servicios</a></li>
-                    <li><a href="#servicios">Stock</a></li>
+                    <li><a href="#servicios">Catálogo</a></li>
                     <li><a href="#nosotros">Nosotros</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
                 </ul>
             </div>
             
             <div class="footer-column">
-                <h4>SERVICIOS</h4>
+                <h4>CATEGORÍAS</h4>
                 <ul>
                     <li><a href="javascript:void(0)" onclick="openStockModal('autos-0km')">Autos 0KM</a></li>
                     <li><a href="javascript:void(0)" onclick="openStockModal('autos-usados')">Autos Usados</a></li>
+                    <li><a href="javascript:void(0)" onclick="openStockModal('vehiculos-especiales')">Vehículos Especiales</a></li>
                     <li><a href="javascript:void(0)" onclick="openStockModal('motos')">Motos</a></li>
                     <li><a href="#creditos">Financiación</a></li>
-                    <li><a href="#contacto">Trámites</a></li>
                 </ul>
             </div>
             
@@ -550,6 +470,6 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
-    <script src="script.js?v=44" defer></script>
+    <script src="script.js?v=45" defer></script>
 </body>
 </html>
