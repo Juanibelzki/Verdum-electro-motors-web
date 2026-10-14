@@ -2321,7 +2321,7 @@ section#inicio,
     position: absolute;
     top: 14px;
     right: 16px;
-    z-index: 2;
+    z-index: 10;
     background: var(--bg-surface);
     color: var(--text-primary);
     border: var(--glass-border);
@@ -2683,18 +2683,186 @@ section#inicio,
     }
 }
 
+/* Modal de Vehículo Borde-a-Borde y Compacto para Smartphones */
+@media (max-width: 768px) {
+    .vm-overlay {
+        padding: 8px 6px;
+        align-items: center;
+    }
+
+    .vm-card {
+        grid-template-columns: 1fr;
+        max-height: 94vh;
+        border-radius: 18px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    /* Galería Bleed / Borde a Borde sin paddings laterales */
+    .vm-gallery {
+        padding: 0 0 8px 0;
+        gap: 6px;
+        max-height: none;
+        overflow: visible;
+        width: 100%;
+    }
+
+    .vm-main-image {
+        width: 100%;
+        height: 260px;
+        max-height: 35vh;
+        aspect-ratio: auto;
+        object-fit: cover;
+        border-radius: 0 0 12px 12px;
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: block;
+    }
+
+    /* Superposiciones flotantes sobre la foto: Badge a la izq, Botón X a la der */
+    .vm-close {
+        top: 12px;
+        right: 12px;
+        z-index: 20;
+        width: 36px;
+        height: 36px;
+        font-size: 1.3rem;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .vm-badges {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 15;
+        display: flex;
+        gap: 6px;
+        pointer-events: none;
+        margin: 0;
+    }
+
+    .vm-badges .vehicle-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+
+    /* Miniaturas compactas en fila horizontal scrolleable */
+    .vm-thumbs {
+        margin-top: 6px;
+        padding: 0 14px 4px;
+        gap: 6px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .vm-thumbs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .vm-thumb {
+        flex: 0 0 45px;
+        width: 45px;
+        height: 40px;
+        border-radius: 6px;
+    }
+
+    /* Resumen comercial en mobile con padding alineado al texto */
+    .vm-summary-left {
+        margin: 6px 14px 0;
+        padding: 10px 12px;
+        font-size: 0.84rem;
+        line-height: 1.45;
+        max-height: 130px;
+        border-radius: 8px;
+    }
+
+    /* Información de texto compacta */
+    .vm-info {
+        border-left: none;
+        border-top: none;
+        padding: 10px 14px 18px;
+        gap: 10px;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .vm-title {
+        font-size: 1.25rem;
+        line-height: 1.25;
+        margin: 0;
+    }
+
+    /* Ficha técnica compacta en 2 columnas */
+    .vm-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px 12px;
+        font-size: 0.85rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        padding: 8px 10px;
+        margin-bottom: 4px;
+    }
+
+    .vm-detail-item {
+        font-size: 0.82rem;
+        gap: 4px;
+    }
+
+    .vm-description {
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+    }
+
+    .vm-features-section {
+        margin-top: 2px;
+    }
+
+    .vm-features-title {
+        font-size: 0.74rem;
+        margin-bottom: 6px;
+    }
+
+    .vm-features-list {
+        gap: 2px;
+    }
+
+    .vm-feature-item {
+        font-size: 0.85rem;
+        gap: 6px;
+        padding: 4px 0;
+        line-height: 1.35;
+    }
+
+    .btn-vm-whatsapp {
+        margin-top: 10px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        border-radius: 10px;
+    }
+}
+
 @media (max-width: 480px) {
     .vm-overlay {
-        padding: 10px;
+        padding: 6px 4px;
     }
 
     .vm-card {
         border-radius: 16px;
-    }
-
-    .vm-thumb {
-        width: 68px;
-        height: 51px;
     }
 
     .vehicle-actions {
