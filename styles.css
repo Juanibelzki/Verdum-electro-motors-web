@@ -2638,53 +2638,8 @@ section#inicio,
     gap: 8px;
 }
 
-/* Responsive */
+/* Modal de Vehículo Borde-a-Borde y Compacto para Smartphones y Tablets */
 @media (max-width: 900px) {
-    .vm-card {
-        grid-template-columns: 1fr;
-        max-height: 92vh;
-        overflow-y: auto;
-    }
-
-    .vm-info {
-        border-left: none;
-        border-top: var(--glass-border);
-        padding: 24px 20px;
-        max-height: none;
-        overflow: visible;
-    }
-
-    .vm-description {
-        max-height: 280px;
-    }
-
-    .vm-gallery {
-        padding: 16px 16px 8px;
-        max-height: none;
-        overflow: visible;
-    }
-
-    .vm-summary-left {
-        max-height: 160px;
-        margin-top: 6px;
-    }
-
-    .vm-thumbs {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .vm-details {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .vm-title {
-        font-size: 1.3rem;
-    }
-}
-
-/* Modal de Vehículo Borde-a-Borde y Compacto para Smartphones */
-@media (max-width: 768px) {
     .vm-overlay {
         padding: 8px 6px;
         align-items: center;
