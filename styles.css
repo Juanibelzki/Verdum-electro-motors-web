@@ -2573,13 +2573,20 @@ section#inicio,
 
 .vehicle-actions {
     display: flex;
-    gap: 10px;
-    margin-top: 4px;
+    width: 100%;
+    margin-top: auto;
+    padding-top: 6px;
 }
 
 .vehicle-actions .btn-consultar {
+    width: 100%;
     flex: 1;
     margin-top: 0;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 /* Responsive */

@@ -473,12 +473,6 @@ function renderVehicles(vehicles, category) {
                     </div>
                     <div class="vehicle-actions">
                         <button
-                            class="btn-detalle"
-                            onclick="event.stopPropagation(); openVehicleModal(${cardId})"
-                        >
-                            Ver detalles / Fotos
-                        </button>
-                        <button
                             class="btn-consultar"
                             onclick="event.stopPropagation(); consultarWhatsApp('${safeName}', ${vehicle.año || 0}, '${whatsappMsg}')"
                         >
