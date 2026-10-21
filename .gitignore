@@ -1,5 +1,6 @@
 migrate.js
-package.json
-package-lock.json
 node_modules/
+dist/
+.vercel/
 .DS_Store
+*.log
