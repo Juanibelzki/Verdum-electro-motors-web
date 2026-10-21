@@ -34,7 +34,17 @@ export default function Hero({
     { value: "100%", label: "Financiación propia" },
   ];
 
-  const brands = ["Volkswagen", "Nissan", "Chevrolet", "Toyota", "Ford", "Fiat"];
+  const brands = [
+    "Volkswagen",
+    "Nissan",
+    "Chevrolet",
+    "Toyota",
+    "Ford",
+    "Peugeot",
+    "Honda",
+    "Renault",
+    "Fiat",
+  ];
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -266,19 +276,23 @@ export default function Hero({
           ))}
         </div>
 
-        <div className="mt-9 flex flex-col gap-3 border-t border-line/70 pt-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="mt-9 flex flex-col gap-4 border-t border-line/70 pt-6 sm:flex-row sm:items-center sm:gap-6">
           <p className="shrink-0 text-[9px] font-bold uppercase tracking-[0.24em] text-muted/80">
             Marcas que representamos
           </p>
-          <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2 sm:justify-end sm:gap-x-7">
-            {brands.map((brand) => (
-              <span
-                key={brand}
-                className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-ink/35 transition hover:text-ink/60"
-              >
-                {brand}
-              </span>
-            ))}
+          <div className="relative min-w-0 flex-1 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+            <div className="marquee-track items-center">
+              {[...brands, ...brands].map((brand, index) => (
+                <span
+                  key={`${brand}-${index}`}
+                  aria-hidden={index >= brands.length}
+                  className="mr-10 inline-flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.13em] text-ink/45 transition hover:text-ink/75"
+                >
+                  {brand}
+                  <span className="h-1 w-1 rounded-full bg-ink/25" aria-hidden="true" />
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
