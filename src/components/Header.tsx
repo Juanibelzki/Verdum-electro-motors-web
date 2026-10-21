@@ -33,14 +33,14 @@ export default function Header({ onSchedule }: { onSchedule: () => void }) {
           </p>
           <div className="flex items-center gap-4 sm:gap-6">
             <p className="hidden items-center gap-1.5 text-[11px] text-cream/65 md:flex">
-              <span className="font-semibold text-lime">Tasa 0%</span> en modelos seleccionados
+              <span className="font-semibold text-lime">Financiación propia</span> sin banco
             </p>
             <a
-              href="tel:+541155550198"
+              href="tel:+5493795300020"
               className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide transition hover:text-lime"
             >
               <Phone className="h-3 w-3" />
-              +54 11 5555 0198
+              +54 9 3795-300020
             </a>
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function Header({ onSchedule }: { onSchedule: () => void }) {
 
             <div className="flex items-center gap-2.5">
               <a
-                href="tel:+541155550198"
+                href="tel:+5493795300020"
                 className="mr-1 hidden items-center gap-2 text-[12px] font-semibold text-ink/75 transition hover:text-ink xl:flex"
               >
                 <span className="grid h-8 w-8 place-items-center rounded-full border border-ink/10">
@@ -134,8 +134,8 @@ export default function Header({ onSchedule }: { onSchedule: () => void }) {
               <ArrowUpRight className="h-4 w-4" />
             </button>
             <div className="mt-4 flex items-center justify-between text-[11px] text-muted">
-              <a href="tel:+541155550198" className="font-semibold text-ink">
-                +54 11 5555 0198
+              <a href="tel:+5493795300020" className="font-semibold text-ink">
+                +54 9 3795-300020
               </a>
               <span>Lun a Sáb · 9 a 20 h</span>
             </div>

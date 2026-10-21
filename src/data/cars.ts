@@ -60,7 +60,7 @@ export const cars: Car[] = [
       "Techo panorámico",
       "Escape deportivo",
       "Asientos deportivos adaptativos",
-      "Garantía VELTA 12 meses",
+      "Garantía Verdun 12 meses",
     ],
   },
   {
@@ -171,8 +171,8 @@ export const cars: Car[] = [
       "Siete plazas",
       "Burmester surround",
       "Conducción asistida",
-      "Inspección de 120 puntos",
-      "Garantía VELTA 12 meses",
+      "Revisión mecánica",
+      "Garantía Verdun 12 meses",
     ],
   },
   {
@@ -228,7 +228,7 @@ export const cars: Car[] = [
       "Escape deportivo AMG",
       "Cuero bitono",
       "Burmester High-End",
-      "Inspección de 120 puntos",
+      "Revisión mecánica",
     ],
   },
   {

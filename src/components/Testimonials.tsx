@@ -4,30 +4,30 @@ import { Eyebrow, Reveal, Stars } from "./ui";
 
 const testimonials = [
   {
-    name: "Camila Rey",
-    initials: "CR",
-    car: "Genesis GV70",
-    date: "Febrero 2026",
+    name: "Roberto S.",
+    initials: "RS",
+    car: "Cliente desde 2016",
+    date: "Corrientes",
     quote:
-      "Entré a mirar y salí con mi próximo auto. Cero presión, mil respuestas. La cuota quedó exactamente como me la mostraron, sin un peso de diferencia.",
+      "Compré mi primera camioneta con Verdun hace 8 años y volví por la segunda. La financiación propia fue clave, sin tantos papeles.",
     dark: false,
   },
   {
-    name: "Diego Paredes",
-    initials: "DP",
-    car: "Mercedes-Benz EQB",
-    date: "Enero 2026",
+    name: "Analía M.",
+    initials: "AM",
+    car: "Compradora de 0KM",
+    date: "2024",
     quote:
-      "Hice todo el trámite online y en 48 horas ya estaba manejando. La entrega fue impecable: el auto parecía salido de fábrica y el equipo un diez.",
+      "Me atendieron diferente desde el primer mensaje de WhatsApp. Sin presión, me explicaron todo y salí con el auto ese mismo día.",
     dark: true,
   },
   {
-    name: "Lucía & Martín",
-    initials: "LM",
-    car: "Porsche 911 Carrera S",
-    date: "Diciembre 2025",
+    name: "Diego P.",
+    initials: "DP",
+    car: "Permuta + financiación",
+    date: "2023",
     quote:
-      "Buscábamos un deportivo y encontramos asesoramiento de verdad. Nos explicaron cada detalle de la garantía y del historial. Volveríamos a elegirlos.",
+      "Di mi usado en parte de pago y fue muy transparente. Me tasaron bien y no tuve sorpresas. Los recomiendo sin dudarlo.",
     dark: false,
   },
 ];
@@ -47,19 +47,19 @@ export default function Testimonials() {
                 </span>
               </h2>
               <p className="mt-4 max-w-md text-[13.5px] leading-relaxed text-muted">
-                Más de 2.400 entregas y una sola forma de trabajar: que la experiencia sea tan
-                buena como el auto.
+                Más de 30 años de trayectoria y una sola forma de trabajar: que la experiencia sea
+                tan buena como el auto.
               </p>
             </div>
 
             <div className="flex w-fit items-center gap-4 rounded-2xl border border-line/80 bg-cream px-5 py-4">
               <p className="text-[36px] font-extrabold leading-none tracking-[-0.05em] text-ink">
-                4,9
+                30
               </p>
               <div className="border-l border-line pl-4">
-                <Stars />
+                <p className="text-[11px] font-bold text-ink">años de trayectoria</p>
                 <p className="mt-1.5 text-[10px] font-medium text-muted">
-                  340 reseñas verificadas en Google
+                  Desde 1994 en Corrientes
                 </p>
               </div>
             </div>

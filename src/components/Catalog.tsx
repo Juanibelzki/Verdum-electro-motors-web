@@ -284,7 +284,7 @@ export default function Catalog({
                 </span>
               </h2>
               <p className="mt-4 max-w-lg text-[13.5px] leading-relaxed text-muted">
-                Cada unidad pasa por una inspección de 120 puntos. Publicamos lo que ves: precio
+                Cada unidad está revisada y garantizada. Publicamos lo que ves: precio
                 final, historial y disponibilidad real.
               </p>
             </div>

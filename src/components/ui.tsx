@@ -81,7 +81,7 @@ export function Logo({ light = false, className }: { light?: boolean; className?
     <a
       href="#top"
       className={cn("group inline-flex items-center gap-2.5", className)}
-      aria-label="VELTA Motors, ir al inicio"
+      aria-label="Verdun Automotores, ir al inicio"
     >
       <span
         className={cn(
@@ -105,7 +105,7 @@ export function Logo({ light = false, className }: { light?: boolean; className?
           light ? "text-cream" : "text-ink"
         )}
       >
-        Velta
+        Verdun
       </span>
     </a>
   );

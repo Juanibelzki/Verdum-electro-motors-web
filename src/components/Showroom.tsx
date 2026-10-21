@@ -15,23 +15,23 @@ import { Eyebrow, Reveal } from "./ui";
 const details = [
   {
     icon: MapPin,
-    label: "Showroom Palermo",
-    value: "Av. del Libertador 4200, CABA",
+    label: "Verdun Automotores",
+    value: "Av. Chacabuco 1725, Corrientes",
   },
   {
     icon: Clock,
     label: "Horarios",
-    value: "Lun a Vie 9:00–20:00 · Sáb 9:00–14:00",
+    value: "Lun a Sáb · 9:00–20:00",
   },
   {
     icon: Phone,
     label: "Ventas y asesoramiento",
-    value: "+54 11 5555 0198",
+    value: "+54 9 3795-300020",
   },
   {
     icon: Mail,
     label: "Escribinos",
-    value: "hola@veltamotors.com",
+    value: "info@verdun.com.ar",
   },
 ];
 
@@ -45,7 +45,7 @@ export default function Showroom({ onSchedule }: { onSchedule: () => void }) {
               <div className="relative overflow-hidden rounded-[1.75rem] border border-line">
                 <img
                   src={images.lounge}
-                  alt="Showroom luminoso de VELTA Motors con vehículos en exhibición"
+                  alt="Showroom de Verdun Automotores en Corrientes"
                   className="h-[380px] w-full object-cover sm:h-[460px] lg:h-[520px]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent" />
@@ -59,12 +59,12 @@ export default function Showroom({ onSchedule }: { onSchedule: () => void }) {
                       Visitanos
                     </p>
                     <p className="mt-1 text-[14px] font-extrabold leading-tight text-cream">
-                      Av. del Libertador 4200
+                      Av. Chacabuco 1725
                     </p>
-                    <p className="mt-0.5 text-[10px] text-cream/60">Palermo · Buenos Aires</p>
+                    <p className="mt-0.5 text-[10px] text-cream/60">Corrientes · Argentina</p>
                   </div>
                   <a
-                    href="https://maps.google.com/?q=Av.+del+Libertador+4200,+Buenos+Aires"
+                    href="https://maps.google.com/?q=Av.+Chacabuco+1725,+Corrientes,+Argentina"
                     target="_blank"
                     rel="noreferrer"
                     className="grid h-10 w-10 place-items-center rounded-full bg-lime text-ink transition hover:rotate-45 hover:bg-cream"
@@ -133,7 +133,7 @@ export default function Showroom({ onSchedule }: { onSchedule: () => void }) {
                   <ArrowUpRight className="h-4 w-4" />
                 </button>
                 <a
-                  href="https://maps.google.com/?q=Av.+del+Libertador+4200,+Buenos+Aires"
+                  href="https://maps.google.com/?q=Av.+Chacabuco+1725,+Corrientes,+Argentina"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 px-5 py-3.5 text-[12px] font-semibold text-ink transition hover:border-ink/30"
@@ -144,7 +144,7 @@ export default function Showroom({ onSchedule }: { onSchedule: () => void }) {
               </div>
               <p className="mt-3 flex items-center gap-1.5 text-[9.5px] text-muted">
                 <span className="h-1 w-1 rounded-full bg-moss" />
-                Estacionamiento gratuito para clientes VELTA.
+                Estacionamiento gratuito para clientes Verdun.
               </p>
             </Reveal>
           </div>
@@ -158,7 +158,7 @@ const faqs = [
   {
     question: "¿Los autos tienen garantía?",
     answer:
-      "Sí. Los vehículos nuevos cuentan con la garantía oficial de fábrica y los seminuevos incluyen 12 meses de garantía VELTA sobre mecánica y caja, además de una inspección certificada de 120 puntos.",
+      "Sí. Los vehículos nuevos cuentan con la garantía oficial de fábrica y los usados incluyen garantía Verdun sobre mecánica y caja, además de una revisión mecánica previa.",
   },
   {
     question: "¿Puedo entregar mi auto en parte de pago?",
@@ -168,12 +168,12 @@ const faqs = [
   {
     question: "¿Cómo funciona la financiación?",
     answer:
-      "Podés simular tu cuota en la sección de financiación con diferentes anticipos y plazos. La aprobación se realiza en 24 horas hábiles y trabajamos con bancos y entidades partner. La tasa es fija durante todo el plan.",
+      "Podés simular tu cuota en la sección de financiación con diferentes anticipos y plazos. La aprobación es ágil y la financiación es propia, sin banco. La tasa es fija durante todo el plan.",
   },
   {
     question: "¿Hacen entregas en todo el país?",
     answer:
-      "Sí. Coordinamos entregas en CABA y GBA sin cargo, y enviamos al interior con transporte especializado. El auto viaja asegurado y con todos los papeles listos para patentar.",
+      "Sí. Coordinamos entregas en Corrientes y alrededores, y enviamos al interior con transporte especializado. El auto viaja asegurado y con todos los papeles listos para patentar.",
   },
   {
     question: "¿Qué necesito para comprar?",
@@ -222,7 +222,7 @@ export function Faq({ onSchedule }: { onSchedule: () => void }) {
                   </div>
                 </div>
                 <a
-                  href="https://wa.me/541155550198?text=Hola%20VELTA%2C%20tengo%20una%20consulta%20sobre%20un%20auto"
+                  href="https://wa.me/5493795300020?text=Hola%20Verdun%2C%20tengo%20una%20consulta%20sobre%20un%20auto"
                   target="_blank"
                   rel="noreferrer"
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3 text-[11.5px] font-semibold text-cream transition hover:bg-forest"

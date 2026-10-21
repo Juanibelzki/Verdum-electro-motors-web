@@ -1,6 +1,5 @@
 import { featuredCar, formatKm, formatUSD, images, monthlyPayment, type Car } from "../data/cars";
 import { ArrowUpRight, Calendar, Sparkles } from "./Icons";
-import { Stars } from "./ui";
 
 export default function Hero({
   onSchedule,
@@ -16,13 +15,13 @@ export default function Hero({
   ];
 
   const stats = [
-    { value: "2.400+", label: "Autos entregados" },
-    { value: "4,9/5", label: "Valoración de clientes" },
-    { value: "12 años", label: "De trayectoria" },
-    { value: "48 h", label: "Entrega promedio" },
+    { value: "30 años", label: "De trayectoria" },
+    { value: "1994", label: "Desde, en Corrientes" },
+    { value: "0KM", label: "y usados garantizados" },
+    { value: "100%", label: "Financiación propia" },
   ];
 
-  const brands = ["Genesis", "Mercedes-Benz", "Porsche", "Toyota", "Hyundai", "BMW"];
+  const brands = ["Volkswagen", "Nissan", "Chevrolet", "Toyota", "Ford", "Fiat"];
 
   return (
     <section id="top" className="relative overflow-hidden bg-cream">
@@ -39,7 +38,7 @@ export default function Hero({
           <div className="relative z-10">
             <p className="inline-flex items-center gap-2.5 rounded-full border border-ink/10 bg-paper/70 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-moss">
               <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-moss" />
-              Agencia premium · Buenos Aires
+              Concesionaria · Corrientes
             </p>
 
             <h1 className="mt-6 max-w-[680px] text-[clamp(2.25rem,8vw,4rem)] font-extrabold leading-[0.94] tracking-[-0.055em] text-ink lg:text-[clamp(2.9rem,5.1vw,4.5rem)]">
@@ -55,8 +54,8 @@ export default function Hero({
             </h1>
 
             <p className="mt-6 max-w-[455px] text-[14.5px] leading-relaxed text-muted sm:text-[15px]">
-              Una selección curada de vehículos nuevos y seminuevos, financiación clara y entrega
-              en 48 horas. Sin vueltas, sin letra chica.
+              Autos 0KM, usados garantizados y motos eléctricas, con financiación propia y
+              entrega inmediata en Corrientes. Sin vueltas, sin letra chica.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -93,16 +92,15 @@ export default function Hero({
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <Stars size="h-3 w-3" />
-                    <span className="text-[11px] font-bold text-ink">4,9</span>
+                    <span className="text-[11px] font-bold text-ink">Familia Verdun</span>
                   </div>
-                  <p className="mt-0.5 text-[10.5px] text-muted">340 clientes satisfechos</p>
+                  <p className="mt-0.5 text-[10.5px] text-muted">Atención personalizada</p>
                 </div>
               </div>
               <div className="h-8 w-px bg-line" aria-hidden="true" />
               <div>
-                <p className="text-[11px] font-bold text-ink">Garantía real</p>
-                <p className="mt-0.5 text-[10.5px] text-muted">12 meses incluidos</p>
+                <p className="text-[11px] font-bold text-ink">Garantía en usados</p>
+                <p className="mt-0.5 text-[10.5px] text-muted">Incluida</p>
               </div>
             </div>
           </div>
@@ -111,7 +109,7 @@ export default function Hero({
             <div className="relative overflow-hidden rounded-[1.75rem] border border-ink/10 bg-forest shadow-[0_35px_80px_-40px_rgba(20,36,30,0.65)]">
               <img
                 src={images.hero}
-                alt="Porsche 911 Carrera S en un showroom con iluminación dramática"
+                alt="Vehículo destacado en Verdun Automotores"
                 className="h-[430px] w-full object-cover sm:h-[500px] lg:h-[548px]"
                 loading="eager"
               />
@@ -153,7 +151,7 @@ export default function Hero({
                   <button
                     type="button"
                     onClick={() => onViewCar(featuredCar)}
-                    aria-label="Ver el Porsche 911 Carrera S"
+                    aria-label="Ver el vehículo destacado"
                     className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-lime text-ink transition duration-300 hover:rotate-45 hover:bg-ink hover:text-lime"
                   >
                     <ArrowUpRight className="h-5 w-5" />

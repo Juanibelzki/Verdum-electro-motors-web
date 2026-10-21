@@ -8,13 +8,13 @@ import {
   ShieldCheck,
   Wallet,
 } from "./Icons";
-import { Eyebrow, Reveal, Stars } from "./ui";
+import { Eyebrow, Reveal } from "./ui";
 
 const features = [
   {
     icon: CarIcon,
     title: "Selección, no stock",
-    text: "Cada auto pasa una inspección de 120 puntos. Si no lo compraríamos nosotros, no está acá.",
+    text: "Cada auto está revisado y garantizado. Si no lo compraríamos nosotros, no está acá.",
   },
   {
     icon: BadgeCheck,
@@ -23,8 +23,8 @@ const features = [
   },
   {
     icon: Wallet,
-    title: "Financiación que se adapta",
-    text: "Armamos la cuota a tu medida entre 24 y 60 meses, con bancos y entidades partner.",
+    title: "Financiación propia",
+    text: "Armamos la cuota a tu medida, sin banco y con la mejor tasa. De 24 a 60 meses.",
   },
   {
     icon: Handshake,
@@ -46,14 +46,14 @@ export default function Experience({ onSchedule }: { onSchedule: () => void }) {
               <div className="relative overflow-hidden rounded-[1.75rem] border border-line bg-sand">
                 <img
                   src={images.showroom}
-                  alt="Interior del showroom VELTA con autos de alta gama"
+                  alt="Interior del showroom de Verdun Automotores"
                   className="h-[420px] w-full object-cover sm:h-[500px] lg:h-[570px]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/15 to-transparent" />
 
                 <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-ink/25 px-3 py-1.5 text-[9.5px] font-bold uppercase tracking-[0.16em] text-cream backdrop-blur-md">
                   <MapPin className="h-3 w-3 text-lime" />
-                  Showroom Palermo
+                  Av. Chacabuco 1725
                 </span>
 
                 <div className="absolute inset-x-4 bottom-4 sm:inset-x-5 sm:bottom-5">
@@ -63,14 +63,13 @@ export default function Experience({ onSchedule }: { onSchedule: () => void }) {
                     </p>
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-3.5">
                       <div>
-                        <p className="text-[11px] font-semibold text-cream">Sofía Lagos</p>
+                        <p className="text-[11px] font-semibold text-cream">Familia Verdun</p>
                         <p className="mt-0.5 text-[9.5px] uppercase tracking-[0.12em] text-cream/50">
-                          Directora de VELTA Motors
+                          Verdun Automotores
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5 text-lime">
-                        <Stars size="h-3 w-3" className="text-lime" />
-                        <span className="text-[10px] font-bold">4,9</span>
+                        <span className="text-[10px] font-bold">Desde 1994</span>
                       </div>
                     </div>
                   </div>
@@ -83,8 +82,8 @@ export default function Experience({ onSchedule }: { onSchedule: () => void }) {
                     <ShieldCheck className="h-4 w-4" />
                   </span>
                   <div>
-                    <p className="text-[11px] font-extrabold leading-none text-ink">12 meses</p>
-                    <p className="mt-0.5 text-[9px] text-muted">de garantía real</p>
+                    <p className="text-[11px] font-extrabold leading-none text-ink">Garantía</p>
+                    <p className="mt-0.5 text-[9px] text-muted">en todos los usados</p>
                   </div>
                 </div>
               </div>
@@ -93,7 +92,7 @@ export default function Experience({ onSchedule }: { onSchedule: () => void }) {
 
           <div>
             <Reveal>
-              <Eyebrow>02 — La experiencia VELTA</Eyebrow>
+              <Eyebrow>02 — La experiencia Verdun</Eyebrow>
               <h2 className="mt-4 text-[clamp(2.1rem,4.4vw,3.5rem)] font-extrabold leading-[1.02] tracking-[-0.05em] text-ink">
                 Comprar un auto
                 <br className="hidden sm:block" /> puede ser{" "}
@@ -102,7 +101,7 @@ export default function Experience({ onSchedule }: { onSchedule: () => void }) {
                 </span>
               </h2>
               <p className="mt-4 max-w-md text-[13.5px] leading-relaxed text-muted">
-                Desde 2014 cambiamos la forma de comprar un auto: menos sala de ventas, más
+                Desde 1994 cambiamos la forma de comprar un auto: menos sala de ventas, más
                 asesoramiento. Menos trámites, más tiempo manejando.
               </p>
             </Reveal>
@@ -145,7 +144,7 @@ export default function Experience({ onSchedule }: { onSchedule: () => void }) {
                 </button>
                 <div className="flex items-center gap-2 text-[10.5px] text-muted">
                   <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-moss" />
-                  Visitas sin turno previo · Café de especialidad
+                  Visitas sin turno previo
                 </div>
               </div>
             </Reveal>

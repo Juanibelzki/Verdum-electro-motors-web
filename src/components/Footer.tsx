@@ -4,12 +4,10 @@ import {
   Check,
   Clock,
   Instagram,
-  Linkedin,
   Mail,
   MapPin,
   Phone,
   Whatsapp,
-  Youtube,
 } from "./Icons";
 import { Eyebrow, Logo } from "./ui";
 
@@ -28,9 +26,12 @@ const companyLinks = [
 ];
 
 const socials = [
-  { label: "Instagram", href: "https://instagram.com", icon: Instagram },
-  { label: "YouTube", href: "https://youtube.com", icon: Youtube },
-  { label: "LinkedIn", href: "https://linkedin.com", icon: Linkedin },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/verdun_automotores",
+    icon: Instagram,
+  },
+  { label: "WhatsApp", href: "https://wa.me/5493795300020", icon: Whatsapp },
 ];
 
 export default function Footer({ onSchedule }: { onSchedule: () => void }) {
@@ -79,11 +80,11 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
                 <ArrowUpRight className="h-4 w-4" />
               </button>
               <a
-                href="tel:+541155550198"
+                href="tel:+5493795300020"
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-cream/20 px-6 py-4 text-[12.5px] font-semibold text-cream transition hover:border-lime hover:text-lime"
               >
                 <Phone className="h-3.5 w-3.5" />
-                +54 11 5555 0198
+                +54 9 3795-300020
               </a>
             </div>
           </div>
@@ -93,21 +94,20 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
           <div>
             <Logo light />
             <p className="mt-4 max-w-[250px] text-[11.5px] leading-relaxed text-cream/45">
-              Autos excepcionales. Decisiones simples. Desde 2014, acompañando a quienes eligen
-              manejar mejor.
+              Autos 0KM, usados garantizados y motos eléctricas. Desde 1994, en Corrientes.
             </p>
             <div className="mt-5 space-y-2 text-[10.5px] text-cream/55">
               <p className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-lime/70" />
-                Av. del Libertador 4200, Palermo, CABA
+                Av. Chacabuco 1725, Corrientes, Argentina
               </p>
               <p className="flex items-center gap-2">
                 <Clock className="h-3.5 w-3.5 shrink-0 text-lime/70" />
-                Lun a Vie 9–20 h · Sáb 9–14 h
+                Lun a Sáb · 9–20 h
               </p>
-              <a href="mailto:hola@veltamotors.com" className="flex items-center gap-2 transition hover:text-cream">
+              <a href="mailto:info@verdun.com.ar" className="flex items-center gap-2 transition hover:text-cream">
                 <Mail className="h-3.5 w-3.5 shrink-0 text-lime/70" />
-                hola@veltamotors.com
+                info@verdun.com.ar
               </a>
             </div>
             <div className="mt-5 flex gap-2">
@@ -126,15 +126,6 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
                   </a>
                 );
               })}
-              <a
-                href="https://wa.me/541155550198"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="WhatsApp"
-                className="grid h-9 w-9 place-items-center rounded-full border border-cream/15 text-cream/65 transition hover:border-lime hover:bg-lime hover:text-ink"
-              >
-                <Whatsapp className="h-3.5 w-3.5" />
-              </a>
             </div>
           </div>
 
@@ -221,7 +212,7 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
         </div>
 
         <div className="flex flex-col gap-4 border-t border-cream/12 py-6 text-[10px] text-cream/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 VELTA Motors. Todos los derechos reservados.</p>
+          <p>© 2026 Verdun Automotores. Todos los derechos reservados.</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             <a href="#faq" className="transition hover:text-cream">
               Términos y condiciones
@@ -239,7 +230,7 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
           Los precios están expresados en dólares estadounidenses e incluyen IVA. Las imágenes son
           ilustrativas y pueden no coincidir con la unidad publicada. Las simulaciones de
           financiación son orientativas y no constituyen una oferta crediticia. Sujeto a aprobación
-          de la entidad financiera. VELTA Motors S.A. — CUIT 30-71555555-8.
+          de la entidad financiera. Verdun Automotores.
         </p>
       </div>
     </footer>

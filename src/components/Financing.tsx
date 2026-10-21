@@ -33,7 +33,7 @@ export default function Financing({
 
   const bullets = [
     "Tasa fija del 7,9% TNA",
-    "Aprobación en 24 horas",
+    "Aprobación ágil",
     "De 24 a 60 meses",
     "Sin gastos de otorgamiento",
   ];
@@ -89,16 +89,16 @@ export default function Financing({
             <Reveal delay={140}>
               <div className="mt-9 border-l-2 border-lime/60 pl-5">
                 <p className="max-w-sm font-serif text-[21px] italic leading-snug text-cream/90">
-                  “Financiamos 6 de cada 10 autos que entregamos.”
+                  “Financiación propia, sin banco, a tu medida.”
                 </p>
                 <p className="mt-2 text-[9.5px] font-bold uppercase tracking-[0.16em] text-cream/40">
-                  Datos internos VELTA · 2025
+                  Verdun Automotores · Corrientes
                 </p>
               </div>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <a
-                  href="tel:+541155550198"
+                  href="tel:+5493795300020"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-cream/20 px-5 py-3.5 text-[12px] font-semibold text-cream transition hover:border-lime hover:text-lime"
                 >
                   <Phone className="h-3.5 w-3.5" />
@@ -107,7 +107,7 @@ export default function Financing({
                 <p className="text-[10px] leading-relaxed text-cream/35">
                   Lun a Sáb · 9 a 20 h
                   <br />
-                  Respuesta promedio: 4 min
+                  Respuesta rápida
                 </p>
               </div>
             </Reveal>

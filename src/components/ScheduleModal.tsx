@@ -95,7 +95,7 @@ export default function ScheduleModal({
               </span>
               <span className="flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5" />
-                {time} h · Showroom Palermo
+                {time} h · Av. Chacabuco 1725
               </span>
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function ScheduleModal({
 
             <div className="flex flex-col gap-3 border-t border-line/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
               <p className="max-w-[250px] text-[10px] leading-relaxed text-muted">
-                Al confirmar aceptás que VELTA te contacte para coordinar tu visita. Tus datos no
+                Al confirmar aceptás que Verdun te contacte para coordinar tu visita. Tus datos no
                 se comparten con terceros.
               </p>
               <button

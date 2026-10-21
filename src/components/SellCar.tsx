@@ -87,7 +87,7 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                     <p className="text-[20px] font-extrabold leading-none tracking-[-0.03em] text-ink">
                       100%
                     </p>
-                    <p className="mt-1 text-[9.5px] font-medium text-ink/50">gestionado por VELTA</p>
+                    <p className="mt-1 text-[9.5px] font-medium text-ink/50">gestionado por Verdun</p>
                   </div>
                   <span className="hidden h-8 w-px bg-ink/15 sm:block" />
                   <p className="hidden max-w-[150px] text-[10px] leading-relaxed text-ink/50 sm:block">

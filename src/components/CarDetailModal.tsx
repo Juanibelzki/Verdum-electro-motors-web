@@ -106,8 +106,8 @@ export default function CarDetailModal({
             <div className="mt-6 flex items-start gap-2.5 rounded-xl bg-cream/60 p-3.5">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-forest" />
               <p className="text-[10.5px] leading-relaxed text-moss">
-                Incluye inspección de 120 puntos, garantía y auxilio 24/7. Transferencia y
-                patentamiento a cargo de VELTA.
+                Incluye revisión mecánica y garantía. Transferencia y
+                patentamiento a cargo de Verdun.
               </p>
             </div>
           </div>
@@ -152,7 +152,7 @@ export default function CarDetailModal({
               Simular financiación
             </button>
             <p className="mt-3 text-center text-[9px] leading-relaxed text-muted">
-              Showroom Palermo · Entrega en 48 h
+              Av. Chacabuco 1725 · Corrientes
             </p>
           </aside>
         </div>
