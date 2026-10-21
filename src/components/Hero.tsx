@@ -1,5 +1,14 @@
-import { featuredCar, formatKm, formatUSD, images, monthlyPayment, type Car } from "../data/cars";
-import { ArrowUpRight, Calendar, Sparkles } from "./Icons";
+import { useEffect, useRef, useState } from "react";
+import {
+  featuredCar,
+  formatKm,
+  formatUSD,
+  heroPoster,
+  heroVideos,
+  monthlyPayment,
+  type Car,
+} from "../data/cars";
+import { ArrowUpRight, Calendar, MapPin } from "./Icons";
 
 export default function Hero({
   onSchedule,
@@ -8,6 +17,10 @@ export default function Hero({
   onSchedule: () => void;
   onViewCar: (car: Car) => void;
 }) {
+  const [videoIndex, setVideoIndex] = useState(0);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
+
   const avatars = [
     { initials: "CM", tone: "bg-forest text-cream" },
     { initials: "DR", tone: "bg-sand text-ink" },
@@ -23,6 +36,35 @@ export default function Hero({
 
   const brands = ["Volkswagen", "Nissan", "Chevrolet", "Toyota", "Ford", "Fiat"];
 
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduceMotion(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    const id = window.setInterval(() => {
+      setVideoIndex((current) => (current + 1) % heroVideos.length);
+    }, 8000);
+    return () => window.clearInterval(id);
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    videoRefs.current.forEach((video, index) => {
+      if (!video) return;
+      if (index === videoIndex) {
+        video.currentTime = 0;
+        void video.play().catch(() => undefined);
+      } else {
+        video.pause();
+      }
+    });
+  }, [videoIndex, reduceMotion]);
+
   return (
     <section id="top" className="relative overflow-hidden bg-cream">
       <div className="pointer-events-none absolute inset-0 hidden lg:block">
@@ -33,145 +75,175 @@ export default function Hero({
         </div>
       </div>
 
-      <div className="relative mx-auto max-w-[1440px] px-5 pb-10 pt-8 sm:px-8 sm:pt-12 lg:px-10 lg:pb-14 lg:pt-14">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:gap-12">
-          <div className="relative z-10">
-            <p className="inline-flex items-center gap-2.5 rounded-full border border-ink/10 bg-paper/70 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-moss">
-              <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-moss" />
-              Concesionaria · Corrientes
-            </p>
-
-            <h1 className="mt-6 max-w-[680px] text-[clamp(2.25rem,8vw,4rem)] font-extrabold leading-[0.94] tracking-[-0.055em] text-ink lg:text-[clamp(2.9rem,5.1vw,4.5rem)]">
-              Tu próximo auto
-              <br />
-              no es una compra.
-              <br />
-              Es una{" "}
-              <span className="relative isolate inline-block whitespace-nowrap font-serif font-normal italic tracking-[-0.025em] text-forest">
-                <span className="absolute inset-x-[-3px] bottom-[0.1em] -z-10 h-[0.32em] -rotate-[0.6deg] bg-lime" />
-                elección.
-              </span>
-            </h1>
-
-            <p className="mt-6 max-w-[455px] text-[14.5px] leading-relaxed text-muted sm:text-[15px]">
-              Autos 0KM, usados garantizados y motos eléctricas, con financiación propia y
-              entrega inmediata en Corrientes. Sin vueltas, sin letra chica.
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a
-                href="#vehiculos"
-                className="inline-flex items-center justify-center gap-2.5 rounded-full bg-ink px-6 py-4 text-[13px] font-semibold text-cream transition duration-300 hover:bg-forest hover:shadow-[0_18px_35px_-18px_rgba(20,36,30,0.8)]"
-              >
-                Explorar vehículos
-                <ArrowUpRight className="h-4 w-4" />
-              </a>
-              <button
-                type="button"
-                onClick={onSchedule}
-                className="group inline-flex items-center justify-center gap-3 rounded-full border border-ink/12 bg-paper/70 py-2 pl-2 pr-5 text-[13px] font-semibold text-ink transition duration-300 hover:border-ink/25 hover:bg-paper"
-              >
-                <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-ink shadow-sm transition duration-300 group-hover:bg-lime">
-                  <Calendar className="h-4 w-4" />
-                </span>
-                Agendar test drive
-              </button>
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-line/70 pt-5">
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-2.5">
-                  {avatars.map((avatar) => (
-                    <span
-                      key={avatar.initials}
-                      className={`grid h-8 w-8 place-items-center rounded-full text-[9px] font-extrabold ring-2 ring-cream ${avatar.tone}`}
-                    >
-                      {avatar.initials}
-                    </span>
-                  ))}
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-bold text-ink">Familia Verdun</span>
-                  </div>
-                  <p className="mt-0.5 text-[10.5px] text-muted">Atención personalizada</p>
-                </div>
-              </div>
-              <div className="h-8 w-px bg-line" aria-hidden="true" />
-              <div>
-                <p className="text-[11px] font-bold text-ink">Garantía en usados</p>
-                <p className="mt-0.5 text-[10.5px] text-muted">Incluida</p>
-              </div>
-            </div>
+      <div className="relative mx-auto max-w-[1440px] px-4 pb-10 pt-5 sm:px-8 sm:pt-8 lg:px-10 lg:pb-14 lg:pt-10">
+        <div className="relative isolate flex min-h-[560px] flex-col overflow-hidden rounded-[1.75rem] border border-ink/10 bg-forest shadow-[0_45px_100px_-50px_rgba(20,36,30,0.75)] sm:min-h-[640px] sm:rounded-[2.25rem] lg:min-h-[760px] lg:rounded-[2.5rem]">
+          {/* Media layer */}
+          <div className="absolute inset-0" aria-hidden="true">
+            <img
+              src={heroPoster}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            {!reduceMotion &&
+              heroVideos.map((src, index) => (
+                <video
+                  key={src}
+                  ref={(element) => {
+                    videoRefs.current[index] = element;
+                  }}
+                  src={src}
+                  poster={heroPoster}
+                  muted
+                  loop
+                  playsInline
+                  preload={index === videoIndex ? "auto" : "metadata"}
+                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1400ms] ease-out ${
+                    index === videoIndex ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              ))}
           </div>
 
-          <div className="relative lg:pl-2">
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-ink/10 bg-forest shadow-[0_35px_80px_-40px_rgba(20,36,30,0.65)]">
-              <img
-                src={images.hero}
-                alt="Vehículo destacado en Verdun Automotores"
-                className="h-[430px] w-full object-cover sm:h-[500px] lg:h-[548px]"
-                loading="eager"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-ink/15" />
+          {/* Overlay requested in the original template */}
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-ink/15" />
+          {/* Soft scrim behind the copy so it stays legible over bright frames */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(20,36,30,0.78)_0%,rgba(20,36,30,0.34)_45%,transparent_78%)] lg:bg-[radial-gradient(130%_115%_at_12%_92%,rgba(20,36,30,0.85)_0%,rgba(20,36,30,0.42)_38%,transparent_72%)]" />
 
-              <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4 sm:p-5">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-ink/25 px-3 py-1.5 text-[9.5px] font-bold uppercase tracking-[0.16em] text-cream backdrop-blur-md">
-                  <Sparkles className="h-3 w-3 text-lime" />
-                  Disponible ahora
-                </span>
-                <span className="rounded-full border border-white/20 bg-ink/25 px-3 py-1.5 text-[10px] font-semibold text-cream/90 backdrop-blur-md">
-                  {featuredCar.year} · {formatKm(featuredCar.km)}
-                </span>
+          {/* Content */}
+          <div className="relative z-10 flex flex-1 flex-col justify-between gap-12 p-5 sm:p-8 lg:p-12">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <p className="inline-flex items-center gap-2.5 rounded-full border border-cream/20 bg-ink/25 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-cream backdrop-blur-md">
+                <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-lime" />
+                Concesionaria · Corrientes
+              </p>
+              <a
+                href="https://maps.google.com/?q=Av.+Chacabuco+1725,+Corrientes,+Argentina"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-cream/20 bg-ink/25 px-3.5 py-1.5 text-[10px] font-semibold text-cream/85 backdrop-blur-md transition hover:border-lime/60 hover:text-cream"
+              >
+                <MapPin className="h-3 w-3 text-lime" />
+                Av. Chacabuco 1725
+              </a>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_270px] lg:items-end lg:gap-10">
+              <div className="max-w-[800px]">
+                <h1 className="text-[clamp(2.1rem,8.5vw,3.6rem)] font-extrabold leading-[0.94] tracking-[-0.055em] text-cream [text-shadow:0_2px_10px_rgba(0,0,0,0.55),0_14px_50px_rgba(0,0,0,0.6)] sm:text-[clamp(2.8rem,6.4vw,4.4rem)] lg:text-[clamp(3.3rem,5.1vw,5rem)]">
+                  Tu próximo auto
+                  <br />
+                  no es una compra.
+                  <br />
+                  Es una{" "}
+                  <span className="relative isolate inline-block whitespace-nowrap font-serif font-normal italic tracking-[-0.025em] text-forest">
+                    <span className="absolute inset-x-[-3px] bottom-[0.1em] -z-10 h-[0.32em] -rotate-[0.6deg] bg-lime" />
+                    elección.
+                  </span>
+                </h1>
+
+                <p className="mt-6 max-w-[470px] text-[14.5px] leading-relaxed text-cream/80 [text-shadow:0_1px_10px_rgba(0,0,0,0.7)] sm:text-[15px]">
+                  Autos 0KM, usados garantizados y motos eléctricas, con financiación propia y
+                  entrega inmediata en Corrientes. Sin vueltas, sin letra chica.
+                </p>
+
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <a
+                    href="#vehiculos"
+                    className="inline-flex items-center justify-center gap-2.5 rounded-full bg-lime px-6 py-4 text-[13px] font-semibold text-ink transition duration-300 hover:bg-cream hover:shadow-[0_18px_35px_-18px_rgba(0,0,0,0.65)]"
+                  >
+                    Explorar vehículos
+                    <ArrowUpRight className="h-4 w-4" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={onSchedule}
+                    className="group inline-flex items-center justify-center gap-3 rounded-full border border-cream/25 bg-cream/10 py-2 pl-2 pr-5 text-[13px] font-semibold text-cream backdrop-blur-md transition duration-300 hover:border-cream/45 hover:bg-cream/20"
+                  >
+                    <span className="grid h-9 w-9 place-items-center rounded-full bg-cream text-ink shadow-sm transition duration-300 group-hover:bg-lime">
+                      <Calendar className="h-4 w-4" />
+                    </span>
+                    Agendar test drive
+                  </button>
+                </div>
               </div>
 
-              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                <div className="flex items-end justify-between gap-3 rounded-[1.2rem] border border-white/40 bg-cream/95 p-4 shadow-2xl backdrop-blur-xl sm:p-5">
+              <button
+                type="button"
+                onClick={() => onViewCar(featuredCar)}
+                className="group hidden w-[270px] shrink-0 rounded-[1.2rem] border border-white/30 bg-cream/95 p-4 text-left shadow-2xl backdrop-blur-xl transition hover:bg-cream lg:block"
+              >
+                <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-moss">
                       Destacado de la semana
                     </p>
-                    <p className="mt-2 truncate text-[19px] font-extrabold leading-tight tracking-[-0.02em] text-ink sm:text-[21px]">
+                    <p className="mt-2 truncate text-[18px] font-extrabold leading-tight tracking-[-0.02em] text-ink">
                       {featuredCar.brand} {featuredCar.model}
                     </p>
-                    <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10.5px] font-medium text-muted">
-                      <span>{featuredCar.acceleration} 0–100</span>
-                      <span className="h-0.5 w-0.5 rounded-full bg-muted/60" />
-                      <span>{featuredCar.power} hp</span>
-                      <span className="h-0.5 w-0.5 rounded-full bg-muted/60" />
-                      <span>{featuredCar.drive}</span>
-                    </p>
-                    <p className="mt-2.5 text-[13px] font-extrabold text-ink">
-                      {formatUSD(featuredCar.price)}{" "}
-                      <span className="font-medium text-muted">
-                        · desde {formatUSD(monthlyPayment(featuredCar.price))}/mes
-                      </span>
-                    </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => onViewCar(featuredCar)}
-                    aria-label="Ver el vehículo destacado"
-                    className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-lime text-ink transition duration-300 hover:rotate-45 hover:bg-ink hover:text-lime"
-                  >
-                    <ArrowUpRight className="h-5 w-5" />
-                  </button>
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-lime text-ink transition duration-300 group-hover:rotate-45 group-hover:bg-ink group-hover:text-lime">
+                    <ArrowUpRight className="h-4 w-4" />
+                  </span>
                 </div>
-              </div>
+                <p className="mt-2 text-[10.5px] font-medium text-muted">
+                  {featuredCar.year} · {formatKm(featuredCar.km)} · {featuredCar.transmission}
+                </p>
+                <p className="mt-2.5 text-[13px] font-extrabold text-ink">
+                  {formatUSD(featuredCar.price)}{" "}
+                  <span className="font-medium text-muted">
+                    · desde {formatUSD(monthlyPayment(featuredCar.price))}/mes
+                  </span>
+                </p>
+              </button>
             </div>
 
-            <div className="floaty absolute -right-3 -top-5 hidden h-[104px] w-[104px] items-center justify-center rounded-full border border-ink/10 bg-lime text-center shadow-[0_14px_30px_-14px_rgba(20,36,30,0.5)] sm:flex lg:-right-5">
-              <div>
-                <span className="block text-[8.5px] font-extrabold uppercase leading-[1.35] tracking-[0.12em] text-ink/60">
-                  Test drive
-                </span>
-                <span className="my-1 flex justify-center text-ink">
-                  <Sparkles className="h-4 w-4" />
-                </span>
-                <span className="block text-[9.5px] font-extrabold uppercase tracking-[0.1em] text-ink">
-                  Sin cargo
-                </span>
+            <div className="flex flex-wrap items-end justify-between gap-5 border-t border-cream/15 pt-5">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex -space-x-2.5">
+                    {avatars.map((avatar) => (
+                      <span
+                        key={avatar.initials}
+                        className={`grid h-8 w-8 place-items-center rounded-full text-[9px] font-extrabold ring-2 ring-ink/50 ${avatar.tone}`}
+                      >
+                        {avatar.initials}
+                      </span>
+                    ))}
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold text-cream">Familia Verdun</p>
+                    <p className="mt-0.5 text-[10.5px] text-cream/55">Atención personalizada</p>
+                  </div>
+                </div>
+                <div className="hidden h-8 w-px bg-cream/15 sm:block" aria-hidden="true" />
+                <div>
+                  <p className="text-[11px] font-bold text-cream">Garantía en usados</p>
+                  <p className="mt-0.5 text-[10.5px] text-cream/55">Incluida</p>
+                </div>
               </div>
+
+              {!reduceMotion && (
+                <div className="flex items-center gap-2" role="group" aria-label="Videos del hero">
+                  {heroVideos.map((src, index) => (
+                    <button
+                      key={src}
+                      type="button"
+                      onClick={() => setVideoIndex(index)}
+                      aria-label={`Ver video ${index + 1}`}
+                      aria-pressed={index === videoIndex}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        index === videoIndex
+                          ? "w-8 bg-lime"
+                          : "w-4 bg-cream/30 hover:bg-cream/60"
+                      }`}
+                    />
+                  ))}
+                  <span className="ml-1 text-[9px] font-bold uppercase tracking-[0.2em] text-cream/40">
+                    {String(videoIndex + 1).padStart(2, "0")} /{" "}
+                    {String(heroVideos.length).padStart(2, "0")}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

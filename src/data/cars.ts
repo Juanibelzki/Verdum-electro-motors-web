@@ -34,6 +34,15 @@ export const images = {
   lounge: img(15513826, 1200, 900),
 };
 
+/** Hero background videos (self-hosted, optimized loops). */
+export const heroVideos = [
+  "/videos/hero-2.mp4",
+  "/videos/hero-3.mp4",
+  "/videos/hero-1.mp4",
+];
+
+export const heroPoster = "/videos/hero-poster.jpg";
+
 export const cars: Car[] = [
   {
     id: "porsche-911",
