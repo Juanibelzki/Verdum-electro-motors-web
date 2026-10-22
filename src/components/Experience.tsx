@@ -92,7 +92,7 @@ export default function Experience({ onSchedule }: { onSchedule: () => void }) {
 
           <div>
             <Reveal>
-              <Eyebrow>02 — La experiencia Verdun</Eyebrow>
+              <Eyebrow>06 — La experiencia Verdun</Eyebrow>
               <h2 className="mt-4 text-[clamp(2.1rem,4.4vw,3.5rem)] font-extrabold leading-[1.02] tracking-[-0.05em] text-ink">
                 Comprar un auto
                 <br className="hidden sm:block" /> puede ser{" "}

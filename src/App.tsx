@@ -49,11 +49,11 @@ export default function App() {
           onSchedule={() => openSchedule()}
           onRetry={reload}
         />
-        <Experience onSchedule={() => openSchedule()} />
+        <Showroom stories={showroomStories} onSchedule={() => openSchedule()} />
         <Financing onSchedule={() => openSchedule()} />
         <SellCar onSchedule={() => openSchedule()} />
         <Testimonials />
-        <Showroom stories={showroomStories} onSchedule={() => openSchedule()} />
+        <Experience onSchedule={() => openSchedule()} />
         <Faq onSchedule={() => openSchedule()} />
       </main>
 

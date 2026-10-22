@@ -277,7 +277,7 @@ export default function Showroom({
 
           <div>
             <Reveal>
-              <Eyebrow>06 — Showroom</Eyebrow>
+              <Eyebrow>02 — Showroom</Eyebrow>
               <h2 className="mt-4 text-[clamp(2.1rem,4.4vw,3.5rem)] font-extrabold leading-[1.02] tracking-[-0.05em] text-ink">
                 Vení a conocerlo
                 <br className="hidden sm:block" /> en{" "}
