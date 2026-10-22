@@ -547,7 +547,15 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                           max={TASACION_MAX_KM - 1}
                           inputMode="numeric"
                           value={form.km}
-                          onChange={(event) => update("km", event.target.value)}
+                          onChange={(event) => {
+                            event.currentTarget.setCustomValidity("");
+                            update("km", event.target.value);
+                          }}
+                          onInvalid={(event) =>
+                            event.currentTarget.setCustomValidity(
+                              `Para tomar tu auto como parte de pago, debe tener menos de ${TASACION_MAX_KM.toLocaleString("es-AR")} km.`
+                            )
+                          }
                           disabled={busy}
                           required
                         />
