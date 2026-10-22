@@ -52,13 +52,30 @@ Si no están definidas, la app usa los valores públicos del proyecto actual.
 - `src/data/cars.ts` — tipos, helpers de formato y número de WhatsApp
 - `src/data/vehicles.ts` — lectura de Supabase y normalización del stock
 - `src/data/useVehicles.ts` — hook de carga con cache en memoria y reintento
+- `src/data/heroScenes.ts` — lectura/guardado de los videos del hero
+- `src/data/useHeroScenes.ts` — hook de carga del hero con fallback local
+- `src/admin/` — panel `/admin` y carga de videos a Supabase Storage
 - `src/index.css` — tokens de diseño y animaciones
-- `admin.html`, `admin.js`, `admin-styles.css` — panel admin (legacy, pendiente migrar a `public/`)
+- `legacy/` — panel admin viejo, solo como referencia (no entra en el build)
+
+## Admin
+
+El panel nuevo vive en `/admin` y por ahora solo administra los videos del
+hero: subir archivos, ordenarlos, etiquetarlos, previsualizarlos y guardar la
+lista en `admin_content.hero_scenes`. Los videos se suben al bucket público
+`stock-photos`, carpeta `hero/`, y la home los lee en vivo. Si no hay fila o
+falla la lectura, usa los videos locales de `public/videos/` como respaldo.
+
+> **Seguridad:** el panel todavía no tiene login propio y usa la anon key.
+> Queda cubierto por la protección de deployment de Vercel en preview. Antes
+> de exponerlo en producción hay que agregar Supabase Auth y reemplazar las
+> políticas RLS permisivas.
 
 ## Estado
 
 - Fase 1: integración del diseño nuevo en la rama `feat/react-redesign`.
 - Fase 2: identidad Verdun, contacto real y limpieza de datos falsos.
 - Fase 3: stock real de Supabase, precios “Consultar”, WhatsApp y ficha técnica.
+- Fase 4: videos del hero administrables desde `/admin` (staging).
 
 La web actual sigue viva en `main`.

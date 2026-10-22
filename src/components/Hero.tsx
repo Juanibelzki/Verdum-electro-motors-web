@@ -1,19 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  formatKm,
-  formatPrice,
-  heroPoster,
-  heroVideos,
-  type Car,
-} from "../data/cars";
+import { formatKm, formatPrice, heroPoster, type Car } from "../data/cars";
+import type { HeroScene } from "../data/heroScenes";
 import { ArrowUpRight, Calendar, MapPin } from "./Icons";
 
 export default function Hero({
   featuredCar,
+  heroScenes,
   onSchedule,
   onViewCar,
 }: {
   featuredCar: Car | null;
+  heroScenes: HeroScene[];
   onSchedule: () => void;
   onViewCar: (car: Car) => void;
 }) {
@@ -21,6 +18,8 @@ export default function Hero({
   const [reduceMotion, setReduceMotion] = useState(false);
   const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
   const featuredModel = featuredCar ? featuredCar.model.split(" ").slice(0, 2).join(" ") : "";
+  const totalScenes = Math.max(heroScenes.length, 1);
+  const posterSrc = heroScenes[0]?.poster || heroPoster;
 
   const avatars = [
     { initials: "CM", tone: "bg-forest text-cream" },
@@ -58,23 +57,45 @@ export default function Hero({
   useEffect(() => {
     if (reduceMotion) return;
     const id = window.setInterval(() => {
-      setVideoIndex((current) => (current + 1) % heroVideos.length);
+      setVideoIndex((current) => (current + 1) % totalScenes);
     }, 8000);
     return () => window.clearInterval(id);
-  }, [reduceMotion]);
+  }, [reduceMotion, totalScenes]);
+
+  useEffect(() => {
+    setVideoIndex((current) => (current >= heroScenes.length ? 0 : current));
+  }, [heroScenes.length]);
 
   useEffect(() => {
     if (reduceMotion) return;
+    const cleanups: Array<() => void> = [];
+
     videoRefs.current.forEach((video, index) => {
       if (!video) return;
       if (index === videoIndex) {
-        video.currentTime = 0;
-        void video.play().catch(() => undefined);
+        try {
+          if (video.readyState >= 1) video.currentTime = 0;
+        } catch {
+          // The video may not have metadata yet; starting at 0 is fine.
+        }
+
+        const play = () => {
+          void video.play().catch(() => undefined);
+        };
+
+        if (video.readyState >= 2) {
+          play();
+        } else {
+          video.addEventListener("canplay", play, { once: true });
+          cleanups.push(() => video.removeEventListener("canplay", play));
+        }
       } else {
         video.pause();
       }
     });
-  }, [videoIndex, reduceMotion]);
+
+    return () => cleanups.forEach((cleanup) => cleanup());
+  }, [videoIndex, reduceMotion, heroScenes.length]);
 
   return (
     <section id="top" className="relative overflow-hidden bg-cream">
@@ -91,28 +112,40 @@ export default function Hero({
           {/* Media layer */}
           <div className="absolute inset-0" aria-hidden="true">
             <img
-              src={heroPoster}
+              src={posterSrc}
               alt=""
               className="absolute inset-0 h-full w-full object-cover"
             />
             {!reduceMotion &&
-              heroVideos.map((src, index) => (
-                <video
-                  key={src}
-                  ref={(element) => {
-                    videoRefs.current[index] = element;
-                  }}
-                  src={src}
-                  poster={heroPoster}
-                  muted
-                  loop
-                  playsInline
-                  preload={index === videoIndex ? "auto" : "metadata"}
-                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1400ms] ease-out ${
-                    index === videoIndex ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-              ))}
+              heroScenes.map((scene, index) =>
+                scene.type === "image" ? (
+                  <img
+                    key={scene.id}
+                    src={scene.src}
+                    alt=""
+                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1400ms] ease-out ${
+                      index === videoIndex ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                ) : (
+                  <video
+                    key={scene.id}
+                    ref={(element) => {
+                      videoRefs.current[index] = element;
+                    }}
+                    src={scene.src}
+                    poster={scene.poster || heroPoster}
+                    autoPlay={index === videoIndex}
+                    muted
+                    loop
+                    playsInline
+                    preload={index === videoIndex ? "auto" : "metadata"}
+                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1400ms] ease-out ${
+                      index === videoIndex ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                )
+              )}
           </div>
 
           {/* Overlay requested in the original template */}
@@ -264,9 +297,9 @@ export default function Hero({
 
               {!reduceMotion && (
                 <div className="flex items-center gap-2" role="group" aria-label="Videos del hero">
-                  {heroVideos.map((src, index) => (
+                  {heroScenes.map((scene, index) => (
                     <button
-                      key={src}
+                      key={scene.id}
                       type="button"
                       onClick={() => setVideoIndex(index)}
                       aria-label={`Ver video ${index + 1}`}
@@ -280,7 +313,7 @@ export default function Hero({
                   ))}
                   <span className="ml-1 text-[9px] font-bold uppercase tracking-[0.2em] text-cream/40">
                     {String(videoIndex + 1).padStart(2, "0")} /{" "}
-                    {String(heroVideos.length).padStart(2, "0")}
+                    {String(heroScenes.length).padStart(2, "0")}
                   </span>
                 </div>
               )}

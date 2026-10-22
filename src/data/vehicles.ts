@@ -1,10 +1,5 @@
 import { FALLBACK_CAR_IMAGE, formatPrice, type Car } from "./cars";
-
-const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL ?? "https://ymiakfjhgndqhdtoubkr.supabase.co";
-const SUPABASE_ANON_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ??
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltaWFrZmpoZ25kcWhkdG91YmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwMjkyNTIsImV4cCI6MjEwMDYwNTI1Mn0.Q0opccAEYWgkuyV1unwnpNu0OiWbio3E1pAURi8GPaI";
+import { SUPABASE_URL, supabaseHeaders } from "./supabase";
 
 export type VehicleCategory = {
   id: string;
@@ -184,11 +179,7 @@ const CATEGORY_SHORT: Record<string, string> = {
 
 const CATEGORY_ORDER = ["0km", "usados", "especiales", "motos", "patacletas"];
 
-const headers = {
-  apikey: SUPABASE_ANON_KEY,
-  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-  Accept: "application/json",
-};
+const headers = supabaseHeaders({ Accept: "application/json" });
 
 async function rest<T>(path: string): Promise<T> {
   const controller = new AbortController();

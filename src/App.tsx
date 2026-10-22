@@ -11,12 +11,14 @@ import ScheduleModal from "./components/ScheduleModal";
 import Showroom, { Faq } from "./components/Showroom";
 import Testimonials from "./components/Testimonials";
 import type { Car } from "./data/cars";
+import { useHeroScenes } from "./data/useHeroScenes";
 import { useVehicles } from "./data/useVehicles";
 
 type ScheduleState = { open: boolean; carId?: string };
 
 export default function App() {
   const { cars, categories, featured, loading, error, reload } = useVehicles();
+  const { scenes: heroScenes } = useHeroScenes();
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [schedule, setSchedule] = useState<ScheduleState>({ open: false });
 
@@ -30,7 +32,12 @@ export default function App() {
       <Header onSchedule={() => openSchedule()} />
 
       <main>
-        <Hero featuredCar={featured} onSchedule={() => openSchedule()} onViewCar={setSelectedCar} />
+        <Hero
+          featuredCar={featured}
+          heroScenes={heroScenes}
+          onSchedule={() => openSchedule()}
+          onViewCar={setSelectedCar}
+        />
         <Catalog
           cars={cars}
           categories={categories}
