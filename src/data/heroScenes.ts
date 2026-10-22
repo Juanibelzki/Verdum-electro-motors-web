@@ -1,5 +1,5 @@
+import { loadAdminContent, saveAdminContent } from "./adminContent";
 import { heroPoster, heroVideos } from "./cars";
-import { SUPABASE_URL, supabaseHeaders } from "./supabase";
 
 export type HeroScene = {
   id: string;
@@ -72,28 +72,7 @@ const parseScenes = (data: unknown): HeroScene[] => {
 
 /** Reads the hero scenes saved from /admin. Returns an empty array if none exist. */
 export async function loadHeroScenes(): Promise<HeroScene[]> {
-  const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), 15000);
-
-  try {
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/admin_content?select=data&key=eq.${HERO_SCENES_KEY}`,
-      {
-        headers: supabaseHeaders({ Accept: "application/json" }),
-        cache: "no-store",
-        signal: controller.signal,
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Supabase respondió ${response.status}`);
-    }
-
-    const rows = (await response.json()) as Array<{ data?: unknown }>;
-    return parseScenes(rows?.[0]?.data);
-  } finally {
-    window.clearTimeout(timer);
-  }
+  return parseScenes(await loadAdminContent(HERO_SCENES_KEY));
 }
 
 export const heroScenesWithFallback = (scenes: HeroScene[]): HeroScene[] =>
@@ -101,37 +80,5 @@ export const heroScenesWithFallback = (scenes: HeroScene[]): HeroScene[] =>
 
 /** Saves the scenes in admin_content.hero_scenes (creates the row if needed). */
 export async function saveHeroScenes(scenes: HeroScene[]): Promise<void> {
-  const headers = supabaseHeaders({
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    Prefer: "return=representation",
-  });
-
-  const patch = await fetch(
-    `${SUPABASE_URL}/rest/v1/admin_content?key=eq.${HERO_SCENES_KEY}`,
-    {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify({ data: scenes }),
-    }
-  );
-
-  if (!patch.ok) {
-    throw new Error(`No se pudo guardar el hero (${patch.status}).`);
-  }
-
-  const body = await patch.text();
-  const updated = body ? (JSON.parse(body) as unknown[]) : [];
-
-  if (Array.isArray(updated) && updated.length > 0) return;
-
-  const insert = await fetch(`${SUPABASE_URL}/rest/v1/admin_content`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ key: HERO_SCENES_KEY, data: scenes }),
-  });
-
-  if (!insert.ok) {
-    throw new Error(`No se pudo crear la configuración del hero (${insert.status}).`);
-  }
+  await saveAdminContent(HERO_SCENES_KEY, scenes);
 }

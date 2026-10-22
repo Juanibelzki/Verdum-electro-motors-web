@@ -1,13 +1,18 @@
-import { useState } from "react";
-import { images } from "../data/cars";
+import { useCallback, useEffect, useState, type SyntheticEvent } from "react";
+import type { ShowroomStory } from "../data/showroomStories";
 import { cn } from "../utils/cn";
 import {
+  ArrowLeft,
+  ArrowRight,
   ArrowUpRight,
   Clock,
   Mail,
   MapPin,
   Phone,
   Plus,
+  ShieldCheck,
+  Volume2,
+  VolumeX,
   Whatsapp,
 } from "./Icons";
 import { Eyebrow, Reveal } from "./ui";
@@ -35,53 +40,238 @@ const details = [
   },
 ];
 
-export default function Showroom({ onSchedule }: { onSchedule: () => void }) {
+export default function Showroom({
+  stories,
+  onSchedule,
+}: {
+  stories: ShowroomStory[];
+  onSchedule: () => void;
+}) {
+  const [storyIndex, setStoryIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [muted, setMuted] = useState(true);
+  const count = stories.length;
+  const activeStory = stories[storyIndex] ?? stories[0];
+
+  const goNext = useCallback(() => {
+    if (!count) return;
+    setStoryIndex((current) => (current + 1) % count);
+    setProgress(0);
+  }, [count]);
+
+  const goPrev = useCallback(() => {
+    if (!count) return;
+    setStoryIndex((current) => (current - 1 + count) % count);
+    setProgress(0);
+  }, [count]);
+
+  useEffect(() => {
+    setStoryIndex(0);
+    setProgress(0);
+  }, [count]);
+
+  useEffect(() => {
+    if (!count || !activeStory) return;
+
+    setProgress(0);
+
+    if (activeStory.type === "video") {
+      const id = window.setTimeout(() => {
+        if (count === 1) {
+          setProgress(1);
+          return;
+        }
+        setStoryIndex((current) => (current + 1) % count);
+        setProgress(0);
+      }, 20000);
+
+      return () => window.clearTimeout(id);
+    }
+
+    const started = performance.now();
+    const id = window.setInterval(() => {
+      const nextProgress = Math.min((performance.now() - started) / 7000, 1);
+      setProgress(nextProgress);
+
+      if (nextProgress >= 1) {
+        window.clearInterval(id);
+        if (count === 1) {
+          setProgress(1);
+          return;
+        }
+        setStoryIndex((current) => (current + 1) % count);
+        setProgress(0);
+      }
+    }, 80);
+
+    return () => window.clearInterval(id);
+  }, [activeStory, count]);
+
+  const handleTimeUpdate = (event: SyntheticEvent<HTMLVideoElement>) => {
+    const video = event.currentTarget;
+    if (Number.isFinite(video.duration) && video.duration > 0) {
+      setProgress(Math.min(video.currentTime / video.duration, 1));
+    }
+  };
+
   return (
     <section id="showroom" className="scroll-mt-24 bg-cream py-20 sm:py-24 lg:py-28">
       <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-10">
         <div className="grid items-center gap-14 lg:grid-cols-[1.04fr_0.96fr] lg:gap-16">
           <Reveal>
-            <div className="relative mb-8">
-              <div className="relative overflow-hidden rounded-[1.75rem] border border-line">
-                <img
-                  src={images.lounge}
-                  alt="Showroom de Verdun Automotores en Corrientes"
-                  className="h-[380px] w-full object-cover sm:h-[460px] lg:h-[520px]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent" />
-                <span className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-cream/95 px-3 py-1.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink backdrop-blur">
-                  <MapPin className="h-3 w-3 text-moss" />
-                  Showroom · Corrientes
-                </span>
-                <div className="absolute inset-x-4 bottom-4 flex flex-wrap items-end justify-between gap-3 rounded-2xl border border-white/20 bg-ink/45 p-4 backdrop-blur-md sm:inset-x-5 sm:bottom-5">
-                  <div>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-cream/50">
-                      Visitanos
+            <div className="relative mx-auto w-full max-w-[420px]">
+              <div className="group/story relative aspect-[9/16] w-full overflow-hidden rounded-[1.75rem] border border-line bg-sand shadow-[0_30px_70px_-45px_rgba(20,36,30,0.65)]">
+                {activeStory ? (
+                  activeStory.type === "image" ? (
+                    <img
+                      key={activeStory.id}
+                      src={activeStory.src}
+                      alt="Historia del showroom de Verdun Automotores"
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : (
+                    <video
+                      key={activeStory.id}
+                      src={activeStory.src}
+                      poster={activeStory.poster}
+                      autoPlay
+                      muted={muted}
+                      playsInline
+                      loop={count === 1}
+                      onTimeUpdate={handleTimeUpdate}
+                      onEnded={goNext}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  )
+                ) : (
+                  <div className="absolute inset-0 bg-forest" />
+                )}
+
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/15 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-ink/70 to-transparent" />
+
+                <div className="pointer-events-none absolute inset-x-4 top-3 z-20 flex gap-1">
+                  {stories.map((story, index) => (
+                    <span
+                      key={story.id}
+                      className="h-[3px] flex-1 overflow-hidden rounded-full bg-cream/25"
+                    >
+                      <span
+                        className="block h-full rounded-full bg-cream transition-[width] duration-100 ease-linear"
+                        style={{
+                          width:
+                            index < storyIndex
+                              ? "100%"
+                              : index === storyIndex
+                                ? `${Math.round(progress * 100)}%`
+                                : "0%",
+                        }}
+                      />
+                    </span>
+                  ))}
+                </div>
+
+                <div className="pointer-events-none absolute inset-x-4 top-6 z-20 flex items-center gap-2.5">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-cream ring-1 ring-white/30">
+                    <img
+                      src="/logo-verdun.png"
+                      alt=""
+                      className="h-8 w-8 scale-110 object-contain"
+                    />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10.5px] font-bold text-cream [text-shadow:0_1px_10px_rgba(0,0,0,0.65)]">
+                      Verdun Automotores
                     </p>
-                    <p className="mt-1 text-[14px] font-extrabold leading-tight text-cream">
-                      Av. Chacabuco 1725
+                    <p className="mt-0.5 text-[9px] text-cream/65">
+                      Showroom · Corrientes
                     </p>
-                    <p className="mt-0.5 text-[10px] text-cream/60">Corrientes · Argentina</p>
                   </div>
-                  <a
-                    href="https://maps.google.com/?q=Av.+Chacabuco+1725,+Corrientes,+Argentina"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="grid h-10 w-10 place-items-center rounded-full bg-lime text-ink transition hover:rotate-45 hover:bg-cream"
-                    aria-label="Ver ubicación en Google Maps"
-                  >
-                    <ArrowUpRight className="h-4 w-4" />
-                  </a>
+                  {activeStory?.type === "video" ? (
+                    <button
+                      type="button"
+                      onClick={() => setMuted((current) => !current)}
+                      aria-label={muted ? "Activar sonido del reel" : "Silenciar reel"}
+                      title={muted ? "Activar sonido" : "Silenciar"}
+                      className="pointer-events-auto ml-auto grid h-7 w-7 place-items-center rounded-full border border-white/20 bg-ink/25 text-cream backdrop-blur-md transition hover:bg-ink/45"
+                    >
+                      {muted ? (
+                        <VolumeX className="h-3.5 w-3.5" />
+                      ) : (
+                        <Volume2 className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  ) : (
+                    <span className="ml-auto rounded-full border border-white/20 bg-ink/20 px-2.5 py-1 text-[8.5px] font-semibold uppercase tracking-[0.14em] text-cream/70 backdrop-blur-md">
+                      Ahora
+                    </span>
+                  )}
+                </div>
+
+                <span className="pointer-events-none absolute left-4 top-[4.8rem] z-20 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-ink/25 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-cream backdrop-blur-md">
+                  <MapPin className="h-3 w-3 text-lime" />
+                  Av. Chacabuco 1725
+                </span>
+
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  aria-label="Historia anterior"
+                  className="absolute inset-y-0 left-0 z-10 flex w-1/3 cursor-w-resize items-center"
+                >
+                  <span className="ml-3 hidden h-9 w-9 place-items-center rounded-full border border-white/20 bg-ink/30 text-cream opacity-0 backdrop-blur-md transition group-hover/story:opacity-100 sm:grid">
+                    <ArrowLeft className="h-4 w-4" />
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  aria-label="Siguiente historia"
+                  className="absolute inset-y-0 right-0 z-10 flex w-1/3 cursor-e-resize items-center justify-end"
+                >
+                  <span className="mr-3 hidden h-9 w-9 place-items-center rounded-full border border-white/20 bg-ink/30 text-cream opacity-0 backdrop-blur-md transition group-hover/story:opacity-100 sm:grid">
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </button>
+
+                <div className="pointer-events-none absolute inset-x-3 bottom-3 z-20 rounded-2xl border border-white/15 bg-ink/45 p-4 backdrop-blur-md sm:p-5">
+                  <p className="font-serif text-[20px] italic leading-[1.15] tracking-[-0.01em] text-cream sm:text-[23px]">
+                    “No vendemos autos. Acompañamos decisiones.”
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/15 pt-3">
+                    <div>
+                      <p className="text-[10.5px] font-semibold text-cream">
+                        Familia Verdun
+                      </p>
+                      <p className="mt-0.5 text-[8.5px] uppercase tracking-[0.14em] text-cream/50">
+                        Verdun Automotores
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-lime">
+                      <span className="h-1.5 w-1.5 rounded-full bg-lime" />
+                      <span className="text-[9px] font-bold">Desde 1994</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="absolute -bottom-9 right-4 hidden w-40 overflow-hidden rounded-2xl border-[5px] border-cream shadow-xl sm:block lg:w-48">
-                <img
-                  src={images.interior}
-                  alt="Interior premium de uno de los vehículos disponibles"
-                  className="aspect-[5/4] w-full object-cover"
-                />
+              <div className="absolute -right-2 top-20 z-30 hidden items-center gap-2 rounded-2xl border border-line/80 bg-paper px-4 py-3.5 shadow-[0_18px_40px_-20px_rgba(20,36,30,0.45)] xl:flex">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-lime text-ink">
+                  <ShieldCheck className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-[11px] font-extrabold leading-none text-ink">
+                    Garantía
+                  </p>
+                  <p className="mt-0.5 text-[9px] text-muted">
+                    en todos los usados
+                  </p>
+                </div>
               </div>
+
+              <p className="mt-3 text-center text-[9.5px] text-muted">
+                Tocá las historias para recorrer el showroom.
+              </p>
             </div>
           </Reveal>
 

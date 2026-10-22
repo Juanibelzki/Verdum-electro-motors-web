@@ -193,15 +193,18 @@ export default function HeroVideosPanel() {
   };
 
   return (
-    <section className="mt-8 rounded-[1.75rem] border border-line bg-paper p-5 shadow-[0_30px_70px_-55px_rgba(20,36,30,0.8)] sm:p-7">
+    <section
+      id="hero-videos"
+      className="mt-8 scroll-mt-24 rounded-[1.75rem] border border-line bg-paper p-5 shadow-[0_30px_70px_-55px_rgba(20,36,30,0.8)] sm:p-7"
+    >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-moss">
             Home · Hero
           </p>
-          <h1 className="mt-1.5 text-[28px] font-extrabold tracking-[-0.04em] text-ink sm:text-[34px]">
+          <h2 className="mt-1.5 text-[28px] font-extrabold tracking-[-0.04em] text-ink sm:text-[34px]">
             Videos del hero
-          </h1>
+          </h2>
           <p className="mt-2 max-w-[620px] text-[13px] leading-relaxed text-muted">
             Subí los videos que se reproducen en la portada, ordenalos y guardá
             los cambios. La home los lee desde Supabase.
@@ -255,6 +258,7 @@ export default function HeroVideosPanel() {
           type="file"
           accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.webm,.mov,.m4v"
           multiple
+          aria-label="Subir videos del hero"
           className="sr-only"
           onChange={onFileChange}
           disabled={uploading || saving}

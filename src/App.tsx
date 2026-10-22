@@ -12,6 +12,7 @@ import Showroom, { Faq } from "./components/Showroom";
 import Testimonials from "./components/Testimonials";
 import type { Car } from "./data/cars";
 import { useHeroScenes } from "./data/useHeroScenes";
+import { useShowroomStories } from "./data/useShowroomStories";
 import { useVehicles } from "./data/useVehicles";
 
 type ScheduleState = { open: boolean; carId?: string };
@@ -19,6 +20,7 @@ type ScheduleState = { open: boolean; carId?: string };
 export default function App() {
   const { cars, categories, featured, loading, error, reload } = useVehicles();
   const { scenes: heroScenes } = useHeroScenes();
+  const { stories: showroomStories } = useShowroomStories();
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [schedule, setSchedule] = useState<ScheduleState>({ open: false });
 
@@ -51,7 +53,7 @@ export default function App() {
         <Financing onSchedule={() => openSchedule()} />
         <SellCar onSchedule={() => openSchedule()} />
         <Testimonials />
-        <Showroom onSchedule={() => openSchedule()} />
+        <Showroom stories={showroomStories} onSchedule={() => openSchedule()} />
         <Faq onSchedule={() => openSchedule()} />
       </main>
 

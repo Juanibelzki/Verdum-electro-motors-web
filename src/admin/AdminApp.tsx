@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { ArrowUpRight, ShieldCheck } from "../components/Icons";
 import HeroVideosPanel from "./HeroVideosPanel";
+import ShowroomStoriesPanel from "./ShowroomStoriesPanel";
 
 export default function AdminApp() {
   useEffect(() => {
@@ -65,7 +66,36 @@ export default function AdminApp() {
           </p>
         </div>
 
+        <div className="mt-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-moss">
+              Contenido
+            </p>
+            <h1 className="mt-1.5 text-[32px] font-extrabold tracking-[-0.05em] text-ink sm:text-[40px]">
+              Home
+            </h1>
+            <p className="mt-1.5 text-[13px] text-muted">
+              Videos de portada e historias del showroom.
+            </p>
+          </div>
+          <nav className="flex flex-wrap gap-2" aria-label="Secciones del admin">
+            <a
+              href="#hero-videos"
+              className="rounded-full border border-line bg-paper px-4 py-2 text-[11px] font-semibold text-ink transition hover:border-ink/25"
+            >
+              Hero
+            </a>
+            <a
+              href="#showroom-stories"
+              className="rounded-full border border-line bg-paper px-4 py-2 text-[11px] font-semibold text-ink transition hover:border-ink/25"
+            >
+              Historias
+            </a>
+          </nav>
+        </div>
+
         <HeroVideosPanel />
+        <ShowroomStoriesPanel />
       </main>
 
       <footer className="border-t border-line">
