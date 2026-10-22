@@ -99,13 +99,23 @@ export function Logo({ light = false, className }: { light?: boolean; className?
           />
         </svg>
       </span>
-      <span
-        className={cn(
-          "text-[16px] font-extrabold uppercase leading-none tracking-[0.26em]",
-          light ? "text-cream" : "text-ink"
-        )}
-      >
-        Verdun
+      <span className="flex flex-col justify-center leading-none">
+        <span
+          className={cn(
+            "text-[16px] font-extrabold uppercase leading-none tracking-[0.26em]",
+            light ? "text-cream" : "text-ink"
+          )}
+        >
+          Verdun
+        </span>
+        <span
+          className={cn(
+            "mt-1 text-[7.5px] font-semibold uppercase leading-none tracking-[0.24em]",
+            light ? "text-cream/45" : "text-muted"
+          )}
+        >
+          Automotores
+        </span>
       </span>
     </a>
   );
