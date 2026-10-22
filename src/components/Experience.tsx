@@ -1,10 +1,8 @@
-import { images } from "../data/cars";
 import {
   ArrowUpRight,
   BadgeCheck,
   CarIcon,
   Handshake,
-  MapPin,
   ShieldCheck,
   Wallet,
 } from "./Icons";
@@ -43,38 +41,26 @@ export default function Experience({ onSchedule }: { onSchedule: () => void }) {
         <div className="grid items-center gap-12 lg:grid-cols-[0.98fr_1.02fr] lg:gap-16">
           <Reveal>
             <div className="relative">
-              <div className="relative overflow-hidden rounded-[1.75rem] border border-line bg-sand">
+              <a
+                href="https://maps.google.com/?q=Av.+Chacabuco+1725,+Corrientes,+Argentina"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Ver en Google Maps"
+                className="group relative block overflow-hidden rounded-[1.75rem] border border-line bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2"
+              >
                 <img
-                  src={images.showroom}
-                  alt="Interior del showroom de Verdun Automotores"
-                  className="h-[420px] w-full object-cover sm:h-[500px] lg:h-[570px]"
+                  src="/images/local.jpg"
+                  alt="Local Verdun Automotores"
+                  loading="lazy"
+                  decoding="async"
+                  width={600}
+                  height={400}
+                  className="h-[420px] w-full object-cover transition duration-700 ease-out group-hover:scale-[1.03] group-hover:brightness-105 sm:h-[500px] lg:h-[570px]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/15 to-transparent" />
-
-                <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-ink/25 px-3 py-1.5 text-[9.5px] font-bold uppercase tracking-[0.16em] text-cream backdrop-blur-md">
-                  <MapPin className="h-3 w-3 text-lime" />
-                  Av. Chacabuco 1725
+                <span className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/15 bg-ink/85 px-4 py-1.5 text-[12px] font-semibold text-cream backdrop-blur-md transition group-hover:bg-forest">
+                  📍 Ver en Maps
                 </span>
-
-                <div className="absolute inset-x-4 bottom-4 sm:inset-x-5 sm:bottom-5">
-                  <div className="rounded-2xl border border-white/15 bg-ink/45 p-5 backdrop-blur-md sm:p-6">
-                    <p className="font-serif text-[23px] italic leading-[1.15] tracking-[-0.01em] text-cream sm:text-[27px]">
-                      “No vendemos autos. Acompañamos decisiones.”
-                    </p>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-3.5">
-                      <div>
-                        <p className="text-[11px] font-semibold text-cream">Familia Verdun</p>
-                        <p className="mt-0.5 text-[9.5px] uppercase tracking-[0.12em] text-cream/50">
-                          Verdun Automotores
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-lime">
-                        <span className="text-[10px] font-bold">Desde 1994</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              </a>
 
               <div className="absolute -right-3 top-8 hidden flex-col gap-2 rounded-2xl border border-line/80 bg-paper px-4 py-3.5 shadow-[0_18px_40px_-20px_rgba(20,36,30,0.45)] sm:flex">
                 <div className="flex items-center gap-2">
