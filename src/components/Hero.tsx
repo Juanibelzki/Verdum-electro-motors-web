@@ -1,25 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  featuredCar,
   formatKm,
-  formatUSD,
+  formatPrice,
   heroPoster,
   heroVideos,
-  monthlyPayment,
   type Car,
 } from "../data/cars";
 import { ArrowUpRight, Calendar, MapPin } from "./Icons";
 
 export default function Hero({
+  featuredCar,
   onSchedule,
   onViewCar,
 }: {
+  featuredCar: Car | null;
   onSchedule: () => void;
   onViewCar: (car: Car) => void;
 }) {
   const [videoIndex, setVideoIndex] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
   const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
+  const featuredModel = featuredCar ? featuredCar.model.split(" ").slice(0, 2).join(" ") : "";
 
   const avatars = [
     { initials: "CM", tone: "bg-forest text-cream" },
@@ -29,9 +30,9 @@ export default function Hero({
 
   const stats = [
     { value: "30 años", label: "De trayectoria" },
-    { value: "1994", label: "Desde, en Corrientes" },
+    { value: "1994", label: "Año de fundación" },
     { value: "0KM", label: "y usados garantizados" },
-    { value: "100%", label: "Financiación propia" },
+    { value: "A medida", label: "Financiación propia" },
   ];
 
   const brands = [
@@ -152,8 +153,8 @@ export default function Hero({
                 </h1>
 
                 <p className="mt-6 max-w-[470px] text-[14.5px] leading-relaxed text-cream/80 [text-shadow:0_1px_10px_rgba(0,0,0,0.7)] sm:text-[15px]">
-                  Autos 0KM, usados garantizados y motos eléctricas, con financiación propia y
-                  entrega inmediata en Corrientes. Sin vueltas, sin letra chica.
+                  Autos 0KM y usados garantizados, con financiación propia y entrega inmediata
+                  en Corrientes. Sin vueltas, sin letra chica.
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -177,34 +178,63 @@ export default function Hero({
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => onViewCar(featuredCar)}
-                className="group hidden w-[270px] shrink-0 rounded-[1.2rem] border border-white/30 bg-cream/95 p-4 text-left shadow-2xl backdrop-blur-xl transition hover:bg-cream lg:block"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-moss">
-                      Destacado de la semana
-                    </p>
-                    <p className="mt-2 truncate text-[18px] font-extrabold leading-tight tracking-[-0.02em] text-ink">
-                      {featuredCar.brand} {featuredCar.model}
-                    </p>
+              {featuredCar ? (
+                <button
+                  type="button"
+                  onClick={() => onViewCar(featuredCar)}
+                  title={featuredCar.title}
+                  className="group hidden w-[270px] shrink-0 rounded-[1.2rem] border border-white/30 bg-cream/95 p-4 text-left shadow-2xl backdrop-blur-xl transition hover:bg-cream lg:block"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-moss">
+                        {featuredCar.condition === "0KM" ? "0KM destacado" : "Destacado"}
+                      </p>
+                      <p className="mt-2 truncate text-[18px] font-extrabold leading-tight tracking-[-0.02em] text-ink">
+                        {featuredCar.brand} {featuredModel}
+                      </p>
+                    </div>
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-lime text-ink transition duration-300 group-hover:rotate-45 group-hover:bg-ink group-hover:text-lime">
+                      <ArrowUpRight className="h-4 w-4" />
+                    </span>
                   </div>
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-lime text-ink transition duration-300 group-hover:rotate-45 group-hover:bg-ink group-hover:text-lime">
-                    <ArrowUpRight className="h-4 w-4" />
-                  </span>
-                </div>
-                <p className="mt-2 text-[10.5px] font-medium text-muted">
-                  {featuredCar.year} · {formatKm(featuredCar.km)} · {featuredCar.transmission}
-                </p>
-                <p className="mt-2.5 text-[13px] font-extrabold text-ink">
-                  {formatUSD(featuredCar.price)}{" "}
-                  <span className="font-medium text-muted">
-                    · desde {formatUSD(monthlyPayment(featuredCar.price))}/mes
-                  </span>
-                </p>
-              </button>
+                  <p className="mt-2 text-[10.5px] font-medium text-muted">
+                    {[
+                      featuredCar.year ? String(featuredCar.year) : null,
+                      formatKm(featuredCar.km),
+                      featuredCar.transmission !== "Consultar" ? featuredCar.transmission : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                  <p className="mt-2.5 text-[13px] font-extrabold text-ink">
+                    {formatPrice(featuredCar.price)}
+                    <span className="font-medium text-muted"> · {featuredCar.condition}</span>
+                  </p>
+                </button>
+              ) : (
+                <a
+                  href="#vehiculos"
+                  className="group hidden w-[270px] shrink-0 rounded-[1.2rem] border border-white/30 bg-cream/95 p-4 text-left shadow-2xl backdrop-blur-xl transition hover:bg-cream lg:block"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-moss">
+                        Stock en vivo
+                      </p>
+                      <p className="mt-2 text-[18px] font-extrabold leading-tight tracking-[-0.02em] text-ink">
+                        Ver vehículos disponibles
+                      </p>
+                    </div>
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-lime text-ink transition duration-300 group-hover:rotate-45 group-hover:bg-ink group-hover:text-lime">
+                      <ArrowUpRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[10.5px] font-medium text-muted">
+                    0KM y usados con fotos y datos reales.
+                  </p>
+                </a>
+              )}
             </div>
 
             <div className="flex flex-wrap items-end justify-between gap-5 border-t border-cream/15 pt-5">

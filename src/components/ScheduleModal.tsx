@@ -1,7 +1,7 @@
-import { useState, type FormEvent } from "react";
-import { cars, formatKm, monthlyPayment, formatUSD } from "../data/cars";
+import { useEffect, useState, type FormEvent } from "react";
+import { formatKm, whatsappLink, type Car } from "../data/cars";
 import { cn } from "../utils/cn";
-import { ArrowUpRight, Calendar, Check, Clock } from "./Icons";
+import { ArrowUpRight, Calendar, Check, Clock, Whatsapp } from "./Icons";
 import { Modal } from "./ui";
 
 const times = ["10:00", "11:30", "15:00", "16:30", "18:00"];
@@ -34,23 +34,33 @@ const inputClass =
   "w-full rounded-xl border border-line bg-white/60 px-4 py-3 text-sm font-medium text-ink placeholder:text-muted/50 transition focus:border-forest focus:outline-none focus:ring-4 focus:ring-forest/10";
 
 export default function ScheduleModal({
+  cars,
   initialCarId,
   onClose,
 }: {
+  cars: Car[];
   initialCarId?: string;
   onClose: () => void;
 }) {
   const days = getNextDays(5);
-  const [carId, setCarId] = useState(initialCarId ?? cars[0].id);
+  const [carId, setCarId] = useState(initialCarId ?? cars[0]?.id ?? "");
   const [date, setDate] = useState(days[0].iso);
   const [time, setTime] = useState(times[0]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [sentLink, setSentLink] = useState("");
   const [error, setError] = useState("");
 
-  const selectedCar = cars.find((car) => car.id === carId) ?? cars[0];
+  useEffect(() => {
+    if (cars.length === 0) return;
+    if (cars.some((car) => car.id === carId)) return;
+    const preferred = cars.find((car) => car.id === initialCarId);
+    setCarId(preferred?.id ?? cars[0].id);
+  }, [cars, carId, initialCarId]);
+
+  const selectedCar = cars.find((car) => car.id === carId) ?? cars[0] ?? null;
   const selectedDay = days.find((day) => day.iso === date) ?? days[0];
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -59,8 +69,26 @@ export default function ScheduleModal({
       setError("Revisá tus datos: necesitamos nombre, teléfono y un email válido.");
       return;
     }
+
+    const vehicle = selectedCar
+      ? `${selectedCar.title}${selectedCar.year ? ` (${selectedCar.year})` : ""}`
+      : "Consulta general por stock";
+
+    const message = [
+      "Hola Verdun, quiero agendar un test drive.",
+      `Nombre: ${name.trim()}`,
+      `Teléfono: ${phone.trim()}`,
+      `Email: ${email.trim()}`,
+      `Vehículo: ${vehicle}`,
+      `Día: ${selectedDay.weekday} ${selectedDay.day} ${selectedDay.month}`,
+      `Horario: ${time} h`,
+    ].join("\n");
+
+    const url = whatsappLink(message);
     setError("");
+    setSentLink(url);
     setSubmitted(true);
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -71,14 +99,14 @@ export default function ScheduleModal({
             <Check className="h-7 w-7" strokeWidth={2.2} />
           </span>
           <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.24em] text-muted">
-            Reserva recibida
+            Consulta enviada
           </p>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Nos vemos pronto, {name.trim().split(" ")[0]}.
+            Te esperamos, {name.trim().split(" ")[0]}.
           </h2>
           <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted">
-            Te contactamos dentro de las próximas 24 horas para confirmar la disponibilidad del
-            vehículo y los detalles de la visita.
+            Abrimos WhatsApp con tu consulta prearmada. Si no se abrió, tocá el botón de abajo
+            y la coordinamos por ahí.
           </p>
 
           <div className="mx-auto mt-7 max-w-md rounded-2xl border border-line/80 bg-cream/70 p-5 text-left">
@@ -86,7 +114,7 @@ export default function ScheduleModal({
               Tu test drive
             </p>
             <p className="mt-2 text-lg font-extrabold tracking-tight">
-              {selectedCar.brand} {selectedCar.model}
+              {selectedCar ? selectedCar.title : "Consulta general"}
             </p>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-moss">
               <span className="flex items-center gap-1.5">
@@ -98,15 +126,28 @@ export default function ScheduleModal({
                 {time} h · Av. Chacabuco 1725
               </span>
             </div>
+            {selectedCar && (
+              <p className="mt-2 text-[11px] text-muted">
+                {formatKm(selectedCar.km)} · {selectedCar.condition}
+              </p>
+            )}
           </div>
 
+          <a
+            href={sentLink}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-lime px-6 py-3.5 text-sm font-bold text-ink transition hover:bg-lime-soft"
+          >
+            <Whatsapp className="h-4 w-4" />
+            Abrir WhatsApp
+          </a>
           <button
             type="button"
             onClick={onClose}
-            className="mt-7 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-semibold text-cream transition hover:bg-forest"
+            className="mt-3 block w-full text-center text-[11px] font-semibold text-muted transition hover:text-ink"
           >
             Volver al catálogo
-            <ArrowUpRight className="h-4 w-4" />
           </button>
         </div>
       ) : (
@@ -132,24 +173,29 @@ export default function ScheduleModal({
               >
                 Auto de interés
               </label>
-              <select
-                id="schedule-car"
-                value={carId}
-                onChange={(event) => setCarId(event.target.value)}
-                className={cn(inputClass, "appearance-none")}
-              >
-                {cars.map((car) => (
-                  <option key={car.id} value={car.id}>
-                    {car.brand} {car.model} · {car.year} · {formatUSD(car.price)}
-                  </option>
-                ))}
-              </select>
+              {cars.length > 0 ? (
+                <select
+                  id="schedule-car"
+                  value={carId}
+                  onChange={(event) => setCarId(event.target.value)}
+                  className={cn(inputClass, "appearance-none")}
+                >
+                  {cars.map((car) => (
+                    <option key={car.id} value={car.id}>
+                      {car.title}
+                      {car.year ? ` · ${car.year}` : ""}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="rounded-xl border border-line bg-white/50 px-4 py-3 text-sm text-muted">
+                  Consulta general por el stock disponible.
+                </p>
+              )}
               <p className="mt-2 text-[11px] text-muted">
-                Cuota estimada desde{" "}
-                <span className="font-semibold text-ink">
-                  {formatUSD(monthlyPayment(selectedCar.price))}/mes
-                </span>{" "}
-                · {formatKm(selectedCar.km)}
+                {selectedCar
+                  ? `${formatKm(selectedCar.km)} · ${selectedCar.condition} · ${selectedCar.category}`
+                  : "Contanos qué buscás y te respondemos con las unidades disponibles."}
               </p>
             </div>
 
@@ -265,15 +311,16 @@ export default function ScheduleModal({
             )}
 
             <div className="flex flex-col gap-3 border-t border-line/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="max-w-[250px] text-[10px] leading-relaxed text-muted">
-                Al confirmar aceptás que Verdun te contacte para coordinar tu visita. Tus datos no
-                se comparten con terceros.
+              <p className="max-w-[260px] text-[10px] leading-relaxed text-muted">
+                Al confirmar se abre WhatsApp con tu consulta prearmada. Tus datos no se
+                comparten con terceros.
               </p>
               <button
                 type="submit"
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-semibold text-cream transition hover:bg-forest"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-lime px-6 py-3.5 text-sm font-bold text-ink transition hover:bg-lime-soft"
               >
-                Confirmar test drive
+                <Whatsapp className="h-4 w-4" />
+                Enviar por WhatsApp
                 <ArrowUpRight className="h-4 w-4" />
               </button>
             </div>

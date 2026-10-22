@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { formatUSD } from "../data/cars";
-import { ArrowUpRight, Check, Sparkles } from "./Icons";
+import { whatsappLink } from "../data/cars";
+import { ArrowUpRight, Check, Sparkles, Whatsapp } from "./Icons";
 import { Eyebrow, Reveal } from "./ui";
 
 const inputClass =
@@ -13,28 +13,35 @@ const benefits = [
 ];
 
 export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
-  const [form, setForm] = useState({ brand: "", model: "", year: "2021", km: "" });
-  const [estimate, setEstimate] = useState<{ low: number; high: number } | null>(null);
+  const [form, setForm] = useState({ brand: "", model: "", year: "", km: "" });
+  const [sent, setSent] = useState(false);
+  const [sentLink, setSentLink] = useState("");
 
   const update = (field: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [field]: value }));
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const year = Number(form.year) || 2021;
-    const km = Number(form.km) || 0;
-    const depreciation = Math.max(0, 2026 - year) * 1250;
-    const wear = Math.max(0, km - 10000) * 0.11;
-    const base = Math.max(7200, 34000 - depreciation - wear);
-    setEstimate({
-      low: Math.round((base * 0.92) / 100) * 100,
-      high: Math.round((base * 1.08) / 100) * 100,
-    });
+    if (!form.brand.trim() || !form.model.trim() || !form.year || !form.km.trim()) return;
+
+    const message = [
+      "Hola Verdun, quiero tasar mi auto.",
+      `Marca: ${form.brand.trim()}`,
+      `Modelo: ${form.model.trim()}`,
+      `Año: ${form.year}`,
+      `Kilómetros: ${form.km.trim()}`,
+    ].join("\n");
+
+    const url = whatsappLink(message);
+    setSentLink(url);
+    setSent(true);
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const reset = () => {
-    setForm({ brand: "", model: "", year: "2021", km: "" });
-    setEstimate(null);
+    setForm({ brand: "", model: "", year: "", km: "" });
+    setSent(false);
+    setSentLink("");
   };
 
   return (
@@ -97,28 +104,37 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
               </div>
 
               <div className="rounded-[1.5rem] border border-ink/10 bg-paper p-5 shadow-[0_25px_60px_-35px_rgba(20,36,30,0.45)] sm:p-6">
-                {estimate ? (
+                {sent ? (
                   <div className="flex min-h-[330px] flex-col justify-center py-3 text-center">
                     <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-lime text-ink">
                       <Check className="h-6 w-6" strokeWidth={2.3} />
                     </span>
                     <p className="mt-5 text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted">
-                      Estimación para {form.brand} {form.model}
+                      Consulta enviada
                     </p>
-                    <p className="mt-2 text-[27px] font-extrabold leading-tight tracking-[-0.04em] text-ink sm:text-[30px]">
-                      {formatUSD(estimate.low)} – {formatUSD(estimate.high)}
+                    <p className="mt-2 text-[26px] font-extrabold leading-tight tracking-[-0.04em] text-ink sm:text-[29px]">
+                      Te pasamos la tasación por WhatsApp.
                     </p>
-                    <p className="mx-auto mt-2 max-w-[280px] text-[10.5px] leading-relaxed text-muted">
-                      Es un valor orientativo. La tasación final se confirma con una revisión de 30
-                      minutos en el showroom.
+                    <p className="mx-auto mt-2 max-w-[290px] text-[10.5px] leading-relaxed text-muted">
+                      Abrimos el chat con los datos de tu {form.brand} {form.model}. Si no se
+                      abrió, tocá el botón de abajo.
                     </p>
                     <div className="mt-5 flex flex-col gap-2">
+                      <a
+                        href={sentLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
+                      >
+                        <Whatsapp className="h-4 w-4" />
+                        Abrir WhatsApp
+                      </a>
                       <button
                         type="button"
                         onClick={onSchedule}
-                        className="flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3.5 text-[12px] font-semibold text-cream transition hover:bg-forest"
+                        className="flex items-center justify-center gap-2 rounded-full border border-ink/15 px-5 py-3.5 text-[12px] font-semibold text-ink transition hover:border-ink/30"
                       >
-                        Coordinar tasación final
+                        Agendar visita al showroom
                         <ArrowUpRight className="h-4 w-4" />
                       </button>
                       <button
@@ -146,7 +162,7 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                       </span>
                     </div>
                     <p className="mt-1.5 text-[11px] leading-relaxed text-muted">
-                      Tres datos. Una estimación real. Sin compromiso.
+                      Cuatro datos. Te enviamos la tasación. Sin compromiso.
                     </p>
 
                     <div className="mt-5 grid grid-cols-2 gap-3">
@@ -185,8 +201,15 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                           className={`${inputClass} appearance-none`}
                           value={form.year}
                           onChange={(event) => update("year", event.target.value)}
+                          required
                         >
-                          {Array.from({ length: 17 }, (_, index) => 2026 - index).map((year) => (
+                          <option value="" disabled>
+                            Año
+                          </option>
+                          {Array.from(
+                            { length: 17 },
+                            (_, index) => new Date().getFullYear() - index
+                          ).map((year) => (
                             <option key={year} value={year}>
                               {year}
                             </option>
@@ -214,14 +237,15 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
 
                     <button
                       type="submit"
-                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-ink px-5 py-3.5 text-[12px] font-semibold text-cream transition hover:bg-forest"
+                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
                     >
-                      Calcular mi tasación
+                      <Whatsapp className="h-4 w-4" />
+                      Enviar por WhatsApp
                       <ArrowUpRight className="h-4 w-4" />
                     </button>
                     <p className="mt-2.5 text-center text-[8.5px] leading-relaxed text-muted">
-                      Estimación orientativa basada en año y kilometraje. No constituye una oferta
-                      de compra.
+                      Al enviar se abre WhatsApp con los datos de tu auto. La tasación se confirma
+                      con una revisión en el showroom.
                     </p>
                   </form>
                 )}

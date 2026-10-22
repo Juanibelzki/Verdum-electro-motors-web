@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
 import {
-  bodies,
-  brands,
-  cars,
+  FALLBACK_CAR_IMAGE,
   formatKm,
-  formatUSD,
-  monthlyPayment,
+  formatPrice,
+  whatsappLink,
   type Car,
 } from "../data/cars";
+import type { VehicleCategory } from "../data/vehicles";
 import { cn } from "../utils/cn";
 import {
   ArrowUpRight,
@@ -18,33 +17,18 @@ import {
   Heart,
   Search,
   Sliders,
+  Whatsapp,
   X,
   Zap,
 } from "./Icons";
 import { Eyebrow, Reveal } from "./ui";
 
-type Tab = "todos" | "nuevos" | "seminuevos" | "electricos";
-
-const tabs: { id: Tab; label: string }[] = [
-  { id: "todos", label: "Todos" },
-  { id: "nuevos", label: "Nuevos" },
-  { id: "seminuevos", label: "Seminuevos" },
-  { id: "electricos", label: "Eléctricos" },
-];
-
-const prices = [
-  { value: "all", label: "Precio: cualquiera" },
-  { value: "0-50000", label: "Hasta USD 50.000" },
-  { value: "50000-80000", label: "USD 50.000 – 80.000" },
-  { value: "80000-120000", label: "USD 80.000 – 120.000" },
-  { value: "120000-999999", label: "Más de USD 120.000" },
-];
-
 const sortOptions = [
   { value: "destacados", label: "Ordenar: destacados" },
+  { value: "anio-desc", label: "Año más reciente" },
+  { value: "km-asc", label: "Menor kilometraje" },
   { value: "precio-asc", label: "Menor precio primero" },
   { value: "precio-desc", label: "Mayor precio primero" },
-  { value: "anio-desc", label: "Año más reciente" },
 ];
 
 function FilterSelect({
@@ -91,36 +75,50 @@ function CarCard({
   onToggleFavorite: () => void;
   onView: () => void;
 }) {
+  const specs = [
+    car.year != null
+      ? { label: "Año", value: String(car.year), icon: Calendar, key: "year" }
+      : null,
+    car.km != null
+      ? { label: "Kilometraje", value: formatKm(car.km), icon: Gauge, key: "km" }
+      : null,
+    car.transmission !== "Consultar"
+      ? { label: "Transmisión", value: car.transmission, icon: Cog, key: "transmission" }
+      : null,
+    car.power != null
+      ? { label: "Potencia", value: `${car.power} CV`, icon: Zap, key: "power" }
+      : null,
+  ].filter((spec) => spec !== null);
+
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-line/75 bg-paper transition duration-500 hover:-translate-y-1 hover:border-forest/25 hover:shadow-[0_30px_60px_-35px_rgba(20,36,30,0.55)]">
       <div className="relative aspect-[4/3] overflow-hidden bg-sand">
         <img
           src={car.image}
-          alt={`${car.brand} ${car.model}`}
+          alt={car.title}
           loading="lazy"
+          onError={(event) => {
+            event.currentTarget.onerror = null;
+            event.currentTarget.src = FALLBACK_CAR_IMAGE;
+          }}
           className="h-full w-full object-cover transition duration-[900ms] ease-out group-hover:scale-[1.045]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/25 via-transparent to-transparent opacity-70" />
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3.5">
-          <span
-            className={cn(
-              "rounded-full px-2.5 py-1.5 text-[9px] font-extrabold uppercase tracking-[0.13em] backdrop-blur-md",
-              car.fuel === "Eléctrico" || car.badge === "Destacado"
-                ? "bg-lime/95 text-ink"
-                : "bg-cream/90 text-ink"
-            )}
-          >
-            {car.badge}
-          </span>
+          {car.featured ? (
+            <span className="rounded-full bg-lime/95 px-2.5 py-1.5 text-[9px] font-extrabold uppercase tracking-[0.13em] text-ink backdrop-blur-md">
+              {car.badge}
+            </span>
+          ) : (
+            <span aria-hidden="true" />
+          )}
           <button
             type="button"
             onClick={onToggleFavorite}
             aria-pressed={favorite}
             aria-label={
-              favorite
-                ? `Quitar ${car.brand} ${car.model} de guardados`
-                : `Guardar ${car.brand} ${car.model}`
+              favorite ? `Quitar ${car.title} de guardados` : `Guardar ${car.title}`
             }
             className={cn(
               "grid h-9 w-9 place-items-center rounded-full border bg-cream/90 backdrop-blur-md transition",
@@ -139,7 +137,7 @@ function CarCard({
           ) : (
             <span className="h-1 w-1 rounded-full bg-lime" />
           )}
-          {car.fuel}
+          {car.fuel !== "Consultar" ? car.fuel : car.body}
         </div>
         {car.km === 0 && (
           <span className="absolute bottom-3.5 right-3.5 rounded-full bg-cream/90 px-2.5 py-1.5 text-[9px] font-extrabold uppercase tracking-[0.1em] text-ink backdrop-blur-md">
@@ -154,7 +152,7 @@ function CarCard({
             <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted">
               {car.brand}
             </p>
-            <h3 className="mt-1.5 truncate text-[18px] font-extrabold leading-tight tracking-[-0.025em] text-ink">
+            <h3 className="mt-1.5 line-clamp-2 text-[18px] font-extrabold leading-tight tracking-[-0.025em] text-ink">
               {car.model}
             </h3>
             <p className="mt-1 truncate text-[11px] leading-relaxed text-muted">{car.version}</p>
@@ -165,39 +163,37 @@ function CarCard({
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 border-y border-line/60 py-3">
-          <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-moss">
-            <Calendar className="h-3.5 w-3.5 text-muted" />
-            {car.year}
-          </span>
-          <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-moss">
-            <Gauge className="h-3.5 w-3.5 text-muted" />
-            {formatKm(car.km)}
-          </span>
-          <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-moss">
-            <Cog className="h-3.5 w-3.5 text-muted" />
-            {car.transmission}
-          </span>
-          <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-moss">
-            <Zap className="h-3.5 w-3.5 text-muted" />
-            {car.power} hp
-          </span>
+          {specs.map((spec) => {
+            const Icon = spec.icon;
+            return (
+              <span
+                key={spec.key}
+                className="flex items-center gap-1.5 text-[10.5px] font-medium text-moss"
+              >
+                <Icon className="h-3.5 w-3.5 text-muted" />
+                {spec.value}
+              </span>
+            );
+          })}
         </div>
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-4">
-          <div>
+          <div className="min-w-0">
             <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted">Precio</p>
-            <p className="mt-0.5 text-[16.5px] font-extrabold tracking-[-0.03em] text-ink">
-              {formatUSD(car.price)}
+            <p className="mt-0.5 text-[15px] font-extrabold leading-tight tracking-[-0.03em] text-ink">
+              {formatPrice(car.price)}
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-[8.5px] font-bold uppercase tracking-[0.16em] text-muted">
-              Cuota desde
-            </p>
-            <p className="mt-0.5 text-[11.5px] font-extrabold text-forest">
-              {formatUSD(monthlyPayment(car.price))}/mes
-            </p>
-          </div>
+          <a
+            href={whatsappLink(car.whatsappMsg)}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Consultar ${car.title} por WhatsApp`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-forest/20 bg-lime/25 px-3 py-2 text-[10px] font-bold text-forest transition hover:bg-lime hover:text-ink"
+          >
+            <Whatsapp className="h-3.5 w-3.5" />
+            WhatsApp
+          </a>
         </div>
 
         <button
@@ -213,20 +209,85 @@ function CarCard({
   );
 }
 
+function CarSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-[1.35rem] border border-line/75 bg-paper">
+      <div className="aspect-[4/3] animate-pulse bg-sand" />
+      <div className="space-y-3 p-5">
+        <div className="h-2.5 w-16 animate-pulse rounded bg-line/70" />
+        <div className="h-5 w-3/4 animate-pulse rounded bg-line/70" />
+        <div className="h-3 w-1/2 animate-pulse rounded bg-line/60" />
+        <div className="h-14 animate-pulse rounded bg-cream" />
+        <div className="h-9 animate-pulse rounded-full bg-cream" />
+      </div>
+    </div>
+  );
+}
+
 export default function Catalog({
+  cars,
+  categories,
+  loading,
+  error,
   onViewCar,
   onSchedule,
+  onRetry,
 }: {
+  cars: Car[];
+  categories: VehicleCategory[];
+  loading: boolean;
+  error: string | null;
   onViewCar: (car: Car) => void;
   onSchedule: () => void;
+  onRetry: () => void;
 }) {
-  const [tab, setTab] = useState<Tab>("todos");
+  const [tab, setTab] = useState("todos");
   const [brand, setBrand] = useState("all");
   const [body, setBody] = useState("all");
   const [price, setPrice] = useState("all");
   const [sort, setSort] = useState("destacados");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [savedOnly, setSavedOnly] = useState(false);
+
+  const hasPrices = cars.some((car) => car.price != null);
+  const brands = useMemo(
+    () => Array.from(new Set(cars.map((car) => car.brand))).sort((a, b) => a.localeCompare(b, "es")),
+    [cars]
+  );
+  const bodies = useMemo(
+    () => Array.from(new Set(cars.map((car) => car.body))).sort((a, b) => a.localeCompare(b, "es")),
+    [cars]
+  );
+  const tabs = useMemo(
+    () => [
+      { id: "todos", label: "Todos", count: cars.length },
+      ...categories.map((category) => ({
+        id: category.id,
+        label: category.shortName,
+        count: category.count,
+      })),
+    ],
+    [cars.length, categories]
+  );
+
+  const priceOptions = useMemo(
+    () => [
+      { value: "all", label: "Precio: cualquiera" },
+      { value: "0-50000", label: "Hasta USD 50.000" },
+      { value: "50000-80000", label: "USD 50.000 – 80.000" },
+      { value: "80000-120000", label: "USD 80.000 – 120.000" },
+      { value: "120000-999999", label: "Más de USD 120.000" },
+    ],
+    []
+  );
+
+  const visibleSortOptions = useMemo(
+    () =>
+      hasPrices
+        ? sortOptions
+        : sortOptions.filter((option) => !option.value.startsWith("precio-")),
+    [hasPrices]
+  );
 
   const toggleFavorite = (id: string) =>
     setFavorites((current) =>
@@ -244,30 +305,39 @@ export default function Catalog({
 
   const filteredCars = useMemo(() => {
     let list = cars.filter((car) => {
-      if (tab === "nuevos" && car.condition !== "Nuevo") return false;
-      if (tab === "seminuevos" && car.condition !== "Seminuevo") return false;
-      if (tab === "electricos" && car.fuel !== "Eléctrico") return false;
+      if (tab !== "todos" && car.categoryId !== tab) return false;
       if (brand !== "all" && car.brand !== brand) return false;
       if (body !== "all" && car.body !== body) return false;
-      if (price !== "all") {
+      if (price !== "all" && hasPrices) {
         const [min, max] = price.split("-").map(Number);
-        if (car.price < min || car.price > max) return false;
+        if (car.price == null || car.price < min || car.price > max) return false;
       }
       if (savedOnly && !favorites.includes(car.id)) return false;
       return true;
     });
 
     list = [...list];
-    if (sort === "precio-asc") list.sort((a, b) => a.price - b.price);
-    if (sort === "precio-desc") list.sort((a, b) => b.price - a.price);
-    if (sort === "anio-desc") list.sort((a, b) => b.year - a.year);
+
+    if (sort === "destacados") {
+      list.sort((a, b) => Number(b.featured) - Number(a.featured));
+    }
+    if (sort === "precio-asc" && hasPrices) {
+      list.sort((a, b) => (a.price ?? Number.POSITIVE_INFINITY) - (b.price ?? Number.POSITIVE_INFINITY));
+    }
+    if (sort === "precio-desc" && hasPrices) {
+      list.sort((a, b) => (b.price ?? Number.NEGATIVE_INFINITY) - (a.price ?? Number.NEGATIVE_INFINITY));
+    }
+    if (sort === "anio-desc") list.sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
+    if (sort === "km-asc") {
+      list.sort((a, b) => (a.km ?? Number.POSITIVE_INFINITY) - (b.km ?? Number.POSITIVE_INFINITY));
+    }
     return list;
-  }, [tab, brand, body, price, sort, savedOnly, favorites]);
+  }, [cars, tab, brand, body, price, sort, savedOnly, favorites, hasPrices]);
 
   const activeFilters =
     (brand !== "all" ? 1 : 0) +
     (body !== "all" ? 1 : 0) +
-    (price !== "all" ? 1 : 0) +
+    (price !== "all" && hasPrices ? 1 : 0) +
     (savedOnly ? 1 : 0);
 
   return (
@@ -284,38 +354,37 @@ export default function Catalog({
                 </span>
               </h2>
               <p className="mt-4 max-w-lg text-[13.5px] leading-relaxed text-muted">
-                Cada unidad está revisada y garantizada. Publicamos lo que ves: precio
-                final, historial y disponibilidad real.
+                Stock real, fotos reales y disponibilidad actualizada. Precios y financiación
+                se confirman con un asesor.
               </p>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-line/80 bg-paper px-3.5 py-2 text-[10.5px] font-semibold text-moss">
               <span className="h-1.5 w-1.5 rounded-full bg-moss" />
-              {cars.length} unidades disponibles
-              <span className="text-muted/50">·</span>
-              <span className="font-normal text-muted">Actualizado hoy</span>
+              {loading
+                ? "Cargando stock..."
+                : error
+                  ? "Stock no disponible"
+                  : `${cars.length} unidades disponibles`}
+              {!loading && !error && (
+                <>
+                  <span className="text-muted/50">·</span>
+                  <span className="font-normal text-muted">Actualizado hoy</span>
+                </>
+              )}
             </div>
           </div>
         </Reveal>
 
-        <Reveal delay={80}>
-          <div className="mt-8 rounded-[1.5rem] border border-line/80 bg-paper p-3 shadow-[0_25px_60px_-50px_rgba(20,36,30,0.7)] sm:p-4">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div
-                className="flex items-center gap-1 overflow-x-auto rounded-full bg-cream/80 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                role="tablist"
-                aria-label="Filtrar por tipo de vehículo"
-              >
-                {tabs.map((item) => {
-                  const count =
-                    item.id === "todos"
-                      ? cars.length
-                      : item.id === "electricos"
-                        ? cars.filter((car) => car.fuel === "Eléctrico").length
-                        : cars.filter(
-                            (car) =>
-                              car.condition === (item.id === "nuevos" ? "Nuevo" : "Seminuevo")
-                          ).length;
-                  return (
+        {!loading && !error && (
+          <Reveal delay={80}>
+            <div className="mt-8 rounded-[1.5rem] border border-line/80 bg-paper p-3 shadow-[0_25px_60px_-50px_rgba(20,36,30,0.7)] sm:p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div
+                  className="flex items-center gap-1 overflow-x-auto rounded-full bg-cream/80 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  role="tablist"
+                  aria-label="Filtrar por tipo de vehículo"
+                >
+                  {tabs.map((item) => (
                     <button
                       key={item.id}
                       type="button"
@@ -336,139 +405,212 @@ export default function Catalog({
                           tab === item.id ? "text-lime" : "text-muted/60"
                         )}
                       >
-                        {count}
+                        {item.count}
                       </span>
                     </button>
-                  );
-                })}
-              </div>
-
-              <div className="flex items-center justify-between gap-2 lg:justify-end">
-                <div className="flex items-center gap-2">
-                  <span className="hidden items-center gap-1.5 text-[10.5px] font-semibold text-muted sm:flex">
-                    <Sliders className="h-3.5 w-3.5" />
-                    Filtrar
-                  </span>
-                  <button
-                    type="button"
-                    aria-pressed={savedOnly}
-                    onClick={() => setSavedOnly((value) => !value)}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[10.5px] font-semibold transition",
-                      savedOnly
-                        ? "border-ink bg-ink text-cream"
-                        : "border-line bg-cream/50 text-moss hover:border-ink/30"
-                    )}
-                  >
-                    <Heart
-                      className={cn("h-3.5 w-3.5", (savedOnly || favorites.length > 0) && "fill-current")}
-                    />
-                    Guardados
-                    {favorites.length > 0 && (
-                      <span
-                        className={cn(
-                          "rounded-full px-1.5 py-0.5 text-[8.5px] font-bold",
-                          savedOnly ? "bg-lime text-ink" : "bg-ink text-cream"
-                        )}
-                      >
-                        {favorites.length}
-                      </span>
-                    )}
-                  </button>
+                  ))}
                 </div>
-                {activeFilters > 0 && (
-                  <button
-                    type="button"
-                    onClick={resetFilters}
-                    className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-muted transition hover:text-ink"
-                  >
-                    <X className="h-3 w-3" />
-                    Limpiar
-                  </button>
+
+                <div className="flex items-center justify-between gap-2 lg:justify-end">
+                  <div className="flex items-center gap-2">
+                    <span className="hidden items-center gap-1.5 text-[10.5px] font-semibold text-muted sm:flex">
+                      <Sliders className="h-3.5 w-3.5" />
+                      Filtrar
+                    </span>
+                    <button
+                      type="button"
+                      aria-pressed={savedOnly}
+                      onClick={() => setSavedOnly((value) => !value)}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[10.5px] font-semibold transition",
+                        savedOnly
+                          ? "border-ink bg-ink text-cream"
+                          : "border-line bg-cream/50 text-moss hover:border-ink/30"
+                      )}
+                    >
+                      <Heart
+                        className={cn(
+                          "h-3.5 w-3.5",
+                          (savedOnly || favorites.length > 0) && "fill-current"
+                        )}
+                      />
+                      Guardados
+                      {favorites.length > 0 && (
+                        <span
+                          className={cn(
+                            "rounded-full px-1.5 py-0.5 text-[8.5px] font-bold",
+                            savedOnly ? "bg-lime text-ink" : "bg-ink text-cream"
+                          )}
+                        >
+                          {favorites.length}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                  {activeFilters > 0 && (
+                    <button
+                      type="button"
+                      onClick={resetFilters}
+                      className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-muted transition hover:text-ink"
+                    >
+                      <X className="h-3 w-3" />
+                      Limpiar
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div
+                className={cn(
+                  "mt-3 grid gap-2 border-t border-line/60 pt-3 sm:grid-cols-2",
+                  hasPrices ? "lg:grid-cols-4" : "lg:grid-cols-3"
                 )}
+              >
+                <FilterSelect
+                  label="Marca"
+                  value={brand}
+                  onChange={setBrand}
+                  options={[
+                    { value: "all", label: "Marca: todas" },
+                    ...brands.map((item) => ({ value: item, label: item })),
+                  ]}
+                />
+                <FilterSelect
+                  label="Carrocería"
+                  value={body}
+                  onChange={setBody}
+                  options={[
+                    { value: "all", label: "Carrocería: todas" },
+                    ...bodies.map((item) => ({ value: item, label: item })),
+                  ]}
+                />
+                {hasPrices && (
+                  <FilterSelect
+                    label="Precio"
+                    value={price}
+                    onChange={setPrice}
+                    options={priceOptions}
+                  />
+                )}
+                <FilterSelect
+                  label="Ordenar"
+                  value={sort}
+                  onChange={setSort}
+                  options={visibleSortOptions}
+                />
               </div>
             </div>
+          </Reveal>
+        )}
 
-            <div className="mt-3 grid gap-2 border-t border-line/60 pt-3 sm:grid-cols-2 lg:grid-cols-4">
-              <FilterSelect
-                label="Marca"
-                value={brand}
-                onChange={setBrand}
-                options={[
-                  { value: "all", label: "Marca: todas" },
-                  ...brands.map((item) => ({ value: item, label: item })),
-                ]}
-              />
-              <FilterSelect
-                label="Carrocería"
-                value={body}
-                onChange={setBody}
-                options={[
-                  { value: "all", label: "Carrocería: todas" },
-                  ...bodies.map((item) => ({ value: item, label: item })),
-                ]}
-              />
-              <FilterSelect label="Precio" value={price} onChange={setPrice} options={prices} />
-              <FilterSelect
-                label="Ordenar"
-                value={sort}
-                onChange={setSort}
-                options={sortOptions}
-              />
-            </div>
+        {!loading && !error && (
+          <div className="mt-6 flex items-center justify-between">
+            <p className="text-[11px] font-medium text-muted">
+              Mostrando <span className="font-bold text-ink">{filteredCars.length}</span> de{" "}
+              {cars.length} vehículos
+            </p>
+            {favorites.length > 0 && !savedOnly && (
+              <button
+                type="button"
+                onClick={() => setSavedOnly(true)}
+                className="text-[11px] font-semibold text-forest underline decoration-forest/30 underline-offset-4 hover:decoration-forest"
+              >
+                Ver mis guardados
+              </button>
+            )}
           </div>
-        </Reveal>
-
-        <div className="mt-6 flex items-center justify-between">
-          <p className="text-[11px] font-medium text-muted">
-            Mostrando{" "}
-            <span className="font-bold text-ink">{filteredCars.length}</span> de {cars.length}{" "}
-            vehículos
-          </p>
-          {favorites.length > 0 && !savedOnly && (
-            <button
-              type="button"
-              onClick={() => setSavedOnly(true)}
-              className="text-[11px] font-semibold text-forest underline decoration-forest/30 underline-offset-4 hover:decoration-forest"
-            >
-              Ver mis guardados
-            </button>
-          )}
-        </div>
+        )}
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-          {filteredCars.map((car, index) => (
-            <Reveal key={car.id} delay={Math.min(index * 55, 220)} className="h-full">
-              <CarCard
-                car={car}
-                favorite={favorites.includes(car.id)}
-                onToggleFavorite={() => toggleFavorite(car.id)}
-                onView={() => onViewCar(car)}
-              />
-            </Reveal>
-          ))}
+          {loading &&
+            Array.from({ length: 6 }).map((_, index) => <CarSkeleton key={index} />)}
 
-          {filteredCars.length === 0 && (
+          {!loading && error && (
             <div className="col-span-full flex flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-ink/20 bg-paper/70 px-6 py-16 text-center">
               <span className="grid h-14 w-14 place-items-center rounded-full bg-cream text-moss">
                 <Search className="h-6 w-6" />
               </span>
               <h3 className="mt-5 text-xl font-extrabold tracking-tight">
-                {savedOnly ? "Todavía no guardaste ningún auto." : "No encontramos ese auto."}
+                No pudimos cargar el stock.
               </h3>
-              <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-muted">
-                {savedOnly
-                  ? "Tocá el corazón en cualquier vehículo para compararlo más tarde."
-                  : "Probá con otros filtros o contanos qué estás buscando. Tenemos ingresos nuevos todas las semanas."}
-              </p>
+              <p className="mt-2 max-w-md text-[13px] leading-relaxed text-muted">{error}</p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
                 <button
                   type="button"
-                  onClick={resetFilters}
+                  onClick={onRetry}
                   className="rounded-full bg-ink px-5 py-3 text-[12px] font-semibold text-cream transition hover:bg-forest"
                 >
-                  Ver todos los vehículos
+                  Reintentar
                 </button>
+                <a
+                  href={whatsappLink(
+                    "Hola Verdun, quiero consultar por el stock disponible de vehículos."
+                  )}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-ink/15 px-5 py-3 text-[12px] font-semibold text-ink transition hover:border-ink/30"
+                >
+                  <Whatsapp className="h-4 w-4 text-forest" />
+                  Consultar por WhatsApp
+                </a>
+              </div>
+            </div>
+          )}
+
+          {!loading &&
+            !error &&
+            filteredCars.map((car, index) => (
+              <Reveal key={car.id} delay={Math.min(index * 55, 220)} className="h-full">
+                <CarCard
+                  car={car}
+                  favorite={favorites.includes(car.id)}
+                  onToggleFavorite={() => toggleFavorite(car.id)}
+                  onView={() => onViewCar(car)}
+                />
+              </Reveal>
+            ))}
+
+          {!loading && !error && filteredCars.length === 0 && (
+            <div className="col-span-full flex flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-ink/20 bg-paper/70 px-6 py-16 text-center">
+              <span className="grid h-14 w-14 place-items-center rounded-full bg-cream text-moss">
+                <Search className="h-6 w-6" />
+              </span>
+              <h3 className="mt-5 text-xl font-extrabold tracking-tight">
+                {cars.length === 0
+                  ? "Estamos actualizando el stock."
+                  : savedOnly
+                    ? "Todavía no guardaste ningún auto."
+                    : "No encontramos ese auto."}
+              </h3>
+              <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-muted">
+                {cars.length === 0
+                  ? "Escribinos y te pasamos las unidades disponibles en el showroom."
+                  : savedOnly
+                    ? "Tocá el corazón en cualquier vehículo para compararlo más tarde."
+                    : "Probá con otros filtros o contanos qué estás buscando. Tenemos ingresos nuevos todas las semanas."}
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                {cars.length === 0 ? (
+                  <a
+                    href={whatsappLink(
+                      "Hola Verdun, quiero consultar por el stock disponible de vehículos."
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-[12px] font-semibold text-cream transition hover:bg-forest"
+                  >
+                    <Whatsapp className="h-4 w-4 text-lime" />
+                    Consultar stock
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="rounded-full bg-ink px-5 py-3 text-[12px] font-semibold text-cream transition hover:bg-forest"
+                  >
+                    Ver todos los vehículos
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={onSchedule}

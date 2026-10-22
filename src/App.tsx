@@ -11,27 +11,18 @@ import ScheduleModal from "./components/ScheduleModal";
 import Showroom, { Faq } from "./components/Showroom";
 import Testimonials from "./components/Testimonials";
 import type { Car } from "./data/cars";
+import { useVehicles } from "./data/useVehicles";
 
 type ScheduleState = { open: boolean; carId?: string };
 
 export default function App() {
+  const { cars, categories, featured, loading, error, reload } = useVehicles();
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [schedule, setSchedule] = useState<ScheduleState>({ open: false });
-  const [financePreset, setFinancePreset] = useState<{ price: number; nonce: number } | null>(
-    null
-  );
 
   const openSchedule = (carId?: string) => {
     setSelectedCar(null);
-    setSchedule({ open: true, carId });
-  };
-
-  const openFinancing = (price: number) => {
-    setSelectedCar(null);
-    setFinancePreset({ price, nonce: Date.now() });
-    window.setTimeout(() => {
-      document.getElementById("financiacion")?.scrollIntoView({ behavior: "smooth" });
-    }, 80);
+    setSchedule({ open: true, carId: carId ?? featured?.id });
   };
 
   return (
@@ -39,10 +30,18 @@ export default function App() {
       <Header onSchedule={() => openSchedule()} />
 
       <main>
-        <Hero onSchedule={() => openSchedule()} onViewCar={setSelectedCar} />
-        <Catalog onViewCar={setSelectedCar} onSchedule={() => openSchedule()} />
+        <Hero featuredCar={featured} onSchedule={() => openSchedule()} onViewCar={setSelectedCar} />
+        <Catalog
+          cars={cars}
+          categories={categories}
+          loading={loading}
+          error={error}
+          onViewCar={setSelectedCar}
+          onSchedule={() => openSchedule()}
+          onRetry={reload}
+        />
         <Experience onSchedule={() => openSchedule()} />
-        <Financing onSchedule={() => openSchedule()} presetPrice={financePreset} />
+        <Financing onSchedule={() => openSchedule()} />
         <SellCar onSchedule={() => openSchedule()} />
         <Testimonials />
         <Showroom onSchedule={() => openSchedule()} />
@@ -56,12 +55,12 @@ export default function App() {
           car={selectedCar}
           onClose={() => setSelectedCar(null)}
           onSchedule={() => openSchedule(selectedCar.id)}
-          onFinance={openFinancing}
         />
       )}
 
       {schedule.open && (
         <ScheduleModal
+          cars={cars}
           initialCarId={schedule.carId}
           onClose={() => setSchedule({ open: false })}
         />

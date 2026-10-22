@@ -50,8 +50,8 @@ export default function Showroom({ onSchedule }: { onSchedule: () => void }) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent" />
                 <span className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-cream/95 px-3 py-1.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink backdrop-blur">
-                  <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-moss" />
-                  Abierto ahora
+                  <MapPin className="h-3 w-3 text-moss" />
+                  Showroom · Corrientes
                 </span>
                 <div className="absolute inset-x-4 bottom-4 flex flex-wrap items-end justify-between gap-3 rounded-2xl border border-white/20 bg-ink/45 p-4 backdrop-blur-md sm:inset-x-5 sm:bottom-5">
                   <div>
@@ -97,7 +97,7 @@ export default function Showroom({ onSchedule }: { onSchedule: () => void }) {
               </h2>
               <p className="mt-4 max-w-md text-[13.5px] leading-relaxed text-muted">
                 Sin turnos obligatorios, sin vendedores que te persiguen. Un espacio para ver,
-                probar y preguntar todo lo que quieras. Café de especialidad incluido.
+                probar y preguntar todo lo que quieras.
               </p>
             </Reveal>
 
@@ -144,7 +144,7 @@ export default function Showroom({ onSchedule }: { onSchedule: () => void }) {
               </div>
               <p className="mt-3 flex items-center gap-1.5 text-[9.5px] text-muted">
                 <span className="h-1 w-1 rounded-full bg-moss" />
-                Estacionamiento gratuito para clientes Verdun.
+                Te esperamos en Av. Chacabuco 1725, Corrientes.
               </p>
             </Reveal>
           </div>
@@ -158,7 +158,7 @@ const faqs = [
   {
     question: "¿Los autos tienen garantía?",
     answer:
-      "Sí. Los vehículos nuevos cuentan con la garantía oficial de fábrica y los usados incluyen garantía Verdun sobre mecánica y caja, además de una revisión mecánica previa.",
+      "Sí. Los vehículos 0KM cuentan con la garantía oficial de fábrica y los usados incluyen garantía Verdun sobre mecánica y caja, además de una revisión mecánica previa.",
   },
   {
     question: "¿Puedo entregar mi auto en parte de pago?",
@@ -168,7 +168,7 @@ const faqs = [
   {
     question: "¿Cómo funciona la financiación?",
     answer:
-      "Podés simular tu cuota en la sección de financiación con diferentes anticipos y plazos. La aprobación es ágil y la financiación es propia, sin banco. La tasa es fija durante todo el plan.",
+      "La financiación es propia, sin banco. No publicamos una cuota genérica: nos contás qué vehículo te interesa, tu anticipo y el plazo, y te pasamos las condiciones vigentes por WhatsApp. La aprobación y las condiciones finales se confirman con un asesor.",
   },
   {
     question: "¿Hacen entregas en todo el país?",
@@ -235,7 +235,7 @@ export function Faq({ onSchedule }: { onSchedule: () => void }) {
                   onClick={onSchedule}
                   className="mt-2 w-full rounded-full px-4 py-2 text-[10.5px] font-semibold text-muted transition hover:text-ink"
                 >
-                  O agendar una llamada
+                  O agendar un test drive
                 </button>
               </div>
             </Reveal>

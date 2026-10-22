@@ -2,5 +2,8 @@ migrate.js
 node_modules/
 dist/
 .vercel/
+.env
+.env.local
+.env.*.local
 .DS_Store
 *.log

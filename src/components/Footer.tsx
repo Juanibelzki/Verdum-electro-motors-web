@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { whatsappLink } from "../data/cars";
 import {
   ArrowUpRight,
   Check,
@@ -22,7 +23,10 @@ const companyLinks = [
   { label: "Nosotros", href: "#nosotros" },
   { label: "Showroom", href: "#showroom" },
   { label: "Preguntas frecuentes", href: "#faq" },
-  { label: "Trabajá con nosotros", href: "#faq" },
+  {
+    label: "Trabajá con nosotros",
+    href: "mailto:info@verdun.com.ar?subject=Trabajar%20en%20Verdun",
+  },
 ];
 
 const socials = [
@@ -37,11 +41,17 @@ const socials = [
 export default function Footer({ onSchedule }: { onSchedule: () => void }) {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [sentLink, setSentLink] = useState("");
 
   const subscribe = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!email.includes("@")) return;
+    const url = whatsappLink(
+      `Hola Verdun, quiero recibir los ingresos semanales. Mi email: ${email.trim()}`
+    );
+    setSentLink(url);
     setSubscribed(true);
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -94,7 +104,7 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
           <div>
             <Logo light />
             <p className="mt-4 max-w-[250px] text-[11.5px] leading-relaxed text-cream/45">
-              Autos 0KM, usados garantizados y motos eléctricas. Desde 1994, en Corrientes.
+              Autos 0KM y usados garantizados. Desde 1994, en Corrientes.
             </p>
             <div className="mt-5 space-y-2 text-[10.5px] text-cream/55">
               <p className="flex items-start gap-2">
@@ -173,10 +183,20 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
             {subscribed ? (
               <div
                 role="status"
-                className="mt-4 flex items-center gap-2.5 rounded-2xl border border-lime/25 bg-lime/10 px-4 py-3.5 text-[11px] font-medium text-lime"
+                className="mt-4 rounded-2xl border border-lime/25 bg-lime/10 px-4 py-3.5 text-[11px] font-medium text-lime"
               >
-                <Check className="h-4 w-4 shrink-0" />
-                ¡Listo! Te vamos a escribir.
+                <p className="flex items-center gap-2.5">
+                  <Check className="h-4 w-4 shrink-0" />
+                  ¡Listo! Abrimos WhatsApp para sumarte.
+                </p>
+                <a
+                  href={sentLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1.5 inline-block pl-[26px] text-[10px] underline decoration-lime/40 underline-offset-2 hover:decoration-lime"
+                >
+                  Si no se abrió, tocá acá.
+                </a>
               </div>
             ) : (
               <form
@@ -227,10 +247,10 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
         </div>
 
         <p className="max-w-3xl pb-7 text-[9px] leading-relaxed text-cream/25">
-          Los precios están expresados en dólares estadounidenses e incluyen IVA. Las imágenes son
-          ilustrativas y pueden no coincidir con la unidad publicada. Las simulaciones de
-          financiación son orientativas y no constituyen una oferta crediticia. Sujeto a aprobación
-          de la entidad financiera. Verdun Automotores.
+          Los precios publicados, cuando están disponibles, se expresan en dólares estadounidenses
+          e incluyen IVA. Las imágenes son ilustrativas y pueden no coincidir con la unidad
+          publicada. Las condiciones de financiación son orientativas, no constituyen una oferta
+          crediticia y se confirman con un asesor. Sujeto a aprobación. Verdun Automotores.
         </p>
       </div>
     </footer>

@@ -18,18 +18,18 @@ const features = [
   },
   {
     icon: BadgeCheck,
-    title: "El precio que ves, es el precio",
-    text: "Sin gastos escondidos ni sorpresas al firmar. Transferencia, patentamiento y garantía incluidos.",
+    title: "Precios claros",
+    text: "Consultá el precio y las condiciones con un asesor. Sin gastos escondidos ni sorpresas al firmar.",
   },
   {
     icon: Wallet,
     title: "Financiación propia",
-    text: "Armamos la cuota a tu medida, sin banco y con la mejor tasa. De 24 a 60 meses.",
+    text: "Armamos el plan a tu medida, sin banco. De 24 a 60 meses.",
   },
   {
     icon: Handshake,
     title: "Te acompañamos después",
-    text: "Service, auxilio 24/7 y un asesor de confianza que sigue tu auto después de la entrega.",
+    text: "Service, asistencia y un asesor de confianza que sigue tu auto después de la entrega.",
   },
 ];
 

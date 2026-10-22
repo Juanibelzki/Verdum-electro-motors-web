@@ -28,7 +28,7 @@ export default function Header({ onSchedule }: { onSchedule: () => void }) {
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-5 py-2.5 lg:px-10">
           <p className="flex items-center gap-2 text-[10px] font-medium tracking-wide text-cream/80 sm:text-[11px]">
             <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-lime" />
-            Showroom abierto
+            Showroom
             <span className="hidden sm:inline">· Lun a Sáb</span>
           </p>
           <div className="flex items-center gap-4 sm:gap-6">

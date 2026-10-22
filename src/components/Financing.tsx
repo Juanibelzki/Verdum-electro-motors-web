@@ -1,43 +1,33 @@
-import { useEffect, useState } from "react";
-import { formatUSD, monthlyPayment } from "../data/cars";
-import { cn } from "../utils/cn";
-import { ArrowUpRight, Check, Phone } from "./Icons";
+import { whatsappLink } from "../data/cars";
+import { ArrowUpRight, Check, Phone, Whatsapp } from "./Icons";
 import { Eyebrow, Reveal } from "./ui";
 
-const MIN_PRICE = 20000;
-const MAX_PRICE = 160000;
-const terms = [24, 36, 48, 60];
+const bullets = [
+  "Financiación propia",
+  "Planes de 24 a 60 meses",
+  "Anticipo a convenir",
+  "Sin gastos de otorgamiento",
+];
 
-export default function Financing({
-  onSchedule,
-  presetPrice,
-}: {
-  onSchedule: () => void;
-  presetPrice?: { price: number; nonce: number } | null;
-}) {
-  const [price, setPrice] = useState(80000);
-  const [downPct, setDownPct] = useState(20);
-  const [months, setMonths] = useState(60);
+const steps = [
+  {
+    title: "Elegí tu vehículo",
+    text: "Del stock disponible o contanos cuál estás buscando.",
+  },
+  {
+    title: "Definí anticipo y plazo",
+    text: "Armamos el plan entre 24 y 60 meses, a tu medida.",
+  },
+  {
+    title: "Recibí el plan",
+    text: "Te pasamos las condiciones vigentes por WhatsApp.",
+  },
+];
 
-  useEffect(() => {
-    if (!presetPrice) return;
-    const clamped = Math.min(MAX_PRICE, Math.max(MIN_PRICE, presetPrice.price));
-    setPrice(Math.round(clamped / 1000) * 1000);
-  }, [presetPrice]);
+const financeMessage =
+  "Hola Verdun, quiero consultar opciones de financiación para un vehículo.";
 
-  const down = Math.round((price * downPct) / 100);
-  const financed = price - down;
-  const monthly = monthlyPayment(price, downPct / 100, months);
-  const priceFill = ((price - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
-  const downFill = ((downPct - 10) / 50) * 100;
-
-  const bullets = [
-    "Tasa fija del 7,9% TNA",
-    "Aprobación ágil",
-    "De 24 a 60 meses",
-    "Sin gastos de otorgamiento",
-  ];
-
+export default function Financing({ onSchedule }: { onSchedule: () => void }) {
   return (
     <section
       id="financiacion"
@@ -68,8 +58,8 @@ export default function Financing({
                 </span>
               </h2>
               <p className="mt-5 max-w-md text-[13.5px] leading-relaxed text-cream/55">
-                Simulá tu cuota en segundos. Sin comisiones ocultas, con tasa fija y la posibilidad
-                de adelantar cuotas cuando quieras.
+                Financiación propia, sin banco y a tu medida. Contanos qué vehículo te interesa
+                y te pasamos las opciones vigentes de anticipo y cuotas.
               </p>
             </Reveal>
 
@@ -98,18 +88,25 @@ export default function Financing({
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <a
+                  href={whatsappLink(financeMessage)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
+                >
+                  <Whatsapp className="h-4 w-4" />
+                  Consultar por WhatsApp
+                </a>
+                <a
                   href="tel:+5493795300020"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-cream/20 px-5 py-3.5 text-[12px] font-semibold text-cream transition hover:border-lime hover:text-lime"
                 >
                   <Phone className="h-3.5 w-3.5" />
                   Hablar con un asesor
                 </a>
-                <p className="text-[10px] leading-relaxed text-cream/35">
-                  Lun a Sáb · 9 a 20 h
-                  <br />
-                  Respuesta rápida
-                </p>
               </div>
+              <p className="mt-3 text-[10px] leading-relaxed text-cream/35">
+                Lun a Sáb · 9 a 20 h · Respuesta rápida
+              </p>
             </Reveal>
           </div>
 
@@ -118,154 +115,62 @@ export default function Financing({
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted">
-                    Simulador de cuota
+                    Financiación a medida
                   </p>
                   <h3 className="mt-1.5 text-[22px] font-extrabold tracking-[-0.03em]">
-                    Armá tu plan.
+                    Armamos tu plan.
                   </h3>
                 </div>
                 <span className="rounded-full border border-forest/15 bg-lime/60 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-forest">
-                  Tasa fija 7,9%
+                  Sin cuota genérica
                 </span>
               </div>
 
-              <div className="mt-6">
-                <div className="flex items-end justify-between gap-3">
-                  <label
-                    htmlFor="finance-price"
-                    className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-muted"
+              <p className="mt-4 text-[12px] leading-relaxed text-muted">
+                No publicamos una cuota fija: cada plan se arma según el vehículo, el anticipo y
+                el plazo que elijas.
+              </p>
+
+              <ol className="mt-6 space-y-3">
+                {steps.map((step, index) => (
+                  <li
+                    key={step.title}
+                    className="flex items-start gap-3 rounded-xl border border-line/70 bg-cream/50 p-3.5"
                   >
-                    Valor del vehículo
-                  </label>
-                  <span className="text-[17px] font-extrabold tracking-[-0.03em]">
-                    {formatUSD(price)}
-                  </span>
-                </div>
-                <input
-                  id="finance-price"
-                  type="range"
-                  className="range mt-3"
-                  min={MIN_PRICE}
-                  max={MAX_PRICE}
-                  step={1000}
-                  value={price}
-                  onChange={(event) => setPrice(Number(event.target.value))}
-                  aria-valuetext={formatUSD(price)}
-                  style={{
-                    background: `linear-gradient(to right, var(--color-forest) 0%, var(--color-forest) ${priceFill}%, var(--color-line) ${priceFill}%, var(--color-line) 100%)`,
-                  }}
-                />
-                <div className="mt-2 flex justify-between text-[9px] font-medium text-muted/70">
-                  <span>{formatUSD(MIN_PRICE)}</span>
-                  <span>{formatUSD(MAX_PRICE)}</span>
-                </div>
-              </div>
+                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink text-[10px] font-extrabold text-lime">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <p className="text-[12px] font-extrabold tracking-tight text-ink">
+                        {step.title}
+                      </p>
+                      <p className="mt-0.5 text-[10.5px] leading-relaxed text-muted">
+                        {step.text}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
 
-              <div className="mt-5">
-                <div className="flex items-end justify-between gap-3">
-                  <label
-                    htmlFor="finance-down"
-                    className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-muted"
-                  >
-                    Anticipo
-                  </label>
-                  <span className="text-[12px] font-extrabold text-ink">
-                    {downPct}%{" "}
-                    <span className="font-medium text-muted">· {formatUSD(down)}</span>
-                  </span>
-                </div>
-                <input
-                  id="finance-down"
-                  type="range"
-                  className="range mt-3"
-                  min={10}
-                  max={60}
-                  step={5}
-                  value={downPct}
-                  onChange={(event) => setDownPct(Number(event.target.value))}
-                  aria-valuetext={`${downPct}% de anticipo`}
-                  style={{
-                    background: `linear-gradient(to right, var(--color-forest) 0%, var(--color-forest) ${downFill}%, var(--color-line) ${downFill}%, var(--color-line) 100%)`,
-                  }}
-                />
-                <div className="mt-2 flex justify-between text-[9px] font-medium text-muted/70">
-                  <span>10%</span>
-                  <span>60%</span>
-                </div>
-              </div>
-
-              <div className="mt-5">
-                <p className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-muted">
-                  Plazo
-                </p>
-                <div className="mt-2.5 grid grid-cols-4 gap-2">
-                  {terms.map((term) => (
-                    <button
-                      key={term}
-                      type="button"
-                      onClick={() => setMonths(term)}
-                      aria-pressed={months === term}
-                      className={cn(
-                        "rounded-xl border py-2.5 text-[11.5px] font-bold transition",
-                        months === term
-                          ? "border-forest bg-forest text-cream"
-                          : "border-line bg-cream/50 text-moss hover:border-ink/30"
-                      )}
-                    >
-                      {term}
-                      <span className="ml-0.5 text-[8.5px] font-medium opacity-60">m</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-2xl bg-ink p-5 text-cream">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-cream/45">
-                      Tu cuota estimada
-                    </p>
-                    <p className="mt-1 text-[32px] font-extrabold leading-none tracking-[-0.045em] text-lime sm:text-[37px]">
-                      {formatUSD(monthly)}
-                      <span className="text-[12px] font-semibold tracking-normal text-cream/50">
-                        {" "}
-                        /mes
-                      </span>
-                    </p>
-                  </div>
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-cream/15 text-lime">
-                    <Check className="h-4 w-4" />
-                  </span>
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-3 border-t border-cream/15 pt-3.5">
-                  <div>
-                    <p className="text-[8.5px] uppercase tracking-[0.12em] text-cream/40">
-                      Monto financiado
-                    </p>
-                    <p className="mt-0.5 text-[12px] font-bold text-cream">{formatUSD(financed)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[8.5px] uppercase tracking-[0.12em] text-cream/40">
-                      Plan
-                    </p>
-                    <p className="mt-0.5 text-[12px] font-bold text-cream">
-                      {months} meses · fija
-                    </p>
-                  </div>
-                </div>
-              </div>
-
+              <a
+                href={whatsappLink(financeMessage)}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12.5px] font-bold text-ink transition hover:bg-lime-soft"
+              >
+                <Whatsapp className="h-4 w-4" />
+                Consultar mi plan
+                <ArrowUpRight className="h-4 w-4" />
+              </a>
               <button
                 type="button"
                 onClick={onSchedule}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12.5px] font-bold text-ink transition hover:bg-lime-soft"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 px-5 py-3 text-[12px] font-semibold text-ink transition hover:border-ink/30 hover:bg-cream/60"
               >
-                Solicitar preaprobación
-                <ArrowUpRight className="h-4 w-4" />
+                Agendar visita al showroom
               </button>
-              <p className="mt-2.5 text-center text-[8.5px] leading-relaxed text-muted">
-                Cálculo orientativo con IVA incluido. No constituye oferta crediticia. Sujeto a
-                aprobación.
+              <p className="mt-3 text-center text-[8.5px] leading-relaxed text-muted">
+                Las condiciones se confirman con un asesor. Sujeto a aprobación.
               </p>
             </div>
           </Reveal>
