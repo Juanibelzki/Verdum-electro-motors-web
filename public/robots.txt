@@ -3,5 +3,3 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /admin.html
-Disallow: /tasacion
-Disallow: /tasacion/

@@ -19,18 +19,6 @@
     {
       "source": "/admin/:path*",
       "destination": "/index.html"
-    },
-    {
-      "source": "/tasacion",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/tasacion/",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/tasacion/:path*",
-      "destination": "/index.html"
     }
   ]
 }

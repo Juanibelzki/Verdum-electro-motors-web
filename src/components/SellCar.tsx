@@ -12,11 +12,6 @@ import {
   MAX_TASACION_PHOTO_BYTES,
   TASACION_MAX_KM,
   TASACION_MIN_YEAR,
-  createTasacionId,
-  getTasacionGalleryUrl,
-  saveTasacionRequest,
-  uploadTasacionPhotos,
-  type TasacionRequest,
 } from "../data/tasacion";
 import { ArrowUpRight, Camera, Check, Sparkles, Whatsapp, X } from "./Icons";
 import { Eyebrow, Reveal } from "./ui";
@@ -57,11 +52,9 @@ const statusClasses = (tone: Status["tone"]) =>
 export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
   const [form, setForm] = useState({ brand: "", model: "", year: "", km: "" });
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
-  const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<Status | null>(null);
   const [sent, setSent] = useState(false);
   const [sentLink, setSentLink] = useState("");
-  const [sentGallery, setSentGallery] = useState("");
   const [sentMessage, setSentMessage] = useState("");
   const photoInputRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<PhotoDraft[]>([]);
@@ -138,7 +131,7 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
 
   const onPhotoDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    if (!busy && event.dataTransfer.files.length) {
+    if (event.dataTransfer.files.length) {
       addPhotos(event.dataTransfer.files);
     }
   };
@@ -157,11 +150,9 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
     photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
     setForm({ brand: "", model: "", year: "", km: "" });
     setPhotos([]);
-    setBusy(false);
     setStatus(null);
     setSent(false);
     setSentLink("");
-    setSentGallery("");
     setSentMessage("");
   };
 
@@ -177,13 +168,13 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
     }
   })();
 
-  const sharePhotos = async () => {
+  const sharePhotos = async (message: string) => {
     if (!canSharePhotos) return;
 
     try {
       await navigator.share({
         files: photos.map((photo) => photo.file),
-        text: sentMessage,
+        text: message,
         title: "Tasación Verdun Automotores",
       });
     } catch (cause) {
@@ -195,7 +186,7 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
     }
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (submittingRef.current) return;
 
@@ -228,85 +219,27 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
 
     submittingRef.current = true;
 
-    // Open the window before the async upload so the popup is not blocked.
-    let whatsappWindow: Window | null = null;
-    try {
-      whatsappWindow = window.open("about:blank", "_blank");
-      if (whatsappWindow) whatsappWindow.opener = null;
-    } catch {
-      whatsappWindow = null;
-    }
+    const message = [
+      "Hola Verdun, quiero entregar mi auto como parte de pago.",
+      `Marca: ${brand}`,
+      `Modelo: ${model}`,
+      `Año: ${year}`,
+      `Kilómetros: ${kmNumber.toLocaleString("es-AR")}`,
+      photos.length ? "Adjunto fotos del vehículo." : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
 
-    setBusy(true);
-    setStatus({
-      tone: "info",
-      text: photos.length
-        ? "Preparando y subiendo las fotos..."
-        : "Preparando tu consulta...",
-    });
+    const url = whatsappLink(message);
+    setSentMessage(message);
+    setSentLink(url);
+    setStatus(null);
+    setSent(true);
 
-    try {
-      let requestId = "";
-      let photoUrls: string[] = [];
-
-      if (photos.length) {
-        requestId = createTasacionId();
-        photoUrls = await uploadTasacionPhotos(
-          requestId,
-          photos.map((photo) => photo.file),
-          (done, total) =>
-            setStatus({
-              tone: "info",
-              text: `Subiendo fotos ${done} de ${total}...`,
-            })
-        );
-
-        const request: TasacionRequest = {
-          brand,
-          model,
-          year,
-          km: String(kmNumber),
-          photos: photoUrls,
-          createdAt: new Date().toISOString(),
-        };
-
-        await saveTasacionRequest(requestId, request);
-      }
-
-      const galleryUrl = requestId ? getTasacionGalleryUrl(requestId) : "";
-      const message = [
-        "Hola Verdun, quiero entregar mi auto como parte de pago.",
-        `Marca: ${brand}`,
-        `Modelo: ${model}`,
-        `Año: ${year}`,
-        `Kilómetros: ${kmNumber.toLocaleString("es-AR")}`,
-        galleryUrl ? `Fotos del vehículo: ${galleryUrl}` : "",
-      ]
-        .filter(Boolean)
-        .join("\n");
-
-      const url = whatsappLink(message);
-      setSentMessage(message);
-      setSentGallery(galleryUrl);
-      setSentLink(url);
-      setStatus(null);
-      setSent(true);
-
-      if (whatsappWindow && !whatsappWindow.closed) {
-        whatsappWindow.location.replace(url);
-      }
-    } catch (cause) {
-      whatsappWindow?.close();
-      setStatus({
-        tone: "error",
-        text:
-          cause instanceof Error
-            ? cause.message
-            : "No se pudieron subir las fotos. Intentá de nuevo.",
-      });
-    } finally {
-      submittingRef.current = false;
-      setBusy(false);
+    if (canSharePhotos) {
+      void sharePhotos(message);
+    } else {
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -386,48 +319,54 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                       <Check className="h-6 w-6" strokeWidth={2.3} />
                     </span>
                     <p className="mt-5 text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted">
-                      Consulta enviada
+                      Consulta preparada
                     </p>
                     <p className="mt-2 text-[26px] font-extrabold leading-tight tracking-[-0.04em] text-ink sm:text-[29px]">
                       Te pasamos la tasación por WhatsApp.
                     </p>
                     <p className="mx-auto mt-2 max-w-[300px] text-[10.5px] leading-relaxed text-muted">
-                      Abrimos el chat con los datos de tu {form.brand}{" "}
-                      {form.model}
-                      {sentGallery ? " y el enlace a las fotos" : ""}. Si no se
-                      abrió, tocá el botón de abajo.
+                      {photos.length
+                        ? canSharePhotos
+                          ? "Compartí las fotos por WhatsApp. Elegí WhatsApp y el contacto de Verdun; si no se abrió, usá los botones de abajo."
+                          : "Abrimos el chat con los datos de tu auto. Adjuntá las fotos en el chat para que Verdun pueda verlas."
+                        : `Abrimos el chat con los datos de tu ${form.brand} ${form.model}. Si no se abrió, usá el botón de abajo.`}
                     </p>
+                    {status && (
+                      <p
+                        role="status"
+                        className={`mx-auto mt-3 max-w-[300px] rounded-xl border px-3 py-2 text-[10px] font-medium leading-relaxed ${statusClasses(
+                          status.tone
+                        )}`}
+                      >
+                        {status.text}
+                      </p>
+                    )}
                     <div className="mt-5 flex flex-col gap-2">
+                      {canSharePhotos && (
+                        <button
+                          type="button"
+                          onClick={() => void sharePhotos(sentMessage)}
+                          className="flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
+                        >
+                          <Whatsapp className="h-4 w-4" />
+                          Compartir fotos por WhatsApp
+                        </button>
+                      )}
                       <a
                         href={sentLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
+                        className={
+                          canSharePhotos
+                            ? "flex items-center justify-center gap-2 rounded-full border border-ink/15 px-5 py-3.5 text-[12px] font-semibold text-ink transition hover:border-ink/30"
+                            : "flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
+                        }
                       >
                         <Whatsapp className="h-4 w-4" />
-                        Abrir WhatsApp
+                        {canSharePhotos
+                          ? "Abrir WhatsApp con los datos"
+                          : "Abrir WhatsApp"}
                       </a>
-                      {sentGallery && (
-                        <a
-                          href={sentGallery}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center justify-center gap-2 rounded-full border border-ink/15 px-5 py-3.5 text-[12px] font-semibold text-ink transition hover:border-ink/30"
-                        >
-                          Ver fotos enviadas
-                          <ArrowUpRight className="h-4 w-4" />
-                        </a>
-                      )}
-                      {canSharePhotos && (
-                        <button
-                          type="button"
-                          onClick={() => void sharePhotos()}
-                          className="flex items-center justify-center gap-2 rounded-full border border-ink/15 px-5 py-3.5 text-[12px] font-semibold text-ink transition hover:border-ink/30"
-                        >
-                          Compartir fotos
-                          <ArrowUpRight className="h-4 w-4" />
-                        </button>
-                      )}
                       <button
                         type="button"
                         onClick={onSchedule}
@@ -446,7 +385,7 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                     </div>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} aria-busy={busy}>
+                  <form onSubmit={handleSubmit}>
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted">
@@ -481,7 +420,6 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                           onChange={(event) =>
                             update("brand", event.target.value)
                           }
-                          disabled={busy}
                           required
                         />
                       </div>
@@ -500,7 +438,6 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                           onChange={(event) =>
                             update("model", event.target.value)
                           }
-                          disabled={busy}
                           required
                         />
                       </div>
@@ -518,7 +455,6 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                           onChange={(event) =>
                             update("year", event.target.value)
                           }
-                          disabled={busy}
                           required
                         >
                           <option value="" disabled>
@@ -556,7 +492,6 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                               `Para tomar tu auto como parte de pago, debe tener menos de ${TASACION_MAX_KM.toLocaleString("es-AR")} km.`
                             )
                           }
-                          disabled={busy}
                           required
                         />
                       </div>
@@ -574,8 +509,8 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                           </p>
                           <p className="mt-1 text-[10.5px] leading-relaxed text-muted">
                             Sumá hasta {MAX_TASACION_PHOTOS} fotos: frente,
-                            laterales, interior y odómetro. Se optimizan
-                            automáticamente.
+                            laterales, interior y odómetro. Quedan en tu
+                            dispositivo; no se suben a ningún servidor.
                           </p>
                         </div>
                         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-lime/60 text-forest">
@@ -591,17 +526,13 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                         multiple
                         className="sr-only"
                         onChange={onPhotoChange}
-                        disabled={
-                          busy || photos.length >= MAX_TASACION_PHOTOS
-                        }
+                        disabled={photos.length >= MAX_TASACION_PHOTOS}
                         aria-label="Adjuntar fotos del vehículo"
                       />
                       <button
                         type="button"
                         onClick={() => photoInputRef.current?.click()}
-                        disabled={
-                          busy || photos.length >= MAX_TASACION_PHOTOS
-                        }
+                        disabled={photos.length >= MAX_TASACION_PHOTOS}
                         className="mt-3 inline-flex items-center gap-2 rounded-full border border-ink/15 bg-paper px-4 py-2.5 text-[11px] font-semibold text-ink transition hover:border-ink/30 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Camera className="h-3.5 w-3.5" />
@@ -623,8 +554,7 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                               <button
                                 type="button"
                                 onClick={() => removePhoto(photo.id)}
-                                disabled={busy}
-                                aria-label={`Quitar foto ${index + 1}`}
+                                      aria-label={`Quitar foto ${index + 1}`}
                                 className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-ink/75 text-cream transition hover:bg-red-600 disabled:opacity-50"
                               >
                                 <X className="h-3 w-3" />
@@ -659,20 +589,15 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
 
                     <button
                       type="submit"
-                      disabled={busy}
-                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft disabled:cursor-not-allowed disabled:opacity-60"
+                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
                     >
                       <Whatsapp className="h-4 w-4" />
-                      {busy
-                        ? photos.length
-                          ? "Subiendo fotos..."
-                          : "Preparando..."
-                        : "Enviar por WhatsApp"}
-                      {!busy && <ArrowUpRight className="h-4 w-4" />}
+                      Enviar por WhatsApp
+                      <ArrowUpRight className="h-4 w-4" />
                     </button>
                     <p className="mt-2.5 text-center text-[8.5px] leading-relaxed text-muted">
                       {photos.length
-                        ? "Al enviar se abre WhatsApp con los datos de tu auto y el enlace a las fotos. La tasación se confirma con una revisión en el showroom."
+                        ? "En celular se comparten las fotos por WhatsApp. En computadora se abre el chat con los datos y las adjuntás manualmente. La tasación se confirma con una revisión en el showroom."
                         : "Al enviar se abre WhatsApp con los datos de tu auto. La tasación se confirma con una revisión en el showroom."}
                     </p>
                   </form>
