@@ -206,8 +206,8 @@ export default function SettingsPanel({
             <div className="mt-4 flex gap-2.5 rounded-xl border border-amber-300/80 bg-amber-50 px-4 py-3 text-[11.5px] leading-relaxed text-amber-900">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
-                La migración es necesaria para que el editor de la Fase 2 pueda
-                guardar transmisión, combustible, carrocería, tracción y
+                La migración es necesaria para que el editor pueda guardar
+                versión, transmisión, combustible, carrocería, tracción y
                 potencia.
               </p>
             </div>
@@ -232,17 +232,19 @@ export default function SettingsPanel({
         </SettingsCard>
 
         <SettingsCard
-          title="Estado de la Fase 1"
-          description="Lo que ya está funcionando y lo que sigue."
-          badge={<StatusPill tone="ok">En curso</StatusPill>}
+          title="Estado de la Fase 2"
+          description="Editor completo de stock y publicación."
+          badge={<StatusPill tone="ok">Listo</StatusPill>}
         >
           <ul className="mt-5 space-y-2.5">
             <ChecklistItem done>Shell con sidebar y navegación.</ChecklistItem>
             <ChecklistItem done>Resumen con métricas reales.</ChecklistItem>
             <ChecklistItem done>Listado de stock con búsqueda y filtros.</ChecklistItem>
-            <ChecklistItem done>Vista de detalle read-only.</ChecklistItem>
-            <ChecklistItem done>Alta rápida de borradores.</ChecklistItem>
-            <ChecklistItem done={false}>Edición completa y fotos (Fase 2).</ChecklistItem>
+            <ChecklistItem done>Vista de detalle y acceso a edición.</ChecklistItem>
+            <ChecklistItem done>Alta y edición completa de vehículos.</ChecklistItem>
+            <ChecklistItem done>Ficha técnica, precio y descripción.</ChecklistItem>
+            <ChecklistItem done>Fotos con conversión a WebP y orden.</ChecklistItem>
+            <ChecklistItem done>Publicar, despublicar y destacar.</ChecklistItem>
             <ChecklistItem done={false}>Auth, RLS y cutover.</ChecklistItem>
           </ul>
           <a

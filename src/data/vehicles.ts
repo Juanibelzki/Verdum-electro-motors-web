@@ -374,6 +374,17 @@ function parsePower(value: RawVehicle["potencia"]): number | null {
   return Number.isFinite(number) && number > 0 ? number : null;
 }
 
+/** Suggested specs for the admin editor, based on the vehicle text. */
+export function inferVehicleSpecs(text: string) {
+  return {
+    transmision: inferTransmission(text),
+    combustible: inferFuel(text),
+    carroceria: inferBody(text),
+    traccion: inferDrive(text),
+    potencia: inferPower(text),
+  };
+}
+
 function cleanSpec(value: string | null | undefined): string {
   return (value ?? "").trim();
 }

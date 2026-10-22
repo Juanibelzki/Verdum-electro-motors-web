@@ -380,7 +380,7 @@ export default function OverviewPanel({
               <QuickAction
                 icon={<CarIcon className="h-4 w-4" />}
                 title="Revisar stock"
-                description="Filtros, faltantes y borradores"
+                description="Editor, filtros y datos faltantes"
                 onClick={() => onNavigate("stock")}
               />
               <QuickAction

@@ -327,6 +327,13 @@ export const ChevronRight = (props: IconProps) => (
   </Svg>
 );
 
+export const Pencil = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+  </Svg>
+);
+
 export const Tag = (props: IconProps) => (
   <Svg {...props}>
     <path d="M20.6 13.6 13.7 20.5a2 2 0 0 1-2.8 0L3 12.6V3h9.6l8 8a2 2 0 0 1 0 2.6Z" />

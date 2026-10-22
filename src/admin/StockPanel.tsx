@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-  type FormEvent,
-  type ReactNode,
-} from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Modal } from "../components/ui";
 import { cn } from "../utils/cn";
 import {
@@ -13,15 +7,16 @@ import {
   Check,
   Eye,
   ImageIcon,
+  Pencil,
   Plus,
   RefreshCw,
   Search,
   Star,
   Tag,
 } from "../components/Icons";
+import StockEditor from "./StockEditor";
 import {
   categoryFor,
-  createVehicleDraft,
   formatDateTime,
   vehicleCover,
   vehicleKmLabel,
@@ -130,12 +125,20 @@ export default function StockPanel({
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sort, setSort] = useState<SortOption>("recent");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
+  const [editorMode, setEditorMode] = useState<"new" | string | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
 
   const selected = useMemo(
     () => vehicles.find((vehicle) => vehicle.id === selectedId) ?? null,
     [vehicles, selectedId]
+  );
+
+  const editingVehicle = useMemo(
+    () =>
+      editorMode && editorMode !== "new"
+        ? vehicles.find((vehicle) => vehicle.id === editorMode) ?? null
+        : null,
+    [editorMode, vehicles]
   );
 
   const counts = useMemo(() => {
@@ -232,13 +235,50 @@ export default function StockPanel({
     onReload();
   };
 
-  const handleCreated = () => {
-    setNotice({
-      tone: "success",
-      text: "Borrador creado. Ya aparece en el stock como no publicado.",
-    });
-    onReload();
+  const openEditor = (mode: "new" | string) => {
+    setNotice(null);
+    setSelectedId(null);
+    setEditorMode(mode);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  if (editorMode) {
+    if (editorMode !== "new" && !editingVehicle) {
+      return (
+        <div className="rounded-2xl border border-line bg-paper px-6 py-12 text-center">
+          <p className="text-[16px] font-bold text-ink">
+            No encontramos ese vehículo.
+          </p>
+          <p className="mx-auto mt-2 max-w-[460px] text-[12.5px] leading-relaxed text-muted">
+            Puede haber cambiado mientras editabas. Volvé al stock para
+            recargar la lista.
+          </p>
+          <button
+            type="button"
+            onClick={() => setEditorMode(null)}
+            className="mt-4 rounded-full bg-ink px-5 py-2.5 text-[12px] font-bold text-cream transition hover:bg-forest"
+          >
+            Volver al stock
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <StockEditor
+        key={editorMode}
+        vehicle={editingVehicle}
+        categories={categories}
+        specsReady={specsReady}
+        onCancel={() => setEditorMode(null)}
+        onSaved={(message) => {
+          setEditorMode(null);
+          setNotice({ tone: "success", text: message });
+          onReload();
+        }}
+      />
+    );
+  }
 
   return (
     <div>
@@ -250,9 +290,9 @@ export default function StockPanel({
           <h2 className="mt-1.5 text-[30px] font-extrabold tracking-[-0.05em] text-ink sm:text-[38px]">
             Stock
           </h2>
-          <p className="mt-2 max-w-[620px] text-[13px] leading-relaxed text-muted">
-            Revisá el inventario completo, detectá datos faltantes y creá
-            borradores. La edición completa y las fotos llegan en la Fase 2.
+          <p className="mt-2 max-w-[680px] text-[13px] leading-relaxed text-muted">
+            Revisá el inventario, editá cada ficha, cargá fotos y
+            especificaciones, y publicá o despublicá vehículos.
           </p>
         </div>
 
@@ -268,11 +308,11 @@ export default function StockPanel({
           </button>
           <button
             type="button"
-            onClick={() => setCreateOpen(true)}
+            onClick={() => openEditor("new")}
             className="inline-flex items-center gap-2 rounded-full bg-lime px-5 py-2.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
           >
             <Plus className="h-4 w-4" />
-            Nuevo borrador
+            Nuevo vehículo
           </button>
         </div>
       </div>
@@ -528,11 +568,11 @@ export default function StockPanel({
                         <td className="px-4 py-3 text-right">
                           <button
                             type="button"
-                            onClick={() => setSelectedId(vehicle.id)}
+                            onClick={() => openEditor(vehicle.id)}
                             className="inline-flex items-center gap-1.5 rounded-full border border-line bg-cream px-3 py-1.5 text-[10.5px] font-bold text-ink transition hover:border-ink/25"
                           >
-                            <Eye className="h-3.5 w-3.5" />
-                            Ver
+                            <Pencil className="h-3.5 w-3.5" />
+                            Editar
                           </button>
                         </td>
                       </tr>
@@ -591,284 +631,16 @@ export default function StockPanel({
         </>
       )}
 
-      <CreateDraftModal
-        open={createOpen}
-        categories={categories}
-        onClose={() => setCreateOpen(false)}
-        onCreated={() => {
-          setCreateOpen(false);
-          handleCreated();
-        }}
-      />
-
       <StockDetailModal
         vehicle={selected}
         categories={categories}
         specsReady={specsReady}
         onClose={() => setSelectedId(null)}
+        onEdit={() => {
+          if (selected) openEditor(selected.id);
+        }}
       />
     </div>
-  );
-}
-
-function CreateDraftModal({
-  open,
-  categories,
-  onClose,
-  onCreated,
-}: {
-  open: boolean;
-  categories: AdminCategory[];
-  onClose: () => void;
-  onCreated: () => void;
-}) {
-  const defaultCategory = useMemo(
-    () => categories.find((category) => category.slug === "usados") ?? categories[0] ?? null,
-    [categories]
-  );
-  const [categoryId, setCategoryId] = useState("");
-  const [brand, setBrand] = useState("");
-  const [model, setModel] = useState("");
-  const [version, setVersion] = useState("");
-  const [year, setYear] = useState("");
-  const [km, setKm] = useState("");
-  const [color, setColor] = useState("");
-  const [price, setPrice] = useState("");
-  const [description, setDescription] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    setCategoryId(defaultCategory?.id ?? "");
-    setBrand("");
-    setModel("");
-    setVersion("");
-    setYear("");
-    setKm("");
-    setColor("");
-    setPrice("");
-    setDescription("");
-    setFormError(null);
-    setCreating(false);
-  }, [open, defaultCategory?.id]);
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const category = categories.find((item) => item.id === categoryId);
-
-    if (!category) {
-      setFormError("Elegí una categoría.");
-      return;
-    }
-    if (!brand.trim() || !model.trim()) {
-      setFormError("Marca y modelo son obligatorios.");
-      return;
-    }
-
-    const yearNumber = year.trim() ? Number(year) : null;
-    if (
-      yearNumber != null &&
-      (!Number.isInteger(yearNumber) ||
-        yearNumber < 1950 ||
-        yearNumber > new Date().getFullYear() + 1)
-    ) {
-      setFormError("El año no parece válido.");
-      return;
-    }
-
-    setCreating(true);
-    setFormError(null);
-
-    try {
-      await createVehicleDraft({
-        category,
-        brand,
-        model,
-        version,
-        year,
-        km,
-        color,
-        price,
-        description,
-      });
-      onCreated();
-    } catch (cause) {
-      setFormError(
-        cause instanceof Error ? cause.message : "No se pudo crear el borrador."
-      );
-      setCreating(false);
-    }
-  };
-
-  return (
-    <Modal
-      open={open}
-      onClose={creating ? () => undefined : onClose}
-      label="Nuevo borrador de vehículo"
-      className="sm:max-w-2xl"
-    >
-      <form onSubmit={handleSubmit} className="overflow-y-auto">
-        <div className="border-b border-line px-5 pb-4 pt-6 sm:px-7">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-moss">
-            Stock · Alta rápida
-          </p>
-          <h2 className="mt-1 text-[26px] font-extrabold tracking-[-0.045em] text-ink">
-            Nuevo borrador
-          </h2>
-          <p className="mt-2 max-w-[520px] text-[12px] leading-relaxed text-muted">
-            Cargá los datos base. Queda oculto en el sitio hasta que lo completes
-            y lo publiques en la próxima fase.
-          </p>
-        </div>
-
-        <div className="grid gap-4 px-5 py-5 sm:grid-cols-2 sm:px-7">
-          <label className="block">
-            <span className={labelClass}>Categoría *</span>
-            <select
-              value={categoryId}
-              onChange={(event) => setCategoryId(event.target.value)}
-              className={cn(inputClass, "mt-1.5")}
-              required
-            >
-              <option value="" disabled>
-                Elegir categoría
-              </option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.nombre}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="block">
-            <span className={labelClass}>Año</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min={1950}
-              max={new Date().getFullYear() + 1}
-              value={year}
-              onChange={(event) => setYear(event.target.value)}
-              placeholder="Ej. 2021"
-              className={cn(inputClass, "mt-1.5")}
-            />
-          </label>
-
-          <label className="block">
-            <span className={labelClass}>Marca *</span>
-            <input
-              type="text"
-              value={brand}
-              onChange={(event) => setBrand(event.target.value)}
-              placeholder="Ej. Toyota"
-              className={cn(inputClass, "mt-1.5")}
-              required
-            />
-          </label>
-
-          <label className="block">
-            <span className={labelClass}>Modelo *</span>
-            <input
-              type="text"
-              value={model}
-              onChange={(event) => setModel(event.target.value)}
-              placeholder="Ej. Yaris"
-              className={cn(inputClass, "mt-1.5")}
-              required
-            />
-          </label>
-
-          <label className="block sm:col-span-2">
-            <span className={labelClass}>Versión</span>
-            <input
-              type="text"
-              value={version}
-              onChange={(event) => setVersion(event.target.value)}
-              placeholder="Ej. XLS Pack 1.5 CVT"
-              className={cn(inputClass, "mt-1.5")}
-            />
-          </label>
-
-          <label className="block">
-            <span className={labelClass}>Kilometraje</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={km}
-              onChange={(event) => setKm(event.target.value)}
-              placeholder="Ej. 19000"
-              className={cn(inputClass, "mt-1.5")}
-            />
-          </label>
-
-          <label className="block">
-            <span className={labelClass}>Color</span>
-            <input
-              type="text"
-              value={color}
-              onChange={(event) => setColor(event.target.value)}
-              placeholder="Ej. Blanco"
-              className={cn(inputClass, "mt-1.5")}
-            />
-          </label>
-
-          <label className="block sm:col-span-2">
-            <span className={labelClass}>Precio en USD</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={price}
-              onChange={(event) => setPrice(event.target.value)}
-              placeholder="Opcional. Si queda vacío se muestra Consultar precio."
-              className={cn(inputClass, "mt-1.5")}
-            />
-          </label>
-
-          <label className="block sm:col-span-2">
-            <span className={labelClass}>Descripción</span>
-            <textarea
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              rows={4}
-              placeholder="Resumen comercial. En la próxima fase vas a poder separar el equipamiento."
-              className={cn(inputClass, "mt-1.5 resize-y")}
-            />
-          </label>
-
-          {formError && (
-            <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] text-red-700 sm:col-span-2">
-              {formError}
-            </p>
-          )}
-
-          <div className="rounded-xl border border-line bg-cream/60 px-4 py-3 text-[11px] leading-relaxed text-muted sm:col-span-2">
-            El borrador no se publica. Las fotos, la ficha técnica y la
-            publicación se completan en la Fase 2.
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-line px-5 py-4 sm:px-7">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={creating}
-            className="rounded-full border border-line bg-paper px-4 py-2.5 text-[12px] font-semibold text-ink transition hover:border-ink/25 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={creating}
-            className="inline-flex items-center gap-2 rounded-full bg-lime px-5 py-2.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Plus className="h-4 w-4" />
-            {creating ? "Creando..." : "Crear borrador"}
-          </button>
-        </div>
-      </form>
-    </Modal>
   );
 }
 
@@ -877,11 +649,13 @@ function StockDetailModal({
   categories,
   specsReady,
   onClose,
+  onEdit,
 }: {
   vehicle: AdminVehicle | null;
   categories: AdminCategory[];
   specsReady: boolean;
   onClose: () => void;
+  onEdit: () => void;
 }) {
   if (!vehicle) return null;
 
@@ -1056,15 +830,25 @@ function StockDetailModal({
 
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-line px-5 py-4 sm:px-7">
           <p className="text-[11px] text-muted">
-            La edición completa y las fotos se habilitan en la Fase 2.
+            Podés editar datos, especificaciones, fotos y publicación.
           </p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full bg-ink px-5 py-2.5 text-[12px] font-bold text-cream transition hover:bg-forest"
-          >
-            Cerrar
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-line bg-paper px-4 py-2.5 text-[12px] font-semibold text-ink transition hover:border-ink/25"
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              onClick={onEdit}
+              className="inline-flex items-center gap-2 rounded-full bg-lime px-5 py-2.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
+            >
+              <Pencil className="h-4 w-4" />
+              Editar ficha
+            </button>
+          </div>
         </div>
       </div>
     </Modal>

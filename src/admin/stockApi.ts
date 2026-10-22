@@ -1,5 +1,9 @@
 import { FALLBACK_CAR_IMAGE, formatKm, formatPrice } from "../data/cars";
+import { canvasToBlob, uploadToStorage } from "../data/storage";
 import { SUPABASE_URL, supabaseHeaders } from "../data/supabase";
+
+export const MAX_VEHICLE_PHOTOS = 8;
+export const MAX_VEHICLE_PHOTO_BYTES = 15 * 1024 * 1024;
 
 export type AdminCategory = {
   id: string;
@@ -9,8 +13,10 @@ export type AdminCategory = {
 };
 
 export type AdminPhoto = {
+  id: string;
   vehicle_id: string;
   url: string;
+  url_thumb: string | null;
   posicion: number | null;
 };
 
@@ -57,16 +63,41 @@ export type AdminStockResult = {
   specsReady: boolean;
 };
 
-export type CreateDraftInput = {
+export type VehicleFormInput = {
   category: AdminCategory;
-  brand: string;
-  model: string;
+  nombre: string;
+  marca: string;
+  modelo: string;
   version: string;
-  year: string;
+  año: string;
   km: string;
   color: string;
-  price: string;
-  description: string;
+  precio: string;
+  descripcion: string;
+  whatsappMsg: string;
+  transmision: string;
+  combustible: string;
+  carroceria: string;
+  traccion: string;
+  potencia: string;
+  destacado: boolean;
+  activo: boolean;
+  specsReady: boolean;
+};
+
+export type VehiclePhotoUpload = {
+  file: File;
+  position: number;
+};
+
+export type VehiclePhotoInsert = {
+  url: string;
+  position: number;
+};
+
+export type VehiclePhotoPosition = {
+  id: string;
+  position: number;
 };
 
 const jsonHeaders = supabaseHeaders({ Accept: "application/json" });
@@ -87,7 +118,7 @@ const slugify = (value: string) =>
 
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), 15000);
+  const timer = window.setTimeout(() => controller.abort(), 30000);
 
   try {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -120,7 +151,7 @@ export async function fetchAdminStock(): Promise<AdminStockResult> {
       "vehicles?select=*&order=created_at.desc"
     ),
     request<AdminPhoto[]>(
-      "photos?select=vehicle_id,url,posicion&order=posicion.asc"
+      "photos?select=id,vehicle_id,url,url_thumb,posicion&order=posicion.asc"
     ),
     request<AdminCategory[]>(
       "categories?select=id,slug,nombre,posicion&order=posicion.asc"
@@ -158,75 +189,237 @@ export async function fetchAdminStock(): Promise<AdminStockResult> {
   return { vehicles, categories, specsReady };
 }
 
-export async function createVehicleDraft(
-  input: CreateDraftInput
+const vehicleType = (category: AdminCategory) =>
+  category.slug === "motos"
+    ? "moto"
+    : category.slug === "patacletas"
+      ? "patineta"
+      : "auto";
+
+export async function saveVehicle(
+  input: VehicleFormInput,
+  id: string,
+  isNew: boolean
 ): Promise<AdminVehicle> {
-  const brand = input.brand.trim();
-  const model = input.model.trim();
+  const brand = input.marca.trim();
+  const model = input.modelo.trim();
   const version = input.version.trim();
 
+  if (!input.category) {
+    throw new Error("Elegí una categoría.");
+  }
   if (!brand || !model) {
     throw new Error("Marca y modelo son obligatorios.");
   }
 
-  const name = [brand, model, version].filter(Boolean).join(" ").replace(/\s+/g, " ");
-  const year = parseNumber(input.year);
-  const km = parseNumber(input.km);
-  const price = parseNumber(input.price);
-  const category = input.category;
+  const year = parseNumber(input.año);
+  if (
+    input.año.trim() &&
+    (year == null || year < 1950 || year > new Date().getFullYear() + 1)
+  ) {
+    throw new Error("El año no parece válido.");
+  }
 
-  const payload = {
+  const km = parseNumber(input.km);
+  const price = parseNumber(input.precio);
+  if (input.precio.trim() && (price == null || price <= 0)) {
+    throw new Error("El precio tiene que ser un número mayor a cero.");
+  }
+
+  const power = parseNumber(input.potencia);
+  if (
+    input.specsReady &&
+    input.potencia.trim() &&
+    (power == null || power <= 0)
+  ) {
+    throw new Error("La potencia tiene que ser un número mayor a cero.");
+  }
+
+  const modelWithVersion =
+    version && !model.toLowerCase().includes(version.toLowerCase())
+      ? `${model} ${version}`
+      : model;
+  const name =
+    input.nombre.trim() ||
+    [brand, modelWithVersion].filter(Boolean).join(" ").replace(/\s+/g, " ");
+
+  const payload: Record<string, unknown> = {
     nombre: name,
     marca: brand,
-    modelo: [model, version].filter(Boolean).join(" "),
+    modelo: modelWithVersion,
     año: year,
     km: km == null ? null : formatKm(km),
     color: input.color.trim() || null,
     precio: price == null ? "Consultar" : formatPrice(price),
     precio_numero: price,
-    descripcion: input.description.trim() || null,
-    whatsapp_msg: null,
-    destacado: false,
-    activo: false,
-    status: "borrador",
-    condicion: category.slug === "0km" ? "0km" : "usado",
-    tipo:
-      category.slug === "motos"
-        ? "moto"
-        : category.slug === "patacletas"
-          ? "patineta"
-          : "auto",
-    categoria: category.slug,
-    seccion: category.slug,
-    category_id: category.id,
-    slug: `${slugify(name)}-${Date.now().toString(36).slice(-5)}`,
+    descripcion: input.descripcion.trim() || null,
+    whatsapp_msg: input.whatsappMsg.trim() || null,
+    destacado: input.destacado,
+    activo: input.activo,
+    status: input.activo ? "publicado" : "borrador",
+    condicion: input.category.slug === "0km" ? "0km" : "usado",
+    tipo: vehicleType(input.category),
+    categoria: input.category.slug,
+    seccion: input.category.slug,
+    category_id: input.category.id,
     updated_at: new Date().toISOString(),
   };
 
-  const rows = await request<AdminVehicle[]>("vehicles", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Prefer: "return=representation",
-    },
-    body: JSON.stringify(payload),
-  });
+  if (input.specsReady) {
+    payload.version = version || null;
+    payload.transmision = input.transmision.trim() || null;
+    payload.combustible = input.combustible.trim() || null;
+    payload.carroceria = input.carroceria.trim() || null;
+    payload.traccion = input.traccion.trim() || null;
+    payload.potencia = power;
+  }
 
-  const created = rows?.[0];
-  if (!created) {
-    throw new Error("No se pudo crear el borrador.");
+  if (isNew) {
+    payload.id = id;
+    payload.slug = `${slugify(name)}-${Date.now().toString(36).slice(-5)}`;
+  }
+
+  const rows = await request<AdminVehicle[]>(
+    isNew ? "vehicles" : `vehicles?id=eq.${encodeURIComponent(id)}`,
+    {
+      method: isNew ? "POST" : "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  const saved = rows?.[0];
+  if (!saved) {
+    throw new Error("No se pudo guardar el vehículo.");
+  }
+
+  if (input.destacado) {
+    await request<unknown>(
+      `vehicles?destacado=eq.true&id=neq.${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({ destacado: false }),
+      }
+    );
   }
 
   return {
-    ...created,
-    version: version || null,
-    transmision: null,
-    combustible: null,
-    carroceria: null,
-    traccion: null,
-    potencia: null,
+    ...saved,
+    version: saved.version ?? (input.specsReady ? version || null : null),
+    transmision: saved.transmision ?? null,
+    combustible: saved.combustible ?? null,
+    carroceria: saved.carroceria ?? null,
+    traccion: saved.traccion ?? null,
+    potencia:
+      saved.potencia == null ? null : parseNumber(String(saved.potencia)),
     photos: [],
   };
+}
+
+const loadImage = (src: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () =>
+      reject(new Error("No se pudo leer la imagen. Probá con JPG, PNG o WebP."));
+    image.src = src;
+  });
+
+const fileToWebp = async (file: File): Promise<Blob> => {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("El archivo tiene que ser una imagen.");
+  }
+  if (file.size > MAX_VEHICLE_PHOTO_BYTES) {
+    throw new Error("La foto supera los 15 MB. Comprimila antes de subirla.");
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = await loadImage(objectUrl);
+    const width = image.naturalWidth;
+    const height = image.naturalHeight;
+    if (!width || !height) throw new Error("La imagen no tiene dimensiones válidas.");
+
+    const maxSide = 1600;
+    const scale = Math.min(1, maxSide / Math.max(width, height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("No se pudo procesar la imagen.");
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    const blob = await canvasToBlob(canvas, "image/webp", 0.82);
+    if (!blob) throw new Error("No se pudo convertir la imagen a WebP.");
+    return blob;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+};
+
+export async function uploadVehiclePhoto(
+  file: File,
+  vehicleId: string,
+  index: number
+): Promise<string> {
+  const blob = await fileToWebp(file);
+  const suffix = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const path = `vehicles/${vehicleId}/${index}_${suffix}.webp`;
+  return uploadToStorage("stock-photos", path, blob, "image/webp");
+}
+
+export async function insertVehiclePhotos(
+  vehicleId: string,
+  photos: VehiclePhotoInsert[]
+): Promise<void> {
+  if (!photos.length) return;
+
+  await request<unknown>("photos", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify(
+      photos.map((photo) => ({
+        vehicle_id: vehicleId,
+        url: photo.url,
+        url_thumb: photo.url,
+        posicion: photo.position,
+      }))
+    ),
+  });
+}
+
+export async function updateVehiclePhotoPositions(
+  photos: VehiclePhotoPosition[]
+): Promise<void> {
+  await Promise.all(
+    photos.map((photo) =>
+      request<unknown>(`photos?id=eq.${encodeURIComponent(photo.id)}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({ posicion: photo.position }),
+      })
+    )
+  );
+}
+
+export async function deleteVehiclePhoto(id: string): Promise<void> {
+  await request<unknown>(`photos?id=eq.${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
 }
 
 export const categoryFor = (

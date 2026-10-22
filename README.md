@@ -64,19 +64,20 @@ Si no están definidas, la app usa los valores públicos del proyecto actual.
 El panel nuevo vive en `/admin` y tiene cuatro secciones:
 
 - **Resumen:** métricas del stock y estado del contenido.
-- **Stock:** listado completo, búsqueda, filtros, vista de detalle y alta rápida
-  de borradores. En esta fase todavía no edita ni sube fotos.
+- **Stock:** listado completo, búsqueda, filtros, vista de detalle y editor de
+  cada vehículo. Permite cargar datos, ficha técnica, precio, descripción,
+  equipamiento y fotos; publicar, despublicar y marcar un destacado.
 - **Home:** videos del hero e historias/reels del showroom. Los archivos se
   suben al bucket público `stock-photos` y la home los lee en vivo.
 - **Ajustes:** estado de la migración y pendientes de seguridad.
 
 ### Migración de ficha técnica
 
-Antes de habilitar la edición completa del stock, ejecutar
-`supabase-stock-specs.sql` en el SQL Editor de Supabase. Agrega las columnas
-`version`, `transmision`, `combustible`, `carroceria`, `traccion` y `potencia`.
-Mientras no esté aplicada, el sitio público sigue infiriendo esas
-especificaciones desde el título y la descripción.
+Para habilitar la edición de versión, transmisión, combustible, carrocería,
+tracción y potencia, ejecutar `supabase-stock-specs.sql` en el SQL Editor de
+Supabase. Mientras no esté aplicada, el editor guarda el resto de la ficha y el
+sitio público sigue infiriendo esas especificaciones desde el título y la
+descripción.
 
 > **Seguridad:** el panel todavía no tiene login propio y usa la anon key.
 > Queda cubierto por la protección de deployment de Vercel en preview. Antes
@@ -90,6 +91,7 @@ especificaciones desde el título y la descripción.
 - Fase 3: stock real de Supabase, precios “Consultar”, WhatsApp y ficha técnica.
 - Fase 4: videos del hero administrables desde `/admin` (staging).
 - Fase 5: shell del admin, resumen, listado de stock y alta rápida de borradores.
-- Próxima: edición completa del stock, fotos, Auth y RLS antes de producción.
+- Fase 6: editor completo de stock, ficha técnica, fotos, publicación y destacado.
+- Próxima: Auth, RLS y cutover a producción.
 
 La web actual sigue viva en `main`.
