@@ -15,7 +15,7 @@ import { Eyebrow, Logo } from "./ui";
 const exploreLinks = [
   { label: "Vehículos", href: "#vehiculos" },
   { label: "Financiación", href: "#financiacion" },
-  { label: "Vender mi auto", href: "#vender" },
+  { label: "Parte de pago", href: "#vender" },
   { label: "Agendar test drive", href: "#showroom" },
 ];
 

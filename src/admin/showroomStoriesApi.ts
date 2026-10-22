@@ -1,8 +1,7 @@
 import { images } from "../data/cars";
 import type { ShowroomStory } from "../data/showroomStories";
+import { canvasToBlob, uploadToStorage } from "../data/storage";
 import {
-  canvasToBlob,
-  uploadToStorage,
   videoContentType,
   videoExtension,
   waitForMediaEvent,

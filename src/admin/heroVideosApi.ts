@@ -1,8 +1,7 @@
 import { heroPoster } from "../data/cars";
 import type { HeroScene } from "../data/heroScenes";
+import { canvasToBlob, uploadToStorage } from "../data/storage";
 import {
-  canvasToBlob,
-  uploadToStorage,
   videoContentType,
   videoExtension,
   waitForMediaEvent,

@@ -7,7 +7,7 @@ const links = [
   { label: "Vehículos", href: "#vehiculos" },
   { label: "Financiación", href: "#financiacion" },
   { label: "Nosotros", href: "#nosotros" },
-  { label: "Vender mi auto", href: "#vender" },
+  { label: "Parte de pago", href: "#vender" },
   { label: "Showroom", href: "#showroom" },
 ];
 

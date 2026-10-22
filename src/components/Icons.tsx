@@ -75,6 +75,13 @@ export const Search = (props: IconProps) => (
   </Svg>
 );
 
+export const Camera = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M4 8h3l2-3h6l2 3h3v11H4V8Z" />
+    <circle cx="12" cy="13" r="3.4" />
+  </Svg>
+);
+
 export const Sliders = (props: IconProps) => (
   <Svg {...props}>
     <path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h8M16 18h4" />
