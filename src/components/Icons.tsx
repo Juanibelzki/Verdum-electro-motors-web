@@ -279,3 +279,64 @@ export const Users = (props: IconProps) => (
     <path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 5a3.5 3.5 0 0 1 0 7M17.5 14.5a6.5 6.5 0 0 1 4 5.5" />
   </Svg>
 );
+
+export const Dashboard = (props: IconProps) => (
+  <Svg {...props}>
+    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+  </Svg>
+);
+
+export const Eye = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+    <circle cx="12" cy="12" r="2.8" />
+  </Svg>
+);
+
+export const RefreshCw = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M20 6v5h-5" />
+    <path d="M4 18v-5h5" />
+    <path d="M18.5 9A7 7 0 0 0 6.2 6.8L4 11" />
+    <path d="M5.5 15A7 7 0 0 0 17.8 17.2L20 13" />
+  </Svg>
+);
+
+export const ImageIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <rect x="3" y="3" width="18" height="18" rx="2.5" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <path d="m21 15-5-5L5 21" />
+  </Svg>
+);
+
+export const AlertTriangle = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M10.3 3.8 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0Z" />
+    <path d="M12 9v4" />
+    <path d="M12 17h.01" />
+  </Svg>
+);
+
+export const ChevronRight = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="m9 18 6-6-6-6" />
+  </Svg>
+);
+
+export const Tag = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M20.6 13.6 13.7 20.5a2 2 0 0 1-2.8 0L3 12.6V3h9.6l8 8a2 2 0 0 1 0 2.6Z" />
+    <circle cx="7.5" cy="7.5" r="1.2" />
+  </Svg>
+);
+
+export const Package = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="m12 3 8.5 4.7v8.6L12 21l-8.5-4.7V7.7L12 3Z" />
+    <path d="m3.8 7.8 8.2 4.5 8.2-4.5M12 12.3V21" />
+  </Svg>
+);

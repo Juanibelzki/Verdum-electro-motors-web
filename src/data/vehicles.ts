@@ -26,6 +26,12 @@ type RawVehicle = {
   color: string | null;
   precio: string | null;
   precio_numero: number | null;
+  version?: string | null;
+  transmision?: string | null;
+  combustible?: string | null;
+  carroceria?: string | null;
+  traccion?: string | null;
+  potencia?: number | string | null;
   descripcion: string | null;
   whatsapp_msg: string | null;
   destacado: boolean | null;
@@ -360,6 +366,18 @@ function inferPower(text: string) {
   return match ? Number(match[1]) : null;
 }
 
+function parsePower(value: RawVehicle["potencia"]): number | null {
+  const number =
+    typeof value === "number"
+      ? value
+      : Number.parseInt(String(value ?? "").replace(/[^\d]/g, ""), 10);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function cleanSpec(value: string | null | undefined): string {
+  return (value ?? "").trim();
+}
+
 function inferColor(rawColor: string | null, text: string) {
   const color = (rawColor ?? "").trim();
   if (color) return smartTitle(color);
@@ -455,18 +473,22 @@ function normalizeVehicle(
   const categoryName = category?.nombre ?? raw.categoria ?? "Sin categoría";
   const condition = conditionFrom(categorySlug, raw.condicion);
   const fullText = `${title} ${raw.descripcion ?? ""}`;
-  const transmission = inferTransmission(fullText);
-  const fuel = inferFuel(fullText);
-  const body = inferBody(fullText);
-  const drive = inferDrive(fullText);
-  const power = inferPower(fullText);
+  const transmission =
+    cleanSpec(raw.transmision) || inferTransmission(fullText);
+  const fuel = cleanSpec(raw.combustible) || inferFuel(fullText);
+  const body = cleanSpec(raw.carroceria) || inferBody(fullText);
+  const drive = cleanSpec(raw.traccion) || inferDrive(fullText);
+  const power = parsePower(raw.potencia) ?? inferPower(fullText);
   const color = inferColor(raw.color, title);
   const parsed = parseDescription(raw.descripcion);
   const tagline =
     parsed.tagline ||
     [condition, year ? String(year) : null, body].filter(Boolean).join(" · ");
+  const explicitVersion = cleanSpec(raw.version);
   const version =
-    [body, drive !== "Consultar" ? drive : null].filter(Boolean).join(" · ") || categoryName;
+    explicitVersion ||
+    [body, drive !== "Consultar" ? drive : null].filter(Boolean).join(" · ") ||
+    categoryName;
   const whatsappMsg =
     (raw.whatsapp_msg ?? "").trim() ||
     `¡Hola! Quiero consultar el precio y disponibilidad del ${title}${

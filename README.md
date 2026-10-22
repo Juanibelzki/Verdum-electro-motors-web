@@ -54,17 +54,29 @@ Si no están definidas, la app usa los valores públicos del proyecto actual.
 - `src/data/useVehicles.ts` — hook de carga con cache en memoria y reintento
 - `src/data/heroScenes.ts` — lectura/guardado de los videos del hero
 - `src/data/useHeroScenes.ts` — hook de carga del hero con fallback local
-- `src/admin/` — panel `/admin` y carga de videos a Supabase Storage
+- `src/admin/` — panel `/admin`, stock, videos del hero e historias del showroom
 - `src/index.css` — tokens de diseño y animaciones
 - `legacy/` — panel admin viejo, solo como referencia (no entra en el build)
+- `supabase-stock-specs.sql` — migración de columnas de ficha técnica
 
 ## Admin
 
-El panel nuevo vive en `/admin` y por ahora solo administra los videos del
-hero: subir archivos, ordenarlos, etiquetarlos, previsualizarlos y guardar la
-lista en `admin_content.hero_scenes`. Los videos se suben al bucket público
-`stock-photos`, carpeta `hero/`, y la home los lee en vivo. Si no hay fila o
-falla la lectura, usa los videos locales de `public/videos/` como respaldo.
+El panel nuevo vive en `/admin` y tiene cuatro secciones:
+
+- **Resumen:** métricas del stock y estado del contenido.
+- **Stock:** listado completo, búsqueda, filtros, vista de detalle y alta rápida
+  de borradores. En esta fase todavía no edita ni sube fotos.
+- **Home:** videos del hero e historias/reels del showroom. Los archivos se
+  suben al bucket público `stock-photos` y la home los lee en vivo.
+- **Ajustes:** estado de la migración y pendientes de seguridad.
+
+### Migración de ficha técnica
+
+Antes de habilitar la edición completa del stock, ejecutar
+`supabase-stock-specs.sql` en el SQL Editor de Supabase. Agrega las columnas
+`version`, `transmision`, `combustible`, `carroceria`, `traccion` y `potencia`.
+Mientras no esté aplicada, el sitio público sigue infiriendo esas
+especificaciones desde el título y la descripción.
 
 > **Seguridad:** el panel todavía no tiene login propio y usa la anon key.
 > Queda cubierto por la protección de deployment de Vercel en preview. Antes
@@ -77,5 +89,7 @@ falla la lectura, usa los videos locales de `public/videos/` como respaldo.
 - Fase 2: identidad Verdun, contacto real y limpieza de datos falsos.
 - Fase 3: stock real de Supabase, precios “Consultar”, WhatsApp y ficha técnica.
 - Fase 4: videos del hero administrables desde `/admin` (staging).
+- Fase 5: shell del admin, resumen, listado de stock y alta rápida de borradores.
+- Próxima: edición completa del stock, fotos, Auth y RLS antes de producción.
 
 La web actual sigue viva en `main`.

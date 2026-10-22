@@ -1,9 +1,249 @@
-import { useEffect } from "react";
-import { ArrowUpRight, ShieldCheck } from "../components/Icons";
+import { useEffect, useState, type ComponentType, type SVGProps } from "react";
+import { cn } from "../utils/cn";
+import {
+  ArrowUpRight,
+  CarIcon,
+  ChevronRight,
+  Cog,
+  Dashboard,
+  Instagram,
+  Menu,
+  Play,
+  ShieldCheck,
+  X,
+} from "../components/Icons";
 import HeroVideosPanel from "./HeroVideosPanel";
 import ShowroomStoriesPanel from "./ShowroomStoriesPanel";
+import OverviewPanel from "./OverviewPanel";
+import SettingsPanel from "./SettingsPanel";
+import StockPanel from "./StockPanel";
+import { useAdminStock } from "./useAdminStock";
+
+type AdminSection = "overview" | "stock" | "hero" | "stories" | "settings";
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+const SECTION_IDS: AdminSection[] = [
+  "overview",
+  "stock",
+  "hero",
+  "stories",
+  "settings",
+];
+
+const SECTION_META: Record<
+  AdminSection,
+  { label: string; eyebrow: string }
+> = {
+  overview: { label: "Resumen", eyebrow: "Panel" },
+  stock: { label: "Stock", eyebrow: "Vehículos" },
+  hero: { label: "Hero", eyebrow: "Home" },
+  stories: { label: "Historias", eyebrow: "Home" },
+  settings: { label: "Ajustes", eyebrow: "Panel" },
+};
+
+function readSection(): AdminSection {
+  const hash = window.location.hash.replace(/^#\/?/, "");
+  return SECTION_IDS.includes(hash as AdminSection)
+    ? (hash as AdminSection)
+    : "overview";
+}
+
+function Brand({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex items-center gap-3 text-left"
+    >
+      <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-forest ring-1 ring-white/10 transition group-hover:ring-lime/60">
+        <img
+          src="/logo-verdun.png"
+          alt="Verdun Automotores"
+          className="h-11 w-11 scale-110 object-contain"
+        />
+      </span>
+      <span className="leading-none">
+        <span className="block text-[17px] font-extrabold tracking-[-0.045em] text-cream">
+          VERDUN
+        </span>
+        <span className="mt-1 block text-[8px] font-semibold uppercase tracking-[0.3em] text-cream/45">
+          Automotores
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function NavItem({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+  badge,
+  sub = false,
+}: {
+  icon: IconComponent;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  badge?: number;
+  sub?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "group flex w-full items-center gap-2.5 rounded-xl text-left text-[12px] font-semibold transition",
+        sub ? "px-3 py-2 pl-9" : "px-3 py-2.5",
+        active
+          ? "bg-lime text-ink"
+          : "text-cream/65 hover:bg-white/[0.07] hover:text-cream"
+      )}
+    >
+      <Icon
+        className={cn(
+          "shrink-0",
+          sub ? "h-3.5 w-3.5" : "h-4 w-4",
+          active ? "text-ink" : "text-cream/45 group-hover:text-cream/75"
+        )}
+      />
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      {badge != null && (
+        <span
+          className={cn(
+            "rounded-full px-1.5 py-0.5 text-[9px] font-bold",
+            active ? "bg-ink/10 text-ink" : "bg-white/10 text-cream/60"
+          )}
+        >
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function SidebarContent({
+  activeSection,
+  activeCount,
+  draftCount,
+  onNavigate,
+  onClose,
+}: {
+  activeSection: AdminSection;
+  activeCount: number;
+  draftCount: number;
+  onNavigate: (section: AdminSection) => void;
+  onClose?: () => void;
+}) {
+  return (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <Brand onClick={() => onNavigate("overview")} />
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar menú"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-cream/70 transition hover:bg-white/10 hover:text-cream"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      <nav className="mt-7 flex-1 space-y-1" aria-label="Secciones del admin">
+        <NavItem
+          icon={Dashboard}
+          label="Resumen"
+          active={activeSection === "overview"}
+          onClick={() => onNavigate("overview")}
+        />
+        <NavItem
+          icon={CarIcon}
+          label="Stock"
+          active={activeSection === "stock"}
+          onClick={() => onNavigate("stock")}
+          badge={activeCount}
+        />
+
+        <p className="px-3 pb-1 pt-5 text-[8.5px] font-bold uppercase tracking-[0.22em] text-cream/30">
+          Home
+        </p>
+        <NavItem
+          icon={Play}
+          label="Hero"
+          sub
+          active={activeSection === "hero"}
+          onClick={() => onNavigate("hero")}
+        />
+        <NavItem
+          icon={Instagram}
+          label="Historias"
+          sub
+          active={activeSection === "stories"}
+          onClick={() => onNavigate("stories")}
+        />
+
+        <p className="px-3 pb-1 pt-5 text-[8.5px] font-bold uppercase tracking-[0.22em] text-cream/30">
+          Panel
+        </p>
+        <NavItem
+          icon={Cog}
+          label="Ajustes"
+          active={activeSection === "settings"}
+          onClick={() => onNavigate("settings")}
+        />
+      </nav>
+
+      <div className="mt-auto space-y-3 pt-6">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-3.5">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-lime" />
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-lime">
+              Staging
+            </p>
+          </div>
+          <p className="mt-2 text-[10.5px] leading-relaxed text-cream/45">
+            Protegido por Vercel SSO. Auth y RLS pendientes antes de producción.
+          </p>
+          <button
+            type="button"
+            onClick={() => onNavigate("settings")}
+            className="mt-2.5 inline-flex items-center gap-1 text-[10px] font-semibold text-cream/70 transition hover:text-cream"
+          >
+            Ver seguridad
+            <ChevronRight className="h-3 w-3" />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between gap-2 px-1 text-[10px] text-cream/35">
+          <span>{draftCount} borradores</span>
+          <a
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 font-semibold text-cream/55 transition hover:text-cream"
+          >
+            Ver sitio
+            <ArrowUpRight className="h-3 w-3" />
+          </a>
+        </div>
+      </div>
+    </>
+  );
+}
 
 export default function AdminApp() {
+  const [section, setSection] = useState<AdminSection>(() => readSection());
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const stock = useAdminStock();
+
+  const activeCount = stock.vehicles.filter((vehicle) => vehicle.activo).length;
+  const draftCount = stock.vehicles.length - activeCount;
+  const meta = SECTION_META[section];
+
   useEffect(() => {
     const previousTitle = document.title;
     document.title = "Admin · Verdun Automotores";
@@ -19,91 +259,149 @@ export default function AdminApp() {
     };
   }, []);
 
+  useEffect(() => {
+    const onHashChange = () => setSection(readSection());
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
+
+  const navigate = (next: AdminSection) => {
+    setSection(next);
+    setMobileOpen(false);
+    if (window.location.hash !== `#${next}`) {
+      window.history.replaceState(null, "", `#${next}`);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <div className="min-h-screen bg-cream">
-      <header className="border-b border-line bg-paper/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <a href="/" className="group flex items-center gap-3">
-            <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-ink ring-1 ring-ink/10 transition group-hover:ring-lime/60">
-              <img
-                src="/logo-verdun.png"
-                alt="Verdun Automotores"
-                className="h-11 w-11 scale-110 object-contain"
+    <div className="min-h-screen bg-cream lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
+      <aside className="hidden border-r border-white/5 bg-ink p-5 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto">
+        <SidebarContent
+          activeSection={section}
+          activeCount={activeCount}
+          draftCount={draftCount}
+          onNavigate={navigate}
+        />
+      </aside>
+
+      <div className="flex min-h-screen min-w-0 flex-col">
+        <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur">
+          <div className="flex min-h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Abrir menú del admin"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line bg-cream text-ink transition hover:border-ink/25 lg:hidden"
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+
+            <div className="min-w-0">
+              <p className="truncate text-[9px] font-bold uppercase tracking-[0.2em] text-moss">
+                {meta.eyebrow}
+              </p>
+              <h1 className="truncate text-[19px] font-extrabold tracking-[-0.035em] text-ink">
+                {meta.label}
+              </h1>
+            </div>
+
+            <div className="ml-auto flex items-center gap-2">
+              <span className="hidden rounded-full border border-line bg-cream px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-muted sm:inline-flex">
+                Staging
+              </span>
+              <a
+                href="/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-2 text-[11px] font-semibold text-cream transition hover:bg-forest"
+              >
+                Ver sitio
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          {section === "overview" && (
+            <OverviewPanel
+              vehicles={stock.vehicles}
+              categories={stock.categories}
+              specsReady={stock.specsReady}
+              loading={stock.loading}
+              error={stock.error}
+              onReload={stock.reload}
+              onNavigate={navigate}
+            />
+          )}
+
+          {section === "stock" && (
+            <StockPanel
+              vehicles={stock.vehicles}
+              categories={stock.categories}
+              loading={stock.loading}
+              error={stock.error}
+              specsReady={stock.specsReady}
+              onReload={stock.reload}
+            />
+          )}
+
+          {section === "hero" && <HeroVideosPanel />}
+          {section === "stories" && <ShowroomStoriesPanel />}
+
+          {section === "settings" && (
+            <SettingsPanel
+              vehicles={stock.vehicles}
+              categories={stock.categories}
+              specsReady={stock.specsReady}
+              loading={stock.loading}
+              onReload={stock.reload}
+            />
+          )}
+        </main>
+
+        <footer className="border-t border-line">
+          <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-2 px-4 py-5 text-[10.5px] text-muted sm:px-6 lg:px-8">
+            <p className="flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Verdun Automotores · Panel de administración
+            </p>
+            <p>Av. Chacabuco 1725 · Corrientes</p>
+          </div>
+        </footer>
+      </div>
+
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            aria-label="Cerrar menú"
+            onClick={() => setMobileOpen(false)}
+            className="animate-overlay absolute inset-0 bg-ink/65 backdrop-blur-[3px]"
+          />
+          <aside className="animate-drawer absolute inset-y-0 left-0 flex w-[286px] flex-col bg-ink p-5 shadow-[24px_0_80px_-30px_rgba(0,0,0,0.65)]">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <SidebarContent
+                activeSection={section}
+                activeCount={activeCount}
+                draftCount={draftCount}
+                onNavigate={navigate}
+                onClose={() => setMobileOpen(false)}
               />
-            </span>
-            <span className="leading-none">
-              <span className="block text-[17px] font-extrabold tracking-[-0.045em] text-ink">
-                VERDUN
-              </span>
-              <span className="mt-1 block text-[8px] font-semibold uppercase tracking-[0.3em] text-muted">
-                Automotores
-              </span>
-            </span>
-          </a>
-
-          <div className="flex items-center gap-3">
-            <span className="rounded-full border border-line bg-cream px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-muted">
-              Admin
-            </span>
-            <a
-              href="/"
-              className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-forest transition hover:text-ink"
-            >
-              Ver sitio
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-          </div>
+            </div>
+          </aside>
         </div>
-      </header>
-
-      <main className="mx-auto max-w-5xl px-4 pb-16 pt-6 sm:px-8 sm:pt-8">
-        <div className="flex gap-3 rounded-2xl border border-amber-300/80 bg-amber-50 p-4 text-[12px] leading-relaxed text-amber-900">
-          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>
-            <strong>Panel de staging.</strong> Hoy queda detrás de la
-            protección de Vercel. Antes de publicarlo en producción hay que
-            agregar login con Supabase Auth y endurecer las políticas RLS.
-          </p>
-        </div>
-
-        <div className="mt-8 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-moss">
-              Contenido
-            </p>
-            <h1 className="mt-1.5 text-[32px] font-extrabold tracking-[-0.05em] text-ink sm:text-[40px]">
-              Home
-            </h1>
-            <p className="mt-1.5 text-[13px] text-muted">
-              Videos de portada e historias del showroom.
-            </p>
-          </div>
-          <nav className="flex flex-wrap gap-2" aria-label="Secciones del admin">
-            <a
-              href="#hero-videos"
-              className="rounded-full border border-line bg-paper px-4 py-2 text-[11px] font-semibold text-ink transition hover:border-ink/25"
-            >
-              Hero
-            </a>
-            <a
-              href="#showroom-stories"
-              className="rounded-full border border-line bg-paper px-4 py-2 text-[11px] font-semibold text-ink transition hover:border-ink/25"
-            >
-              Historias
-            </a>
-          </nav>
-        </div>
-
-        <HeroVideosPanel />
-        <ShowroomStoriesPanel />
-      </main>
-
-      <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-5 py-5 text-[10.5px] text-muted sm:px-8">
-          <p>Verdun Automotores · Panel de contenido</p>
-          <p>Av. Chacabuco 1725 · Corrientes</p>
-        </div>
-      </footer>
+      )}
     </div>
   );
 }
