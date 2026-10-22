@@ -89,15 +89,13 @@ export function Logo({ light = false, className }: { light?: boolean; className?
           light ? "bg-lime text-ink" : "bg-ink text-lime"
         )}
       >
-        <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" aria-hidden="true">
-          <path
-            d="M4 5.5 12 20l8-14.5"
-            stroke="currentColor"
-            strokeWidth="3.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <img
+          src="/logo-verdun.png"
+          alt=""
+          aria-hidden="true"
+          className="h-10 w-10 object-contain"
+          draggable={false}
+        />
       </span>
       <span className="flex flex-col justify-center leading-none">
         <span
