@@ -170,7 +170,7 @@ export default function HeroVideosPanel() {
       setDirty(false);
       setStatus({
         tone: "success",
-        text: "Guardado. El hero de la home ya usa esta lista de videos.",
+        text: "Guardado. Al recargar la home, el hero usa esta lista de videos.",
       });
     } catch (cause) {
       setStatus({
