@@ -1,3 +1,7 @@
+-- ⚠️ LEGACY / NO EJECUTAR
+-- Reemplazado por supabase-auth-rls.sql.
+-- Este archivo permite escritura anónima en Storage y admin_content.
+
 -- Permitir que la anon key suba archivos al bucket stock-photos
 DROP POLICY IF EXISTS "Public INSERT stock-photos" ON storage.objects;
 CREATE POLICY "Public INSERT stock-photos" ON storage.objects

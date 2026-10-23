@@ -1,4 +1,11 @@
 -- ============================================
+-- ⚠️ LEGACY / NO EJECUTAR
+-- Reemplazado por supabase-auth-rls.sql (Supabase Auth + admins + RLS).
+-- Este archivo contiene el login por contraseña en admin_content y
+-- funciones de sesión que ya no se usan.
+-- ============================================
+
+-- ============================================
 -- SEGURIDAD RLS - VERDUN AUTOMOTORES
 -- ============================================
 -- Ejecutar en Supabase SQL Editor

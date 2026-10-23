@@ -1,6 +1,7 @@
+import { clearSession, getAuthHeaders } from "../data/auth";
 import { FALLBACK_CAR_IMAGE, formatKm, formatPrice } from "../data/cars";
 import { canvasToBlob, uploadToStorage } from "../data/storage";
-import { SUPABASE_URL, supabaseHeaders } from "../data/supabase";
+import { SUPABASE_URL } from "../data/supabase";
 
 export const MAX_VEHICLE_PHOTOS = 8;
 export const MAX_VEHICLE_PHOTO_BYTES = 15 * 1024 * 1024;
@@ -100,8 +101,6 @@ export type VehiclePhotoPosition = {
   position: number;
 };
 
-const jsonHeaders = supabaseHeaders({ Accept: "application/json" });
-
 const parseNumber = (value: string | null | undefined) => {
   const number = Number.parseInt(String(value ?? "").replace(/[^\d]/g, ""), 10);
   return Number.isFinite(number) ? number : null;
@@ -123,13 +122,18 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   try {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
       ...init,
-      headers: {
-        ...jsonHeaders,
+      headers: await getAuthHeaders({
+        Accept: "application/json",
         ...(init?.headers as Record<string, string> | undefined),
-      },
+      }),
       cache: "no-store",
       signal: controller.signal,
     });
+
+    if (response.status === 401) {
+      clearSession();
+      throw new Error("Sesión vencida. Volvé a iniciar sesión.");
+    }
 
     if (!response.ok) {
       const detail = await response.text().catch(() => "");
@@ -454,8 +458,12 @@ export const vehiclePriceLabel = (vehicle: AdminVehicle) => {
   return "Consultar precio";
 };
 
-export const vehicleStatusLabel = (vehicle: AdminVehicle) =>
-  vehicle.activo ? "Publicado" : "Borrador";
+export const vehicleStatusLabel = (vehicle: AdminVehicle) => {
+  if (!vehicle.activo) return "Borrador";
+  if (vehicle.status === "pendiente_fotos") return "Pendiente de fotos";
+  if (vehicle.status === "borrador") return "Borrador";
+  return "Publicado";
+};
 
 export const formatDateTime = (value: string | null) => {
   if (!value) return "Sin fecha";

@@ -1,4 +1,10 @@
 -- ============================================
+-- ⚠️ LEGACY / NO EJECUTAR EN PRODUCCIÓN
+-- Contiene políticas RLS permisivas. La migración vigente de seguridad es
+-- supabase-auth-rls.sql.
+-- ============================================
+
+-- ============================================
 -- VERDUN AUTOMOTORES - SCHEMA COMPLETO (CDN)
 -- Ejecutar en Supabase SQL Editor
 -- ============================================

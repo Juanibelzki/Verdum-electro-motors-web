@@ -7,16 +7,20 @@ import {
   Cog,
   Dashboard,
   Instagram,
+  LogOut,
   Menu,
   Play,
   ShieldCheck,
   X,
 } from "../components/Icons";
+import type { AdminSession } from "../data/auth";
+import AdminLogin from "./AdminLogin";
 import HeroVideosPanel from "./HeroVideosPanel";
 import ShowroomStoriesPanel from "./ShowroomStoriesPanel";
 import OverviewPanel from "./OverviewPanel";
 import SettingsPanel from "./SettingsPanel";
 import StockPanel from "./StockPanel";
+import { useAdminAuth } from "./useAdminAuth";
 import { useAdminStock } from "./useAdminStock";
 
 type AdminSection = "overview" | "stock" | "hero" | "stories" | "settings";
@@ -128,13 +132,17 @@ function SidebarContent({
   activeSection,
   activeCount,
   draftCount,
+  adminEmail,
   onNavigate,
+  onSignOut,
   onClose,
 }: {
   activeSection: AdminSection;
   activeCount: number;
   draftCount: number;
+  adminEmail: string | null;
   onNavigate: (section: AdminSection) => void;
+  onSignOut: () => void;
   onClose?: () => void;
 }) {
   return (
@@ -202,20 +210,30 @@ function SidebarContent({
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-lime" />
             <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-lime">
-              Staging
+              Sesión admin
             </p>
           </div>
-          <p className="mt-2 text-[10.5px] leading-relaxed text-cream/45">
-            Protegido por Vercel SSO. Auth y RLS pendientes antes de producción.
+          <p className="mt-2 truncate text-[10.5px] text-cream/70">
+            {adminEmail ?? "Usuario autenticado"}
           </p>
-          <button
-            type="button"
-            onClick={() => onNavigate("settings")}
-            className="mt-2.5 inline-flex items-center gap-1 text-[10px] font-semibold text-cream/70 transition hover:text-cream"
-          >
-            Ver seguridad
-            <ChevronRight className="h-3 w-3" />
-          </button>
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <button
+              type="button"
+              onClick={() => onNavigate("settings")}
+              className="inline-flex items-center gap-1 text-[10px] font-semibold text-cream/70 transition hover:text-cream"
+            >
+              Seguridad
+              <ChevronRight className="h-3 w-3" />
+            </button>
+            <button
+              type="button"
+              onClick={onSignOut}
+              className="inline-flex items-center gap-1 text-[10px] font-semibold text-cream/55 transition hover:text-cream"
+            >
+              <LogOut className="h-3 w-3" />
+              Cerrar sesión
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center justify-between gap-2 px-1 text-[10px] text-cream/35">
@@ -235,7 +253,85 @@ function SidebarContent({
   );
 }
 
-export default function AdminApp() {
+function AdminLoading() {
+  return (
+    <div className="grid min-h-screen place-items-center bg-ink px-4 text-cream">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <span className="grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-forest ring-1 ring-white/10">
+          <img
+            src="/logo-verdun.png"
+            alt="Verdun Automotores"
+            className="h-14 w-14 scale-110 object-contain"
+          />
+        </span>
+        <span className="h-5 w-5 animate-spin rounded-full border-2 border-cream/15 border-t-lime" />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cream/45">
+          Verificando sesión
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function AdminAccessDenied({
+  email,
+  onSignOut,
+}: {
+  email: string | null;
+  onSignOut: () => void;
+}) {
+  return (
+    <div className="grid min-h-screen place-items-center bg-ink px-4 py-10 text-cream">
+      <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-forest p-7 text-center shadow-[0_40px_100px_-50px_rgba(0,0,0,0.9)] sm:p-9">
+        <span className="mx-auto grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-ink ring-1 ring-white/10">
+          <img
+            src="/logo-verdun.png"
+            alt="Verdun Automotores"
+            className="h-14 w-14 scale-110 object-contain"
+          />
+        </span>
+        <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-lime">
+          Acceso restringido
+        </p>
+        <h1 className="mt-2 text-[28px] font-extrabold tracking-[-0.05em] text-cream">
+          Tu usuario no es administrador
+        </h1>
+        <p className="mt-3 text-[12.5px] leading-relaxed text-cream/55">
+          La sesión es válida{email ? ` (${email})` : ""}, pero el usuario no
+          está habilitado como administrador. Pedile al responsable del panel
+          que agregue tu usuario a la tabla de administradores.
+        </p>
+        <div className="mt-6 grid gap-2">
+          <button
+            type="button"
+            onClick={onSignOut}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3 text-[12.5px] font-bold text-ink transition hover:bg-lime-soft"
+          >
+            <LogOut className="h-4 w-4" />
+            Cerrar sesión
+          </button>
+          <a
+            href="/"
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-white/10 px-5 py-3 text-[12px] font-semibold text-cream/70 transition hover:bg-white/5 hover:text-cream"
+          >
+            Volver al sitio
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminWorkspace({
+  session,
+  securityReady,
+  onSignOut,
+}: {
+  session: AdminSession;
+  securityReady: boolean;
+  onSignOut: () => void;
+}) {
   const [section, setSection] = useState<AdminSection>(() => readSection());
   const [mobileOpen, setMobileOpen] = useState(false);
   const stock = useAdminStock();
@@ -290,7 +386,9 @@ export default function AdminApp() {
           activeSection={section}
           activeCount={activeCount}
           draftCount={draftCount}
+          adminEmail={session.user.email}
           onNavigate={navigate}
+          onSignOut={onSignOut}
         />
       </aside>
 
@@ -317,8 +415,17 @@ export default function AdminApp() {
 
             <div className="ml-auto flex items-center gap-2">
               <span className="hidden rounded-full border border-line bg-cream px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-muted sm:inline-flex">
-                Staging
+                Sesión activa
               </span>
+              <button
+                type="button"
+                onClick={onSignOut}
+                aria-label="Cerrar sesión"
+                title="Cerrar sesión"
+                className="hidden h-9 w-9 place-items-center rounded-full border border-line bg-cream text-muted transition hover:border-ink/25 hover:text-ink sm:grid"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
               <a
                 href="/"
                 target="_blank"
@@ -364,6 +471,7 @@ export default function AdminApp() {
               vehicles={stock.vehicles}
               categories={stock.categories}
               specsReady={stock.specsReady}
+              securityReady={securityReady}
               loading={stock.loading}
               onReload={stock.reload}
             />
@@ -395,7 +503,9 @@ export default function AdminApp() {
                 activeSection={section}
                 activeCount={activeCount}
                 draftCount={draftCount}
+                adminEmail={session.user.email}
                 onNavigate={navigate}
+                onSignOut={onSignOut}
                 onClose={() => setMobileOpen(false)}
               />
             </div>
@@ -403,5 +513,32 @@ export default function AdminApp() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminApp() {
+  const auth = useAdminAuth();
+
+  if (auth.checking) return <AdminLoading />;
+  if (!auth.session) return <AdminLogin />;
+  if (!auth.isAdmin) {
+    return (
+      <AdminAccessDenied
+        email={auth.session.user.email}
+        onSignOut={() => {
+          void auth.signOut();
+        }}
+      />
+    );
+  }
+
+  return (
+    <AdminWorkspace
+      session={auth.session}
+      securityReady={auth.isAdmin}
+      onSignOut={() => {
+        void auth.signOut();
+      }}
+    />
   );
 }

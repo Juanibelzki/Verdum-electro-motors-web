@@ -40,6 +40,14 @@ export const ArrowLeft = (props: IconProps) => (
   </Svg>
 );
 
+export const LogOut = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <path d="m16 17 5-5-5-5" />
+    <path d="M21 12H9" />
+  </Svg>
+);
+
 export const ChevronDown = (props: IconProps) => (
   <Svg {...props}>
     <path d="m6 9 6 6 6-6" />

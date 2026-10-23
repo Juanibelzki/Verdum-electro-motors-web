@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "../utils/cn";
 import {
-  AlertTriangle,
   ArrowUpRight,
   CarIcon,
   Check,
@@ -10,6 +9,7 @@ import {
   Package,
   Play,
   RefreshCw,
+  ShieldCheck,
   Star,
   Tag,
 } from "../components/Icons";
@@ -145,8 +145,10 @@ export default function OverviewPanel({
   onNavigate,
 }: OverviewPanelProps) {
   const total = vehicles.length;
-  const active = vehicles.filter((vehicle) => vehicle.activo).length;
-  const drafts = total - active;
+  const published = vehicles.filter(
+    (vehicle) => vehicle.activo && vehicle.status === "publicado"
+  ).length;
+  const drafts = total - published;
   const noPrice = vehicles.filter((vehicle) => vehicle.precio_numero == null).length;
   const noPhotos = vehicles.filter((vehicle) => vehicle.photos.length === 0).length;
   const featured = vehicles.find((vehicle) => vehicle.destacado) ?? null;
@@ -217,12 +219,12 @@ export default function OverviewPanel({
         </div>
       )}
 
-      <div className="mt-5 flex gap-3 rounded-2xl border border-amber-300/80 bg-amber-50 p-4 text-[12px] leading-relaxed text-amber-900">
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+      <div className="mt-5 flex gap-3 rounded-2xl border border-forest/20 bg-forest/5 p-4 text-[12px] leading-relaxed text-moss">
+        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
         <p>
-          <strong>Panel de staging.</strong> Sigue detrás de Vercel SSO. Antes
-          de publicarlo en producción hay que agregar Supabase Auth y endurecer
-          las políticas RLS.{" "}
+          <strong>Panel protegido.</strong> Supabase Auth y RLS activos. El
+          acceso público solo muestra vehículos publicados. El cutover a
+          producción sigue pendiente de aprobación.{" "}
           <button
             type="button"
             onClick={() => onNavigate("settings")}
@@ -244,7 +246,7 @@ export default function OverviewPanel({
         <StatCard
           icon={<Check className="h-4 w-4" />}
           label="Publicados"
-          value={loading ? "—" : active}
+          value={loading ? "—" : published}
           hint="Visibles en el catálogo"
         />
         <StatCard

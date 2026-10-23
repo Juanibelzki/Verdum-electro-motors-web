@@ -52,24 +52,53 @@ Si no están definidas, la app usa los valores públicos del proyecto actual.
 - `src/data/cars.ts` — tipos, helpers de formato y número de WhatsApp
 - `src/data/vehicles.ts` — lectura de Supabase y normalización del stock
 - `src/data/useVehicles.ts` — hook de carga con cache en memoria y reintento
+- `src/data/auth.ts` — Supabase Auth REST, sesión, refresh y headers autenticados
 - `src/data/heroScenes.ts` — lectura/guardado de los videos del hero
 - `src/data/useHeroScenes.ts` — hook de carga del hero con fallback local
 - `src/admin/` — panel `/admin`, stock, videos del hero e historias del showroom
 - `src/index.css` — tokens de diseño y animaciones
 - `legacy/` — panel admin viejo, solo como referencia (no entra en el build)
+- `supabase-auth-rls.sql` — Auth, admins, RLS y Storage endurecido
 - `supabase-stock-specs.sql` — migración de columnas de ficha técnica
 
 ## Admin
 
-El panel nuevo vive en `/admin` y tiene cuatro secciones:
+El panel nuevo vive en `/admin`, requiere Supabase Auth y tiene cinco
+secciones:
 
 - **Resumen:** métricas del stock y estado del contenido.
 - **Stock:** listado completo, búsqueda, filtros, vista de detalle y editor de
   cada vehículo. Permite cargar datos, ficha técnica, precio, descripción,
   equipamiento y fotos; publicar, despublicar y marcar un destacado.
-- **Home:** videos del hero e historias/reels del showroom. Los archivos se
-  suben al bucket público `stock-photos` y la home los lee en vivo.
-- **Ajustes:** estado de la migración y pendientes de seguridad.
+- **Home → Hero:** videos del hero.
+- **Home → Historias:** historias/reels 9:16 del showroom.
+- **Ajustes:** estado de la migración, seguridad y datos actuales.
+
+Los archivos se suben al bucket público `stock-photos` y la home los lee en
+vivo.
+
+### Seguridad y Auth
+
+1. En Supabase, ir a **Authentication → Users** y crear el usuario admin con
+   email y contraseña.
+2. Abrir `supabase-auth-rls.sql`, cambiar `ADMIN_EMAIL` por ese email y
+   ejecutarlo completo en el **SQL Editor**.
+3. Ingresar a `/admin` con esas credenciales.
+
+> **Estado actual:** `supabase-auth-rls.sql` ya está aplicado en el proyecto
+> `ymiakfjhgndqhdtoubkr`. El usuario inicial es `admin@verdun.com.ar`; la
+> contraseña se entrega por separado y se puede cambiar desde Supabase.
+
+El script crea `public.admins`, la función `public.is_admin()`, las políticas
+RLS de stock/contenido y las políticas de Storage. El sitio público solo puede
+leer vehículos con `activo = true` y `status = 'publicado'`; el admin
+autenticado puede leer y escribir todo el stock. Las escrituras del panel y las
+subidas usan el `access_token` de la sesión, no la anon key.
+
+> Los archivos `supabase-rls-secure.sql`, `supabase-admin-content-rls.sql`,
+> `supabase-admin-rls.sql` y `supabase-storage-policies.sql` son legacy. No
+> ejecutar: contienen políticas permisivas o el login por contraseña en
+> `admin_content`. La migración vigente es `supabase-auth-rls.sql`.
 
 ### Migración de ficha técnica
 
@@ -78,11 +107,6 @@ tracción y potencia, ejecutar `supabase-stock-specs.sql` en el SQL Editor de
 Supabase. Mientras no esté aplicada, el editor guarda el resto de la ficha y el
 sitio público sigue infiriendo esas especificaciones desde el título y la
 descripción.
-
-> **Seguridad:** el panel todavía no tiene login propio y usa la anon key.
-> Queda cubierto por la protección de deployment de Vercel en preview. Antes
-> de exponerlo en producción hay que agregar Supabase Auth y reemplazar las
-> políticas RLS permisivas.
 
 ## Estado
 
@@ -93,6 +117,9 @@ descripción.
 - Fase 5: shell del admin, resumen, listado de stock y alta rápida de borradores.
 - Fase 6: editor completo de stock, ficha técnica, fotos, publicación y destacado.
   Código cerrado y migración `supabase-stock-specs.sql` aplicada en Supabase.
-- Próxima: Auth/RLS y cutover a producción.
+- Fase 7: Supabase Auth, `public.admins`, RLS público/admin y Storage seguro.
+  Código implementado y migración `supabase-auth-rls.sql` aplicada; usuario
+  admin creado y login verificado.
+- Próxima: cutover a producción con aprobación explícita.
 
 La web actual sigue viva en `main`.

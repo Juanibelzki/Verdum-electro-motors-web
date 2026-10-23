@@ -1,8 +1,5 @@
-import {
-  publicStorageUrl,
-  SUPABASE_URL,
-  supabaseHeaders,
-} from "./supabase";
+import { clearSession, getAuthHeaders } from "./auth";
+import { publicStorageUrl, SUPABASE_URL } from "./supabase";
 
 export const uploadToStorage = async (
   bucket: string,
@@ -19,13 +16,18 @@ export const uploadToStorage = async (
     `${SUPABASE_URL}/storage/v1/object/${bucket}/${encodedPath}`,
     {
       method: "POST",
-      headers: supabaseHeaders({
+      headers: await getAuthHeaders({
         "Content-Type": contentType,
         "x-upsert": "true",
       }),
       body: blob,
     }
   );
+
+  if (response.status === 401) {
+    clearSession();
+    throw new Error("Sesión vencida. Volvé a iniciar sesión.");
+  }
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");

@@ -1,3 +1,7 @@
+-- ⚠️ LEGACY / NO EJECUTAR
+-- Reemplazado por supabase-auth-rls.sql.
+-- Este archivo permite escritura anónima en stock y fotos.
+
 -- Permitir INSERT/UPDATE/DELETE en vehicles desde el panel (usa anon key)
 DROP POLICY IF EXISTS "Admin INSERT on vehicles" ON vehicles;
 CREATE POLICY "Admin INSERT on vehicles" ON vehicles

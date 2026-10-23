@@ -17,6 +17,7 @@ type SettingsPanelProps = {
   vehicles: AdminVehicle[];
   categories: AdminCategory[];
   specsReady: boolean;
+  securityReady: boolean;
   loading: boolean;
   onReload: () => void;
 };
@@ -107,11 +108,14 @@ export default function SettingsPanel({
   vehicles,
   categories,
   specsReady,
+  securityReady,
   loading,
   onReload,
 }: SettingsPanelProps) {
   const total = vehicles.length;
-  const active = vehicles.filter((vehicle) => vehicle.activo).length;
+  const published = vehicles.filter(
+    (vehicle) => vehicle.activo && vehicle.status === "publicado"
+  ).length;
   const withPhotos = vehicles.filter((vehicle) => vehicle.photos.length > 0).length;
   const withPrice = vehicles.filter((vehicle) => vehicle.precio_numero != null).length;
 
@@ -126,8 +130,8 @@ export default function SettingsPanel({
             Ajustes
           </h2>
           <p className="mt-2 max-w-[620px] text-[13px] leading-relaxed text-muted">
-            Estado técnico del admin, migraciones pendientes y seguridad antes
-            de producción.
+            Estado técnico del admin, seguridad, migraciones y datos actuales
+            del inventario.
           </p>
         </div>
 
@@ -145,27 +149,46 @@ export default function SettingsPanel({
       <div className="mt-6 grid gap-5 xl:grid-cols-2">
         <SettingsCard
           title="Seguridad"
-          description="El admin todavía no tiene login propio. Vercel SSO protege el preview, pero no alcanza para producción."
-          badge={<StatusPill tone="warn">Pendiente</StatusPill>}
+          description={
+            securityReady
+              ? "Supabase Auth activo. El panel exige sesión y todas las escrituras usan el token del administrador."
+              : "El panel todavía no tiene login propio. Completá Auth y RLS antes de producción."
+          }
+          badge={
+            <StatusPill tone={securityReady ? "ok" : "warn"}>
+              {securityReady ? "Activo" : "Pendiente"}
+            </StatusPill>
+          }
         >
           <ul className="mt-5 space-y-2.5">
-            <ChecklistItem done={false}>
-              Agregar Supabase Auth con email y contraseña.
+            <ChecklistItem done={securityReady}>
+              Supabase Auth con email, contraseña y sesión persistente.
             </ChecklistItem>
-            <ChecklistItem done={false}>
-              Aplicar RLS para vehículos, fotos, categorías y contenido.
+            <ChecklistItem done={securityReady}>
+              RLS para vehículos, fotos, categorías y contenido.
             </ChecklistItem>
-            <ChecklistItem done={false}>
-              Endurecer las políticas de Storage.
+            <ChecklistItem done={securityReady}>
+              Storage con escritura reservada a administradores.
             </ChecklistItem>
-            <ChecklistItem done={false}>
-              Retirar el admin legacy y sus credenciales del cliente.
+            <ChecklistItem done={securityReady}>
+              Credenciales legacy y funciones de sesión retiradas.
             </ChecklistItem>
           </ul>
-          <div className="mt-5 rounded-xl border border-amber-300/80 bg-amber-50 px-4 py-3 text-[11.5px] leading-relaxed text-amber-900">
-            <span className="font-bold">No publicar /admin en producción</span>{" "}
-            hasta completar estos puntos. Hoy es un panel de staging.
-          </div>
+          {securityReady ? (
+            <div className="mt-5 rounded-xl border border-forest/20 bg-forest/5 px-4 py-3 text-[11.5px] leading-relaxed text-moss">
+              <span className="font-bold">Panel protegido.</span> El acceso
+              público solo muestra vehículos activos con estado{" "}
+              <code className="rounded bg-cream px-1 py-0.5 text-[10.5px]">
+                publicado
+              </code>
+              . El cutover a producción sigue pendiente de aprobación.
+            </div>
+          ) : (
+            <div className="mt-5 rounded-xl border border-amber-300/80 bg-amber-50 px-4 py-3 text-[11.5px] leading-relaxed text-amber-900">
+              <span className="font-bold">No publicar /admin en producción</span>{" "}
+              hasta completar estos puntos. Hoy es un panel de staging.
+            </div>
+          )}
         </SettingsCard>
 
         <SettingsCard
@@ -243,13 +266,13 @@ export default function SettingsPanel({
         >
           <div className="mt-5 grid grid-cols-2 gap-2.5">
             <DataPoint icon={<Package className="h-4 w-4" />} label="Vehículos" value={total} />
-            <DataPoint icon={<CarIcon className="h-4 w-4" />} label="Publicados" value={active} />
+            <DataPoint icon={<CarIcon className="h-4 w-4" />} label="Publicados" value={published} />
             <DataPoint icon={<ImageIcon className="h-4 w-4" />} label="Con fotos" value={withPhotos} />
             <DataPoint icon={<Cog className="h-4 w-4" />} label="Con precio" value={withPrice} />
           </div>
           <p className="mt-4 text-[11px] text-muted">
             {categories.length} categorías configuradas. El listado de stock
-            muestra vehículos activos y borradores.
+            muestra vehículos activos, publicados y borradores.
           </p>
         </SettingsCard>
 
@@ -273,7 +296,8 @@ export default function SettingsPanel({
             </ChecklistItem>
             <ChecklistItem done>Fotos con conversión a WebP y orden.</ChecklistItem>
             <ChecklistItem done>Publicar, despublicar y destacar.</ChecklistItem>
-            <ChecklistItem done={false}>Auth, RLS y cutover.</ChecklistItem>
+            <ChecklistItem done={securityReady}>Auth y RLS.</ChecklistItem>
+            <ChecklistItem done={false}>Cutover a producción.</ChecklistItem>
           </ul>
           {!specsReady && (
             <p className="mt-4 text-[11px] leading-relaxed text-muted">

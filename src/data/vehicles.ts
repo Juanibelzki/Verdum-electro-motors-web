@@ -540,7 +540,9 @@ function normalizeVehicle(
 
 export async function fetchVehicles(): Promise<VehiclesResult> {
   const [vehicles, photos, categories] = await Promise.all([
-    rest<RawVehicle[]>("vehicles?select=*&activo=eq.true&order=created_at.desc"),
+    rest<RawVehicle[]>(
+      "vehicles?select=*&activo=eq.true&status=eq.publicado&order=created_at.desc"
+    ),
     rest<RawPhoto[]>("photos?select=vehicle_id,url,posicion&order=posicion.asc"),
     rest<RawCategory[]>("categories?select=id,slug,nombre,posicion&order=posicion.asc"),
   ]);

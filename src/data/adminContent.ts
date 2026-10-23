@@ -1,4 +1,9 @@
-import { SUPABASE_URL, supabaseHeaders } from "./supabase";
+import {
+  clearSession,
+  getAuthHeaders,
+  getOptionalAuthHeaders,
+} from "./auth";
+import { SUPABASE_URL } from "./supabase";
 
 /** Reads one admin_content row by key. Returns undefined when it does not exist. */
 export async function loadAdminContent(key: string): Promise<unknown> {
@@ -9,7 +14,7 @@ export async function loadAdminContent(key: string): Promise<unknown> {
     const response = await fetch(
       `${SUPABASE_URL}/rest/v1/admin_content?select=data&key=eq.${encodeURIComponent(key)}`,
       {
-        headers: supabaseHeaders({ Accept: "application/json" }),
+        headers: await getOptionalAuthHeaders({ Accept: "application/json" }),
         cache: "no-store",
         signal: controller.signal,
       }
@@ -26,12 +31,12 @@ export async function loadAdminContent(key: string): Promise<unknown> {
   }
 }
 
-/** Creates or updates one admin_content row. */
+/** Creates or updates one admin_content row. Requires an admin session. */
 export async function saveAdminContent(
   key: string,
   data: unknown
 ): Promise<void> {
-  const headers = supabaseHeaders({
+  const headers = await getAuthHeaders({
     "Content-Type": "application/json",
     Accept: "application/json",
     Prefer: "return=representation",
@@ -45,6 +50,11 @@ export async function saveAdminContent(
       body: JSON.stringify({ data }),
     }
   );
+
+  if (patch.status === 401) {
+    clearSession();
+    throw new Error("Sesión vencida. Volvé a iniciar sesión.");
+  }
 
   if (!patch.ok) {
     throw new Error(`No se pudo guardar la configuración (${patch.status}).`);
@@ -60,6 +70,11 @@ export async function saveAdminContent(
     headers,
     body: JSON.stringify({ key, data }),
   });
+
+  if (insert.status === 401) {
+    clearSession();
+    throw new Error("Sesión vencida. Volvé a iniciar sesión.");
+  }
 
   if (!insert.ok) {
     throw new Error(`No se pudo crear la configuración (${insert.status}).`);

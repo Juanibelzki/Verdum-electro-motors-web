@@ -1,3 +1,7 @@
+-- ⚠️ LEGACY / NO EJECUTAR
+-- Reemplazado por supabase-auth-rls.sql.
+-- Las políticas de este archivo permiten escritura anónima.
+
 -- Políticas RLS para la tabla admin_content (permite que el sitio público
 -- y el panel admin lean y escriban contenido con la anon key)
 -- EJECUTAR EN: Supabase Dashboard > SQL Editor
