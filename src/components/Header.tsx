@@ -5,7 +5,7 @@ import { Logo } from "./ui";
 
 const links = [
   { label: "Vehículos", href: "#vehiculos" },
-  { label: "Financiación", href: "#financiacion" },
+  { label: "Financiamiento", href: "#financiacion" },
   { label: "Nosotros", href: "#nosotros" },
   { label: "Parte de pago", href: "#vender" },
   { label: "Showroom", href: "#showroom" },
@@ -33,7 +33,7 @@ export default function Header({ onSchedule }: { onSchedule: () => void }) {
           </p>
           <div className="flex items-center gap-4 sm:gap-6">
             <p className="hidden items-center gap-1.5 text-[11px] text-cream/65 md:flex">
-              <span className="font-semibold text-lime">Financiación propia</span> sin banco
+              <span className="font-semibold text-lime">Financiamiento</span> por crédito prendario · hasta 50%
             </p>
             <a
               href="tel:+5493795300020"

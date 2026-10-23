@@ -59,7 +59,7 @@ export default function CarDetailModal({
     { label: "Categoría", value: car.category, icon: BadgeCheck },
   ];
 
-  const financeMessage = `Hola Verdun, quiero consultar financiación para el ${car.title}${
+  const financeMessage = `Hola Verdun, quiero consultar el financiamiento por crédito prendario con banco de hasta el 50% del valor del vehículo para el ${car.title}${
     car.year ? ` (${car.year})` : ""
   }.`;
 
@@ -270,7 +270,7 @@ export default function CarDetailModal({
               rel="noreferrer"
               className="mt-2 flex w-full items-center justify-center rounded-full px-4 py-2.5 text-[11px] font-semibold text-forest underline decoration-forest/30 underline-offset-4 transition hover:decoration-forest"
             >
-              Consultar financiación
+              Consultar financiamiento
             </a>
 
             <a

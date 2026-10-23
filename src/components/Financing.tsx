@@ -3,10 +3,10 @@ import { ArrowUpRight, Check, Phone, Whatsapp } from "./Icons";
 import { Eyebrow, Reveal } from "./ui";
 
 const bullets = [
-  "Financiación propia",
-  "Planes de 24 a 60 meses",
-  "Anticipo a convenir",
-  "Sin gastos de otorgamiento",
+  "Financiamiento por crédito prendario",
+  "Con banco, hasta el 50% del valor",
+  "Sujeto a aprobación bancaria",
+  "Gestión con un asesor",
 ];
 
 const steps = [
@@ -15,17 +15,17 @@ const steps = [
     text: "Del stock disponible o contanos cuál estás buscando.",
   },
   {
-    title: "Definí anticipo y plazo",
-    text: "Armamos el plan entre 24 y 60 meses, a tu medida.",
+    title: "Solicitá el crédito",
+    text: "Gestionamos la solicitud de crédito prendario con el banco.",
   },
   {
-    title: "Recibí el plan",
-    text: "Te pasamos las condiciones vigentes por WhatsApp.",
+    title: "Recibí la propuesta",
+    text: "El banco evalúa la operación y confirma las condiciones.",
   },
 ];
 
 const financeMessage =
-  "Hola Verdun, quiero consultar opciones de financiación para un vehículo.";
+  "Hola Verdun, quiero consultar por el financiamiento por crédito prendario con banco de hasta el 50% del valor del vehículo.";
 
 export default function Financing({ onSchedule }: { onSchedule: () => void }) {
   return (
@@ -50,16 +50,16 @@ export default function Financing({ onSchedule }: { onSchedule: () => void }) {
         <div className="grid gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-16">
           <div>
             <Reveal>
-              <Eyebrow light>03 — Financiación</Eyebrow>
+              <Eyebrow light>03 — Financiamiento</Eyebrow>
               <h2 className="mt-4 max-w-xl text-[clamp(2.2rem,4.5vw,3.7rem)] font-extrabold leading-[1.01] tracking-[-0.05em] text-cream">
-                Tu auto, a tu{" "}
+                Tu próximo auto, con{" "}
                 <span className="font-serif font-normal italic tracking-[-0.01em] text-lime">
-                  ritmo.
+                  crédito prendario.
                 </span>
               </h2>
               <p className="mt-5 max-w-md text-[13.5px] leading-relaxed text-cream/55">
-                Financiación propia, sin banco y a tu medida. Contanos qué vehículo te interesa
-                y te pasamos las opciones vigentes de anticipo y cuotas.
+                Financiamiento por crédito prendario con banco de hasta el 50% del valor del
+                vehículo. Contanos qué vehículo te interesa y coordinamos la gestión con un asesor.
               </p>
             </Reveal>
 
@@ -79,7 +79,7 @@ export default function Financing({ onSchedule }: { onSchedule: () => void }) {
             <Reveal delay={140}>
               <div className="mt-9 border-l-2 border-lime/60 pl-5">
                 <p className="max-w-sm font-serif text-[21px] italic leading-snug text-cream/90">
-                  “Financiación propia, sin banco, a tu medida.”
+                  “Financiamiento por crédito prendario, con banco y hasta el 50% del valor del vehículo.”
                 </p>
                 <p className="mt-2 text-[9.5px] font-bold uppercase tracking-[0.16em] text-cream/40">
                   Verdun Automotores · Corrientes
@@ -115,20 +115,20 @@ export default function Financing({ onSchedule }: { onSchedule: () => void }) {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted">
-                    Financiación a medida
+                    Financiamiento bancario
                   </p>
                   <h3 className="mt-1.5 text-[22px] font-extrabold tracking-[-0.03em]">
-                    Armamos tu plan.
+                    Crédito prendario.
                   </h3>
                 </div>
                 <span className="rounded-full border border-forest/15 bg-lime/60 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-[0.12em] text-forest">
-                  Sin cuota genérica
+                  Hasta 50%
                 </span>
               </div>
 
               <p className="mt-4 text-[12px] leading-relaxed text-muted">
-                No publicamos una cuota fija: cada plan se arma según el vehículo, el anticipo y
-                el plazo que elijas.
+                El financiamiento se gestiona con el banco y puede cubrir hasta el 50% del
+                valor del vehículo. La aprobación y las condiciones finales dependen de la entidad.
               </p>
 
               <ol className="mt-6 space-y-3">
@@ -159,7 +159,7 @@ export default function Financing({ onSchedule }: { onSchedule: () => void }) {
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12.5px] font-bold text-ink transition hover:bg-lime-soft"
               >
                 <Whatsapp className="h-4 w-4" />
-                Consultar mi plan
+                Consultar financiamiento
                 <ArrowUpRight className="h-4 w-4" />
               </a>
               <button
@@ -170,7 +170,7 @@ export default function Financing({ onSchedule }: { onSchedule: () => void }) {
                 Agendar visita al showroom
               </button>
               <p className="mt-3 text-center text-[8.5px] leading-relaxed text-muted">
-                Las condiciones se confirman con un asesor. Sujeto a aprobación.
+                Las condiciones se confirman con un asesor. Sujeto a aprobación del banco.
               </p>
             </div>
           </Reveal>

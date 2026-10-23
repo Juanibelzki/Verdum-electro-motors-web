@@ -356,9 +356,9 @@ const faqs = [
       "Claro. Tasamos tu vehículo sin costo en menos de 24 horas y lo tomamos como parte de pago del auto que elijas. Nosotros gestionamos la transferencia y toda la documentación.",
   },
   {
-    question: "¿Cómo funciona la financiación?",
+    question: "¿Cómo funciona el financiamiento?",
     answer:
-      "La financiación es propia, sin banco. No publicamos una cuota genérica: nos contás qué vehículo te interesa, tu anticipo y el plazo, y te pasamos las condiciones vigentes por WhatsApp. La aprobación y las condiciones finales se confirman con un asesor.",
+      "Gestionamos financiamiento por crédito prendario con banco de hasta el 50% del valor del vehículo. La aprobación y las condiciones finales dependen del banco. Si querés avanzar, te contactamos con un asesor por WhatsApp.",
   },
   {
     question: "¿Hacen entregas en todo el país?",
@@ -368,7 +368,7 @@ const faqs = [
   {
     question: "¿Qué necesito para comprar?",
     answer:
-      "Para iniciar la operación solo necesitás tu DNI y comprobantes de ingresos si vas a financiar. El resto —verificación, transferencia, patentamiento y seguro— lo gestionamos nosotros con tu asesor de cuenta.",
+      "Para iniciar la operación solo necesitás tu DNI y comprobantes de ingresos si vas a solicitar el crédito. El resto —verificación, transferencia, patentamiento y seguro— lo gestionamos nosotros con tu asesor de cuenta.",
   },
   {
     question: "¿Puedo probar el auto antes de comprar?",

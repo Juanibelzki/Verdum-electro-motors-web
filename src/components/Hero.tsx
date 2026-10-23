@@ -31,7 +31,7 @@ export default function Hero({
     { value: "30 años", label: "De trayectoria" },
     { value: "1994", label: "Año de fundación" },
     { value: "0KM", label: "y usados garantizados" },
-    { value: "A medida", label: "Financiación propia" },
+    { value: "Hasta 50%", label: "Crédito prendario" },
   ];
 
   const brands = [
@@ -186,7 +186,7 @@ export default function Hero({
                 </h1>
 
                 <p className="mt-6 max-w-[470px] text-[14.5px] leading-relaxed text-cream/80 [text-shadow:0_1px_10px_rgba(0,0,0,0.7)] sm:text-[15px]">
-                  Autos 0KM y usados garantizados, con financiación propia y entrega inmediata
+                  Autos 0KM y usados garantizados, con financiamiento por crédito prendario con banco y entrega inmediata
                   en Corrientes. Sin vueltas, sin letra chica.
                 </p>
 

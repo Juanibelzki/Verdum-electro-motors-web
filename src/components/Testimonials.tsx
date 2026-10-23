@@ -9,7 +9,7 @@ const testimonials = [
     car: "Cliente desde 2016",
     date: "Corrientes",
     quote:
-      "Compré mi primera camioneta con Verdun hace 8 años y volví por la segunda. La financiación propia fue clave, sin tantos papeles.",
+      "Compré mi primera camioneta con Verdun hace 8 años y volví por la segunda. El financiamiento por crédito prendario fue clave.",
     dark: false,
   },
   {
@@ -24,7 +24,7 @@ const testimonials = [
   {
     name: "Diego P.",
     initials: "DP",
-    car: "Permuta + financiación",
+    car: "Permuta + financiamiento",
     date: "2023",
     quote:
       "Di mi usado en parte de pago y fue muy transparente. Me tasaron bien y no tuve sorpresas. Los recomiendo sin dudarlo.",

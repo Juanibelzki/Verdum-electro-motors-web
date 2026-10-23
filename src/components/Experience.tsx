@@ -21,8 +21,8 @@ const features = [
   },
   {
     icon: Wallet,
-    title: "Financiación propia",
-    text: "Armamos el plan a tu medida, sin banco. De 24 a 60 meses.",
+    title: "Crédito prendario",
+    text: "Financiamiento con banco de hasta el 50% del valor del vehículo. Sujeto a aprobación.",
   },
   {
     icon: Handshake,

@@ -354,7 +354,7 @@ export default function Catalog({
                 </span>
               </h2>
               <p className="mt-4 max-w-lg text-[13.5px] leading-relaxed text-muted">
-                Stock real, fotos reales y disponibilidad actualizada. Precios y financiación
+                Stock real, fotos reales y disponibilidad actualizada. Precios y financiamiento
                 se confirman con un asesor.
               </p>
             </div>

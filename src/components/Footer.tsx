@@ -14,7 +14,7 @@ import { Eyebrow, Logo } from "./ui";
 
 const exploreLinks = [
   { label: "Vehículos", href: "#vehiculos" },
-  { label: "Financiación", href: "#financiacion" },
+  { label: "Financiamiento", href: "#financiacion" },
   { label: "Parte de pago", href: "#vender" },
   { label: "Agendar test drive", href: "#showroom" },
 ];
@@ -249,8 +249,9 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
         <p className="max-w-3xl pb-7 text-[9px] leading-relaxed text-cream/25">
           Los precios publicados, cuando están disponibles, se expresan en dólares estadounidenses
           e incluyen IVA. Las imágenes son ilustrativas y pueden no coincidir con la unidad
-          publicada. Las condiciones de financiación son orientativas, no constituyen una oferta
-          crediticia y se confirman con un asesor. Sujeto a aprobación. Verdun Automotores.
+          publicada. Las condiciones del financiamiento por crédito prendario son orientativas,
+          no constituyen una oferta crediticia y se confirman con un asesor. Sujeto a aprobación
+          del banco. Verdun Automotores.
         </p>
       </div>
     </footer>
