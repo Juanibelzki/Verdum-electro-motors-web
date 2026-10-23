@@ -202,6 +202,15 @@ export default function SettingsPanel({
             en el SQL Editor de Supabase. Mientras no esté aplicada, el sitio
             público sigue infiriendo las specs desde el título y la descripción.
           </p>
+          <a
+            href="https://supabase.com/dashboard/project/ymiakfjhgndqhdtoubkr/sql/new"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-forest transition hover:text-ink"
+          >
+            Abrir SQL Editor
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </a>
           {!specsReady && (
             <div className="mt-4 flex gap-2.5 rounded-xl border border-amber-300/80 bg-amber-50 px-4 py-3 text-[11.5px] leading-relaxed text-amber-900">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -234,7 +243,11 @@ export default function SettingsPanel({
         <SettingsCard
           title="Estado de la Fase 2"
           description="Editor completo de stock y publicación."
-          badge={<StatusPill tone="ok">Listo</StatusPill>}
+          badge={
+            <StatusPill tone={specsReady ? "ok" : "warn"}>
+              {specsReady ? "Listo" : "Falta migración"}
+            </StatusPill>
+          }
         >
           <ul className="mt-5 space-y-2.5">
             <ChecklistItem done>Shell con sidebar y navegación.</ChecklistItem>
@@ -242,11 +255,19 @@ export default function SettingsPanel({
             <ChecklistItem done>Listado de stock con búsqueda y filtros.</ChecklistItem>
             <ChecklistItem done>Vista de detalle y acceso a edición.</ChecklistItem>
             <ChecklistItem done>Alta y edición completa de vehículos.</ChecklistItem>
-            <ChecklistItem done>Ficha técnica, precio y descripción.</ChecklistItem>
+            <ChecklistItem done={specsReady}>
+              Ficha técnica, precio y descripción.
+            </ChecklistItem>
             <ChecklistItem done>Fotos con conversión a WebP y orden.</ChecklistItem>
             <ChecklistItem done>Publicar, despublicar y destacar.</ChecklistItem>
             <ChecklistItem done={false}>Auth, RLS y cutover.</ChecklistItem>
           </ul>
+          {!specsReady && (
+            <p className="mt-4 text-[11px] leading-relaxed text-muted">
+              El código del editor está cerrado. La ficha técnica se habilita
+              al aplicar la migración de Supabase.
+            </p>
+          )}
           <a
             href="/"
             target="_blank"
