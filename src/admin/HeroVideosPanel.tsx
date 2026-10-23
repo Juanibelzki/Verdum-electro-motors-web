@@ -75,7 +75,6 @@ export default function HeroVideosPanel() {
 
     let uploaded = 0;
     const errors: string[] = [];
-    let hasMov = false;
 
     for (const file of list) {
       try {
@@ -84,7 +83,6 @@ export default function HeroVideosPanel() {
           text: `Subiendo ${file.name} (${formatBytes(file.size)})...`,
         });
         const scene = await uploadHeroVideo(file);
-        hasMov = hasMov || isMov(scene);
         setScenes((current) => [...current, scene]);
         setDirty(true);
         uploaded += 1;
@@ -110,11 +108,7 @@ export default function HeroVideosPanel() {
       tone: "success",
       text: `${
         uploaded === 1 ? "Video subido" : `${uploaded} videos subidos`
-      }. Acordate de tocar “Guardar cambios” para publicarlos en el hero.${
-        hasMov
-          ? " Los archivos MOV pueden no reproducirse en Chrome; para máxima compatibilidad usá MP4 H.264."
-          : ""
-      }`,
+      }. Acordate de tocar “Guardar cambios” para publicarlos en el hero.`,
     });
   };
 
@@ -234,10 +228,10 @@ export default function HeroVideosPanel() {
 
       <div className="mt-5 grid gap-3 rounded-2xl border border-line bg-cream/70 p-4 text-[12px] leading-relaxed text-moss sm:grid-cols-[1fr_auto] sm:items-center">
         <p>
-          <strong className="text-ink">Formato recomendado:</strong> MP4 H.264,
-          horizontal 16:9, 6 a 10 segundos, sin audio y hasta{" "}
-          {formatBytes(MAX_HERO_VIDEO_BYTES)}. Los MOV/HEVC pueden no
-          reproducirse en Chrome.
+          <strong className="text-ink">Formato aceptado:</strong> MP4 H.264 o
+          WebM, horizontal 16:9, 6 a 10 segundos, sin audio y hasta{" "}
+          {formatBytes(MAX_HERO_VIDEO_BYTES)}. No se aceptan MOV/HEVC porque
+          pueden no reproducirse en todos los navegadores.
         </p>
         <span className="w-fit rounded-full border border-line bg-paper px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted">
           {scenes.length} {scenes.length === 1 ? "video" : "videos"}
@@ -256,7 +250,7 @@ export default function HeroVideosPanel() {
         <input
           ref={inputRef}
           type="file"
-          accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.webm,.mov,.m4v"
+          accept="video/mp4,video/webm,.mp4,.webm"
           multiple
           aria-label="Subir videos del hero"
           className="sr-only"

@@ -1,7 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatKm, formatPrice, heroPoster, type Car } from "../data/cars";
-import type { HeroScene } from "../data/heroScenes";
+import {
+  fallbackHeroScenes,
+  type HeroScene,
+} from "../data/heroScenes";
 import { ArrowUpRight, Calendar, MapPin } from "./Icons";
+
+const FADE_MS = 1000;
 
 export default function Hero({
   featuredCar,
@@ -14,12 +19,38 @@ export default function Hero({
   onSchedule: () => void;
   onViewCar: (car: Car) => void;
 }) {
-  const [videoIndex, setVideoIndex] = useState(0);
+  const [activeSceneId, setActiveSceneId] = useState<string | null>(null);
+  const [failedIds, setFailedIds] = useState<string[]>([]);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
-  const featuredModel = featuredCar ? featuredCar.model.split(" ").slice(0, 2).join(" ") : "";
-  const totalScenes = Math.max(heroScenes.length, 1);
-  const posterSrc = heroScenes[0]?.poster || heroPoster;
+  const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
+  const activeSceneIdRef = useRef<string | null>(null);
+  const previousSceneIdRef = useRef<string | null>(null);
+  const advanceTimerRef = useRef<number | null>(null);
+  const pauseTimerRef = useRef<number | null>(null);
+  const sceneTokenRef = useRef(0);
+  const featuredModel = featuredCar
+    ? featuredCar.model.split(" ").slice(0, 2).join(" ")
+    : "";
+
+  const failedSet = useMemo(() => new Set(failedIds), [failedIds]);
+  const usingFallback =
+    heroScenes.length > 0 &&
+    heroScenes.every((scene) => failedSet.has(scene.id));
+  const scenes = usingFallback ? fallbackHeroScenes : heroScenes;
+  const availableScenes = useMemo(
+    () => scenes.filter((scene) => !failedSet.has(scene.id)),
+    [scenes, failedSet]
+  );
+  const activeIndex = activeSceneId
+    ? availableScenes.findIndex((scene) => scene.id === activeSceneId)
+    : 0;
+  const normalizedActiveIndex = activeIndex >= 0 ? activeIndex : 0;
+  const activeScene = availableScenes[normalizedActiveIndex] ?? null;
+  const nextScene =
+    availableScenes.length > 1 && activeScene
+      ? availableScenes[(normalizedActiveIndex + 1) % availableScenes.length]
+      : null;
+  const posterSrc = activeScene?.poster || scenes[0]?.poster || heroPoster;
 
   const avatars = [
     { initials: "CM", tone: "bg-forest text-cream" },
@@ -46,6 +77,103 @@ export default function Hero({
     "Fiat",
   ];
 
+  const clearAdvanceTimer = useCallback(() => {
+    if (advanceTimerRef.current !== null) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+  }, []);
+
+  const clearPauseTimer = useCallback(() => {
+    if (pauseTimerRef.current !== null) {
+      window.clearTimeout(pauseTimerRef.current);
+      pauseTimerRef.current = null;
+    }
+  }, []);
+
+  const activateScene = useCallback(
+    (sceneId: string) => {
+      clearAdvanceTimer();
+      clearPauseTimer();
+      sceneTokenRef.current += 1;
+      activeSceneIdRef.current = sceneId;
+
+      const video = videoRefs.current.get(sceneId);
+      if (video) {
+        try {
+          video.currentTime = 0;
+        } catch {
+          // The video may not have metadata yet.
+        }
+        void video.play().catch(() => undefined);
+      }
+
+      setActiveSceneId(sceneId);
+    },
+    [clearAdvanceTimer, clearPauseTimer]
+  );
+
+  const goNext = useCallback(() => {
+    if (!activeScene || availableScenes.length < 2) return;
+
+    const currentIndex = availableScenes.findIndex(
+      (scene) => scene.id === activeScene.id
+    );
+    const next = availableScenes[(currentIndex + 1) % availableScenes.length];
+
+    if (next) activateScene(next.id);
+  }, [activateScene, activeScene, availableScenes]);
+
+  const scheduleAdvance = useCallback(
+    (video?: HTMLVideoElement) => {
+      clearAdvanceTimer();
+      if (!activeScene || availableScenes.length < 2) return;
+
+      const token = ++sceneTokenRef.current;
+      const run = () => {
+        if (sceneTokenRef.current !== token) return;
+        goNext();
+      };
+
+      if (activeScene.type === "image") {
+        advanceTimerRef.current = window.setTimeout(run, 7000);
+        return;
+      }
+
+      const duration =
+        video && Number.isFinite(video.duration) && video.duration > 0
+          ? video.duration
+          : 8;
+      const delay = Math.max((duration - FADE_MS / 1000) * 1000, 1500);
+
+      advanceTimerRef.current = window.setTimeout(run, delay);
+    },
+    [activeScene, availableScenes.length, clearAdvanceTimer, goNext]
+  );
+
+  const handleSceneError = useCallback(
+    (sceneId: string) => {
+      videoRefs.current.get(sceneId)?.pause();
+
+      setFailedIds((current) =>
+        current.includes(sceneId) ? current : [...current, sceneId]
+      );
+
+      if (activeSceneIdRef.current === sceneId) {
+        const currentIndex = availableScenes.findIndex(
+          (scene) => scene.id === sceneId
+        );
+        const next =
+          availableScenes[(currentIndex + 1) % availableScenes.length];
+
+        if (next && next.id !== sceneId) {
+          activateScene(next.id);
+        }
+      }
+    },
+    [activateScene, availableScenes]
+  );
+
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => setReduceMotion(media.matches);
@@ -55,47 +183,147 @@ export default function Hero({
   }, []);
 
   useEffect(() => {
-    if (reduceMotion) return;
-    const id = window.setInterval(() => {
-      setVideoIndex((current) => (current + 1) % totalScenes);
-    }, 8000);
-    return () => window.clearInterval(id);
-  }, [reduceMotion, totalScenes]);
+    clearAdvanceTimer();
+    sceneTokenRef.current += 1;
+    setFailedIds([]);
+    setActiveSceneId(null);
+  }, [clearAdvanceTimer, heroScenes]);
 
   useEffect(() => {
-    setVideoIndex((current) => (current >= heroScenes.length ? 0 : current));
-  }, [heroScenes.length]);
-
-  useEffect(() => {
-    if (reduceMotion) return;
-    const cleanups: Array<() => void> = [];
-
-    videoRefs.current.forEach((video, index) => {
-      if (!video) return;
-      if (index === videoIndex) {
-        try {
-          if (video.readyState >= 1) video.currentTime = 0;
-        } catch {
-          // The video may not have metadata yet; starting at 0 is fine.
-        }
-
-        const play = () => {
-          void video.play().catch(() => undefined);
-        };
-
-        if (video.readyState >= 2) {
-          play();
-        } else {
-          video.addEventListener("canplay", play, { once: true });
-          cleanups.push(() => video.removeEventListener("canplay", play));
-        }
-      } else {
-        video.pause();
+    if (!availableScenes.length) {
+      if (activeSceneId !== null) {
+        clearAdvanceTimer();
+        sceneTokenRef.current += 1;
+        setActiveSceneId(null);
       }
+      return;
+    }
+
+    if (
+      !activeSceneId ||
+      !availableScenes.some((scene) => scene.id === activeSceneId)
+    ) {
+      activateScene(availableScenes[0].id);
+    }
+  }, [
+    activateScene,
+    activeSceneId,
+    availableScenes,
+    clearAdvanceTimer,
+  ]);
+
+  useEffect(() => {
+    activeSceneIdRef.current = activeScene?.id ?? null;
+  }, [activeScene?.id]);
+
+  useEffect(() => {
+    if (reduceMotion || !activeScene || activeScene.type === "image") return;
+
+    const video = videoRefs.current.get(activeScene.id);
+    if (!video) return;
+
+    let cancelled = false;
+    const play = () => {
+      if (cancelled) return;
+
+      try {
+        if (video.readyState >= 1 && video.currentTime > 0.05) {
+          video.currentTime = 0;
+        }
+      } catch {
+        // Metadata may not be ready yet; starting at 0 is fine.
+      }
+
+      void video.play().catch(() => undefined);
+    };
+
+    if (video.readyState >= 2) {
+      play();
+    } else {
+      video.addEventListener("canplay", play, { once: true });
+      return () => {
+        cancelled = true;
+        video.removeEventListener("canplay", play);
+      };
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeScene?.id, activeScene?.type, reduceMotion]);
+
+  useEffect(() => {
+    clearAdvanceTimer();
+    sceneTokenRef.current += 1;
+    if (reduceMotion || !activeScene || availableScenes.length < 2) return;
+
+    if (activeScene.type === "image") {
+      scheduleAdvance();
+      return clearAdvanceTimer;
+    }
+
+    const video = videoRefs.current.get(activeScene.id);
+    if (!video) return;
+
+    const schedule = () => scheduleAdvance(video);
+    if (video.readyState >= 2) {
+      schedule();
+    } else {
+      video.addEventListener("canplay", schedule, { once: true });
+      return () => {
+        video.removeEventListener("canplay", schedule);
+        clearAdvanceTimer();
+      };
+    }
+
+    return clearAdvanceTimer;
+  }, [
+    activeScene?.id,
+    activeScene?.type,
+    availableScenes.length,
+    clearAdvanceTimer,
+    reduceMotion,
+    scheduleAdvance,
+  ]);
+
+  useEffect(() => {
+    clearPauseTimer();
+    const activeId = activeScene?.id ?? null;
+    const previousId = previousSceneIdRef.current;
+
+    videoRefs.current.forEach((video, id) => {
+      if (id !== activeId && id !== previousId) video.pause();
     });
 
-    return () => cleanups.forEach((cleanup) => cleanup());
-  }, [videoIndex, reduceMotion, heroScenes.length]);
+    if (previousId && previousId !== activeId) {
+      const previous = videoRefs.current.get(previousId);
+      if (previous) {
+        pauseTimerRef.current = window.setTimeout(() => {
+          if (activeSceneIdRef.current !== previousId) {
+            previous.pause();
+            try {
+              previous.currentTime = 0;
+            } catch {
+              // The video may already be detached.
+            }
+          }
+        }, FADE_MS + 100);
+      }
+    }
+
+    previousSceneIdRef.current = activeId;
+
+    return clearPauseTimer;
+  }, [activeScene?.id, clearPauseTimer]);
+
+  useEffect(
+    () => () => {
+      clearAdvanceTimer();
+      clearPauseTimer();
+      videoRefs.current.forEach((video) => video.pause());
+    },
+    [clearAdvanceTimer, clearPauseTimer]
+  );
 
   return (
     <section id="top" className="relative overflow-hidden bg-cream">
@@ -117,35 +345,62 @@ export default function Hero({
               className="absolute inset-0 h-full w-full object-cover"
             />
             {!reduceMotion &&
-              heroScenes.map((scene, index) =>
-                scene.type === "image" ? (
-                  <img
+              scenes.map((scene) => {
+                const isActive = scene.id === activeScene?.id;
+                const isNext = scene.id === nextScene?.id;
+                const failed = failedSet.has(scene.id);
+                const objectPosition = scene.position || "center";
+
+                return (
+                  <div
                     key={scene.id}
-                    src={scene.src}
-                    alt=""
-                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1400ms] ease-out ${
-                      index === videoIndex ? "opacity-100" : "opacity-0"
+                    className={`absolute inset-0 transition-opacity duration-[1000ms] ease-in-out ${
+                      isActive && !failed ? "opacity-100" : "opacity-0"
                     }`}
-                  />
-                ) : (
-                  <video
-                    key={scene.id}
-                    ref={(element) => {
-                      videoRefs.current[index] = element;
-                    }}
-                    src={scene.src}
-                    poster={scene.poster || heroPoster}
-                    autoPlay={index === videoIndex}
-                    muted
-                    loop
-                    playsInline
-                    preload={index === videoIndex ? "auto" : "metadata"}
-                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1400ms] ease-out ${
-                      index === videoIndex ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                )
-              )}
+                  >
+                    {scene.type === "image" ? (
+                      <img
+                        src={scene.src}
+                        alt=""
+                        onError={() => handleSceneError(scene.id)}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        style={{ objectPosition }}
+                      />
+                    ) : (
+                      <>
+                        <img
+                          src={scene.poster || heroPoster}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-cover"
+                          style={{ objectPosition }}
+                        />
+                        <video
+                          ref={(element) => {
+                            if (element) videoRefs.current.set(scene.id, element);
+                            else videoRefs.current.delete(scene.id);
+                          }}
+                          src={scene.src}
+                          poster={scene.poster || heroPoster}
+                          autoPlay={isActive && !failed}
+                          muted
+                          loop={availableScenes.length === 1}
+                          playsInline
+                          disablePictureInPicture
+                          preload={isActive || isNext ? "auto" : "metadata"}
+                          onError={() => handleSceneError(scene.id)}
+                          onEnded={() => {
+                            if (isActive) goNext();
+                          }}
+                          style={{ objectPosition }}
+                          className={`absolute inset-0 h-full w-full object-cover ${
+                            failed ? "opacity-0" : ""
+                          }`}
+                        />
+                      </>
+                    )}
+                  </div>
+                );
+              })}
           </div>
 
           {/* Overlay requested in the original template */}
@@ -295,25 +550,25 @@ export default function Hero({
                 </div>
               </div>
 
-              {!reduceMotion && (
-                <div className="flex items-center gap-2" role="group" aria-label="Videos del hero">
-                  {heroScenes.map((scene, index) => (
+              {!reduceMotion && availableScenes.length > 0 && (
+                <div className="flex items-center gap-2" role="group" aria-label="Escenas del hero">
+                  {availableScenes.map((scene, index) => (
                     <button
                       key={scene.id}
                       type="button"
-                      onClick={() => setVideoIndex(index)}
-                      aria-label={`Ver video ${index + 1}`}
-                      aria-pressed={index === videoIndex}
+                      onClick={() => activateScene(scene.id)}
+                      aria-label={`Ver escena ${index + 1}`}
+                      aria-pressed={scene.id === activeScene?.id}
                       className={`h-1.5 rounded-full transition-all duration-300 ${
-                        index === videoIndex
+                        scene.id === activeScene?.id
                           ? "w-8 bg-lime"
                           : "w-4 bg-cream/30 hover:bg-cream/60"
                       }`}
                     />
                   ))}
                   <span className="ml-1 text-[9px] font-bold uppercase tracking-[0.2em] text-cream/40">
-                    {String(videoIndex + 1).padStart(2, "0")} /{" "}
-                    {String(heroScenes.length).padStart(2, "0")}
+                    {String(normalizedActiveIndex + 1).padStart(2, "0")} /{" "}
+                    {String(availableScenes.length).padStart(2, "0")}
                   </span>
                 </div>
               )}

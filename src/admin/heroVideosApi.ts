@@ -51,7 +51,13 @@ const createPoster = async (file: File): Promise<Blob | null> => {
 
 export async function uploadHeroVideo(file: File): Promise<HeroScene> {
   if (!file.type.startsWith("video/") && !/\.(mp4|webm|mov|m4v)$/i.test(file.name)) {
-    throw new Error("El archivo tiene que ser un video MP4, WebM o MOV.");
+    throw new Error("El archivo tiene que ser un video MP4 o WebM.");
+  }
+
+  if (/\.mov$/i.test(file.name) || file.type === "video/quicktime") {
+    throw new Error(
+      "Los videos MOV/HEVC pueden no reproducirse en todos los navegadores. Convertí el archivo a MP4 H.264 antes de subirlo."
+    );
   }
 
   if (file.size > MAX_HERO_VIDEO_BYTES) {
