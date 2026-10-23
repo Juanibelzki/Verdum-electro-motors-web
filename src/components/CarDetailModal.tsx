@@ -88,7 +88,7 @@ export default function CarDetailModal({
                 type="button"
                 onClick={() => changePhoto(-1)}
                 aria-label="Foto anterior"
-                className="absolute left-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-ink/40 text-cream backdrop-blur-md transition hover:bg-ink/70"
+                className="absolute left-3 top-1/2 hidden h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-ink/40 text-cream backdrop-blur-md transition hover:bg-ink/70 sm:grid"
               >
                 <ArrowLeft className="h-4 w-4" />
               </button>
@@ -96,11 +96,11 @@ export default function CarDetailModal({
                 type="button"
                 onClick={() => changePhoto(1)}
                 aria-label="Foto siguiente"
-                className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-ink/40 text-cream backdrop-blur-md transition hover:bg-ink/70"
+                className="absolute right-3 top-1/2 hidden h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-ink/40 text-cream backdrop-blur-md transition hover:bg-ink/70 sm:grid"
               >
                 <ArrowRight className="h-4 w-4" />
               </button>
-              <span className="absolute right-3 top-3 rounded-full bg-ink/55 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-cream backdrop-blur-md">
+              <span className="absolute left-3 top-3 rounded-full bg-ink/55 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-cream backdrop-blur-md">
                 {activePhoto + 1} / {photos.length}
               </span>
             </>

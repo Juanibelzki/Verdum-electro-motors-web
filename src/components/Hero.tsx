@@ -335,7 +335,7 @@ export default function Hero({
         </div>
       </div>
 
-      <div className="relative mx-auto max-w-[1440px] px-4 pb-10 pt-5 sm:px-8 sm:pt-8 lg:px-10 lg:pb-14 lg:pt-10">
+      <div className="relative mx-auto max-w-[1440px] px-5 pb-10 pt-5 sm:px-8 sm:pt-8 lg:px-10 lg:pb-14 lg:pt-10">
         <div className="relative isolate flex min-h-[560px] flex-col overflow-hidden rounded-[1.75rem] border border-ink/10 bg-forest shadow-[0_45px_100px_-50px_rgba(20,36,30,0.75)] sm:min-h-[640px] sm:rounded-[2.25rem] lg:min-h-[760px] lg:rounded-[2.5rem]">
           {/* Media layer */}
           <div className="absolute inset-0" aria-hidden="true">
@@ -411,7 +411,7 @@ export default function Hero({
           {/* Content */}
           <div className="relative z-10 flex flex-1 flex-col justify-between gap-12 p-5 sm:p-8 lg:p-12">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <p className="inline-flex items-center gap-2.5 rounded-full border border-cream/20 bg-ink/25 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-cream backdrop-blur-md">
+              <p className="inline-flex items-center gap-2.5 whitespace-nowrap rounded-full border border-cream/20 bg-ink/25 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-cream backdrop-blur-md max-[359px]:gap-2 max-[359px]:px-3 max-[359px]:tracking-[0.16em]">
                 <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-lime" />
                 Concesionaria · Corrientes
               </p>
@@ -428,7 +428,7 @@ export default function Hero({
 
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_270px] lg:items-end lg:gap-10">
               <div className="max-w-[800px]">
-                <h1 className="text-[clamp(2.1rem,8.5vw,3.6rem)] font-extrabold leading-[0.94] tracking-[-0.055em] text-cream [text-shadow:0_2px_10px_rgba(0,0,0,0.55),0_14px_50px_rgba(0,0,0,0.6)] sm:text-[clamp(2.8rem,6.4vw,4.4rem)] lg:text-[clamp(3.3rem,5.1vw,5rem)]">
+                <h1 className="text-[clamp(1.8rem,8.5vw,3.6rem)] font-extrabold leading-[0.94] tracking-[-0.055em] text-cream [text-shadow:0_2px_10px_rgba(0,0,0,0.55),0_14px_50px_rgba(0,0,0,0.6)] sm:text-[clamp(2.8rem,6.4vw,4.4rem)] lg:text-[clamp(3.3rem,5.1vw,5rem)]">
                   Tu próximo auto
                   <br />
                   no es una compra.
