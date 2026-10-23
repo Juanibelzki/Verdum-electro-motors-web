@@ -92,8 +92,7 @@ descripción.
 - Fase 4: videos del hero administrables desde `/admin` (staging).
 - Fase 5: shell del admin, resumen, listado de stock y alta rápida de borradores.
 - Fase 6: editor completo de stock, ficha técnica, fotos, publicación y destacado.
-  Código cerrado; la edición de ficha técnica queda habilitada al aplicar
-  `supabase-stock-specs.sql`.
-- Próxima: aplicar la migración de ficha técnica, Auth/RLS y cutover a producción.
+  Código cerrado y migración `supabase-stock-specs.sql` aplicada en Supabase.
+- Próxima: Auth/RLS y cutover a producción.
 
 La web actual sigue viva en `main`.

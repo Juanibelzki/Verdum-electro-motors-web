@@ -195,22 +195,35 @@ export default function SettingsPanel({
             ))}
           </div>
           <p className="mt-4 text-[11.5px] leading-relaxed text-muted">
-            Ejecutá{" "}
-            <code className="rounded bg-cream px-1.5 py-0.5 text-[11px] font-semibold text-ink">
-              supabase-stock-specs.sql
-            </code>{" "}
-            en el SQL Editor de Supabase. Mientras no esté aplicada, el sitio
-            público sigue infiriendo las specs desde el título y la descripción.
+            {specsReady ? (
+              <>
+                La migración ya está aplicada. El editor puede guardar versión,
+                transmisión, combustible, carrocería, tracción y potencia; el
+                sitio público las usa con prioridad sobre lo inferido.
+              </>
+            ) : (
+              <>
+                Ejecutá{" "}
+                <code className="rounded bg-cream px-1.5 py-0.5 text-[11px] font-semibold text-ink">
+                  supabase-stock-specs.sql
+                </code>{" "}
+                en el SQL Editor de Supabase. Mientras no esté aplicada, el
+                sitio público sigue infiriendo las specs desde el título y la
+                descripción.
+              </>
+            )}
           </p>
-          <a
-            href="https://supabase.com/dashboard/project/ymiakfjhgndqhdtoubkr/sql/new"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-3 inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-forest transition hover:text-ink"
-          >
-            Abrir SQL Editor
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
+          {!specsReady && (
+            <a
+              href="https://supabase.com/dashboard/project/ymiakfjhgndqhdtoubkr/sql/new"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-forest transition hover:text-ink"
+            >
+              Abrir SQL Editor
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
+          )}
           {!specsReady && (
             <div className="mt-4 flex gap-2.5 rounded-xl border border-amber-300/80 bg-amber-50 px-4 py-3 text-[11.5px] leading-relaxed text-amber-900">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
