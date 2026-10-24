@@ -583,7 +583,7 @@ export default function StockPanel({
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 xl:hidden">
+          <div className="mt-4 grid grid-cols-1 gap-3 xl:hidden">
             {filtered.map((vehicle) => {
               const category = categoryFor(vehicle, categories);
               return (
@@ -591,7 +591,7 @@ export default function StockPanel({
                   key={vehicle.id}
                   type="button"
                   onClick={() => setSelectedId(vehicle.id)}
-                  className="rounded-2xl border border-line bg-paper p-3 text-left transition hover:border-ink/25"
+                  className="min-w-0 rounded-2xl border border-line bg-paper p-3 text-left transition hover:border-ink/25"
                 >
                   <div className="flex gap-3">
                     <img
@@ -604,7 +604,7 @@ export default function StockPanel({
                       <p className="truncate text-[13px] font-bold text-ink">
                         {vehicleTitle(vehicle)}
                       </p>
-                      <p className="mt-1 text-[10.5px] text-muted">
+                      <p className="mt-1 truncate text-[10.5px] text-muted">
                         {category?.nombre ?? vehicle.categoria ?? "Sin categoría"} ·{" "}
                         {vehicle.año ?? "—"} · {vehicleKmLabel(vehicle)}
                       </p>
