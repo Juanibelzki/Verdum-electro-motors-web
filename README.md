@@ -27,6 +27,11 @@ Genera `dist/index.html` como archivo único (vía `vite-plugin-singlefile`).
 
 Vercel — framework Vite, build `npm run build`, output `dist` (ver `vercel.json`).
 
+- Producción: <https://verdum-electro-motors-web.vercel.app>
+- Panel privado: <https://verdum-electro-motors-web.vercel.app/admin>
+- La rama `main` se publica automáticamente en producción. Los cambios se revisan
+  primero en un Preview de Vercel antes de mergear.
+
 ## Datos
 
 El stock se lee en vivo desde Supabase (API REST, solo lectura) usando la anon key

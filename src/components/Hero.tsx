@@ -429,9 +429,9 @@ export default function Hero({
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_270px] lg:items-end lg:gap-10">
               <div className="max-w-[800px]">
                 <h1 className="text-[clamp(1.8rem,8.5vw,3.6rem)] font-extrabold leading-[0.94] tracking-[-0.055em] text-cream [text-shadow:0_2px_10px_rgba(0,0,0,0.55),0_14px_50px_rgba(0,0,0,0.6)] sm:text-[clamp(2.8rem,6.4vw,4.4rem)] lg:text-[clamp(3.3rem,5.1vw,5rem)]">
-                  Tu próximo auto
+                  Tu próximo auto{" "}
                   <br />
-                  no es una compra.
+                  no es una compra.{" "}
                   <br />
                   Es una{" "}
                   <span className="relative isolate inline-block whitespace-nowrap font-serif font-normal italic tracking-[-0.025em] text-forest">

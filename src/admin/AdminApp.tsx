@@ -341,21 +341,6 @@ function AdminWorkspace({
   const meta = SECTION_META[section];
 
   useEffect(() => {
-    const previousTitle = document.title;
-    document.title = "Admin · Verdun Automotores";
-
-    const robots = document.createElement("meta");
-    robots.name = "robots";
-    robots.content = "noindex,nofollow";
-    document.head.appendChild(robots);
-
-    return () => {
-      document.title = previousTitle;
-      robots.remove();
-    };
-  }, []);
-
-  useEffect(() => {
     const onHashChange = () => setSection(readSection());
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
@@ -518,6 +503,21 @@ function AdminWorkspace({
 
 export default function AdminApp() {
   const auth = useAdminAuth();
+
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = "Admin · Verdun Automotores";
+
+    const robots = document.createElement("meta");
+    robots.name = "robots";
+    robots.content = "noindex,nofollow";
+    document.head.appendChild(robots);
+
+    return () => {
+      document.title = previousTitle;
+      robots.remove();
+    };
+  }, []);
 
   if (auth.checking) return <AdminLoading />;
   if (!auth.session) return <AdminLogin />;
