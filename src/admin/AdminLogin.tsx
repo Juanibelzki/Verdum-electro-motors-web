@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   ArrowUpRight,
   Eye,
@@ -7,6 +7,7 @@ import {
   ShieldCheck,
 } from "../components/Icons";
 import { signIn } from "../data/auth";
+import { heroPoster, heroVideos } from "../data/cars";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,24 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [canPlayVideo, setCanPlayVideo] = useState(false);
+
+  useEffect(() => {
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const widthQuery = window.matchMedia("(min-width: 768px)");
+
+    const checkPlayback = () => {
+      setCanPlayVideo(!motionQuery.matches && widthQuery.matches);
+    };
+
+    checkPlayback();
+    motionQuery.addEventListener("change", checkPlayback);
+    widthQuery.addEventListener("change", checkPlayback);
+    return () => {
+      motionQuery.removeEventListener("change", checkPlayback);
+      widthQuery.removeEventListener("change", checkPlayback);
+    };
+  }, []);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -35,10 +54,38 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-ink text-cream">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-8 sm:px-6 lg:px-8">
+    <div className="relative isolate min-h-screen overflow-hidden bg-ink text-cream">
+      {/* Fondo con video hero o poster */}
+      <div
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        aria-hidden="true"
+      >
+        {canPlayVideo ? (
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster={heroPoster}
+            className="h-full w-full object-cover"
+          >
+            <source src={heroVideos[0]} type="video/mp4" />
+          </video>
+        ) : (
+          <img
+            src={heroPoster}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+        )}
+        {/* Capa verde oscura al 80% */}
+        <div className="absolute inset-0 bg-ink/80" />
+      </div>
+
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid w-full gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
-          <section className="relative hidden overflow-hidden rounded-[2rem] border border-white/10 bg-forest p-8 lg:flex lg:flex-col lg:justify-between">
+          <section className="relative hidden overflow-hidden rounded-[2rem] border border-white/15 bg-forest/60 p-8 shadow-2xl backdrop-blur-xl lg:flex lg:flex-col lg:justify-between">
             <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-lime/10 blur-3xl" />
             <div className="relative">
               <div className="flex items-center gap-3">
@@ -74,12 +121,7 @@ export default function AdminLogin() {
             <div className="relative mt-12 grid gap-3 text-[11.5px] leading-relaxed text-cream/60">
               <p className="flex items-start gap-2.5">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-lime" />
-                Supabase Auth con sesión protegida y RLS por usuario
-                administrador.
-              </p>
-              <p className="flex items-start gap-2.5">
-                <Key className="mt-0.5 h-4 w-4 shrink-0 text-lime" />
-                Las escrituras del panel requieren una sesión válida.
+                Acceso exclusivo para el equipo de Verdun Automotores.
               </p>
             </div>
           </section>
@@ -127,7 +169,7 @@ export default function AdminLogin() {
                       autoComplete="username"
                       autoFocus
                       required
-                      placeholder="admin@verdun.com.ar"
+                      placeholder="tu-correo@ejemplo.com"
                       className="w-full rounded-xl border border-line bg-cream/50 py-3 pl-10 pr-3.5 text-[13px] text-ink outline-none transition placeholder:text-muted/60 focus:border-forest/40 focus:ring-2 focus:ring-lime/50"
                     />
                   </span>
