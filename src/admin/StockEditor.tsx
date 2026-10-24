@@ -36,6 +36,7 @@ import {
 } from "../data/cars";
 import { inferVehicleSpecs } from "../data/vehicles";
 import {
+  deleteVehicleComplete,
   deleteVehiclePhoto,
   insertVehiclePhotos,
   MAX_VEHICLE_PHOTOS,
@@ -310,6 +311,7 @@ export default function StockEditor({
     };
   });
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [saveStage, setSaveStage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [autofillNotice, setAutofillNotice] = useState<string | null>(null);
@@ -524,7 +526,7 @@ export default function StockEditor({
   };
 
   const handleCancel = () => {
-    if (saving) return;
+    if (saving || deleting) return;
     if (
       dirty &&
       !window.confirm(
@@ -534,6 +536,30 @@ export default function StockEditor({
       return;
     }
     onCancel();
+  };
+
+  const handleDelete = async () => {
+    if (!vehicle || saving || deleting) return;
+
+    const confirmed = window.confirm(
+      "¿Estás seguro de eliminar este vehículo definitivamente de la base de datos y borrar todas sus fotos? Esta acción no se puede deshacer."
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setFormError(null);
+
+    try {
+      await deleteVehicleComplete(vehicle.id, vehicle.photos);
+      onSaved("Vehículo eliminado correctamente junto con todas sus fotos.");
+    } catch (cause) {
+      setFormError(
+        cause instanceof Error
+          ? cause.message
+          : "No se pudo eliminar el vehículo. Intentá de nuevo."
+      );
+      setDeleting(false);
+    }
   };
 
   const save = async (mode: "publish" | "draft") => {
@@ -661,10 +687,20 @@ export default function StockEditor({
 
   const actions = (
     <div className="flex flex-wrap items-center gap-2">
+      {!isNew && (
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={saving || deleting}
+          className="rounded-full border border-red-200/80 bg-red-50/50 px-4 py-2.5 text-[12px] font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {deleting ? "Eliminando..." : "Eliminar"}
+        </button>
+      )}
       <button
         type="button"
         onClick={handleCancel}
-        disabled={saving}
+        disabled={saving || deleting}
         className="rounded-full border border-line bg-paper px-4 py-2.5 text-[12px] font-semibold text-ink transition hover:border-ink/25 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Cancelar
@@ -672,7 +708,7 @@ export default function StockEditor({
       <button
         type="button"
         onClick={() => void save("draft")}
-        disabled={saving}
+        disabled={saving || deleting}
         className="rounded-full border border-line bg-cream px-4 py-2.5 text-[12px] font-semibold text-ink transition hover:border-ink/25 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {vehicle?.activo ? "Despublicar" : "Guardar borrador"}
@@ -680,7 +716,7 @@ export default function StockEditor({
       <button
         type="button"
         onClick={() => void save("publish")}
-        disabled={saving}
+        disabled={saving || deleting}
         className="inline-flex items-center gap-2 rounded-full bg-lime px-5 py-2.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft disabled:cursor-not-allowed disabled:opacity-50"
       >
         {saving ? (
@@ -704,7 +740,7 @@ export default function StockEditor({
           <button
             type="button"
             onClick={handleCancel}
-            disabled={saving}
+            disabled={saving || deleting}
             className="inline-flex items-center gap-1.5 text-[11px] font-bold text-moss transition hover:text-ink disabled:opacity-50"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -1452,11 +1488,13 @@ export default function StockEditor({
 
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
         <p className="text-[11px] text-muted">
-          {saving
-            ? saveStage ?? "Guardando..."
-            : dirty
-              ? "Hay cambios sin guardar."
-              : "Sin cambios pendientes."}
+          {deleting
+            ? "Eliminando vehículo..."
+            : saving
+              ? saveStage ?? "Guardando..."
+              : dirty
+                ? "Hay cambios sin guardar."
+                : "Sin cambios pendientes."}
         </p>
         {actions}
       </div>

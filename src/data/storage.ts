@@ -47,3 +47,32 @@ export const canvasToBlob = (
   new Promise<Blob | null>((resolve) => {
     canvas.toBlob(resolve, type, quality);
   });
+
+export const deleteFromStorage = async (
+  bucket: string,
+  paths: string[]
+): Promise<void> => {
+  if (!paths.length) return;
+  const response = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/${bucket}`,
+    {
+      method: "DELETE",
+      headers: await getAuthHeaders({
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify({ prefixes: paths }),
+    }
+  );
+
+  if (response.status === 401) {
+    clearSession();
+    throw new Error("Sesión vencida. Volvé a iniciar sesión.");
+  }
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(
+      `No se pudieron eliminar los archivos de Storage (${response.status})${detail ? `: ${detail}` : ""}`
+    );
+  }
+};

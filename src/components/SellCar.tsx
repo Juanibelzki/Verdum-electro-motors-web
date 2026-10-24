@@ -13,7 +13,6 @@ import {
   TASACION_MAX_KM,
   TASACION_MIN_YEAR,
 } from "../data/tasacion";
-import { uploadTasacionPhotos } from "../data/tasacionUpload";
 import { ArrowUpRight, Camera, Check, Sparkles, Whatsapp, X } from "./Icons";
 import { Eyebrow, Reveal } from "./ui";
 
@@ -56,11 +55,6 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
   const [status, setStatus] = useState<Status | null>(null);
   const [sent, setSent] = useState(false);
   const [sentLink, setSentLink] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState({
-    done: 0,
-    total: 0,
-  });
   const photoInputRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<PhotoDraft[]>([]);
   const submittingRef = useRef(false);
@@ -158,8 +152,6 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
     setStatus(null);
     setSent(false);
     setSentLink("");
-    setUploading(false);
-    setUploadProgress({ done: 0, total: 0 });
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -194,54 +186,62 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
     }
 
     submittingRef.current = true;
-    setUploading(true);
-    setUploadProgress({ done: 0, total: photos.length });
-    setStatus(
-      photos.length
-        ? {
-            tone: "info",
-            text: "Optimizando las fotos para subirlas...",
-          }
-        : null
-    );
+    setStatus(null);
 
-    try {
-      const photoUrls = await uploadTasacionPhotos(
-        photos.map((photo) => photo.file),
-        (done, total) => {
-          setUploadProgress({ done, total });
-          setStatus({
-            tone: "info",
-            text: `Subiendo fotos ${done}/${total}...`,
-          });
-        }
-      );
+    const messageLines = [
+      "Hola Verdun, quiero entregar mi auto como parte de pago.",
+      `Marca: ${brand}`,
+      `Modelo: ${model}`,
+      `Año: ${year}`,
+      `Kilómetros: ${kmNumber.toLocaleString("es-AR")}`,
+    ];
 
-      const message = [
-        "Hola Verdun, quiero entregar mi auto como parte de pago.",
-        `Marca: ${brand}`,
-        `Modelo: ${model}`,
-        `Año: ${year}`,
-        `Kilómetros: ${kmNumber.toLocaleString("es-AR")}`,
-        photoUrls.length ? "Fotos del vehículo:" : "",
-        ...photoUrls,
-      ]
-        .filter(Boolean)
-        .join("\n");
-
-      setSentLink(whatsappLink(message));
-      setStatus(null);
-      setSent(true);
-    } catch (cause) {
-      console.error("No se pudieron subir las fotos de la tasación.", cause);
-      setStatus({
-        tone: "error",
-        text: "No pudimos subir las fotos. Revisá tu conexión e intentá nuevamente.",
-      });
-      submittingRef.current = false;
-    } finally {
-      setUploading(false);
+    if (photos.length > 0) {
+      messageLines.push("Te adjunto por acá las fotos del vehículo.");
     }
+
+    const message = messageLines.join("\n");
+    const link = whatsappLink(message);
+    setSentLink(link);
+
+    // 1. Si el dispositivo soporta navigator.canShare({ files }) en mobile
+    const photoFiles = photos.map((photo) => photo.file);
+    const canShareFiles =
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function" &&
+      typeof navigator.canShare === "function" &&
+      photoFiles.length > 0 &&
+      (() => {
+        try {
+          return navigator.canShare({ files: photoFiles });
+        } catch {
+          return false;
+        }
+      })();
+
+    if (canShareFiles) {
+      try {
+        await navigator.share({
+          title: "Tasación de vehículo - Verdun Automotores",
+          text: message,
+          files: photoFiles,
+        });
+        setStatus(null);
+        setSent(true);
+        submittingRef.current = false;
+        return;
+      } catch {
+        // Si el usuario canceló el share o falló, continuamos a WhatsApp sin mostrar error
+      }
+    }
+
+    // 2. Si está en desktop o navigator.share no está disponible / falla:
+    // Nunca mostrar cartel de error rojo, abrir directamente WhatsApp
+    setStatus(null);
+    setSent(true);
+    submittingRef.current = false;
+
+    window.open(link, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -325,10 +325,10 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                     <p className="mt-2 text-[26px] font-extrabold leading-tight tracking-[-0.04em] text-ink sm:text-[29px]">
                       Te pasamos la tasación por WhatsApp.
                     </p>
-                    <p className="mx-auto mt-2 max-w-[300px] text-[10.5px] leading-relaxed text-muted">
+                    <p className="mx-auto mt-2 max-w-[320px] text-[10.5px] leading-relaxed text-muted">
                       {photos.length
-                        ? "Ya cargamos las fotos. Abrí el chat para enviarnos los datos y los links."
-                        : `Abrí el chat con los datos de tu ${form.brand} ${form.model}.`}
+                        ? "Ya abrimos el chat con los datos de tu vehículo. Podés adjuntar las fotos directamente en la conversación de WhatsApp que se acaba de abrir."
+                        : `Abrimos el chat con los datos de tu ${form.brand} ${form.model}.`}
                     </p>
                     <div className="mt-5 flex flex-col gap-2">
                       <a
@@ -338,8 +338,7 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                         className="flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
                       >
                         <Whatsapp className="h-4 w-4" />
-                        Abrir WhatsApp con los datos
-                        {photos.length ? " y las fotos" : ""}
+                        Abrir WhatsApp
                       </a>
                       <button
                         type="button"
@@ -563,20 +562,15 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
 
                     <button
                       type="submit"
-                      disabled={uploading}
-                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft disabled:cursor-not-allowed disabled:opacity-60"
+                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
                     >
                       <Whatsapp className="h-4 w-4" />
-                      {uploading
-                        ? uploadProgress.total
-                          ? `Subiendo fotos ${uploadProgress.done}/${uploadProgress.total}...`
-                          : "Preparando..."
-                        : "Enviar por WhatsApp"}
+                      Enviar por WhatsApp
                       <ArrowUpRight className="h-4 w-4" />
                     </button>
                     <p className="mt-2.5 text-center text-[8.5px] leading-relaxed text-muted">
                       {photos.length
-                        ? "Optimizamos las fotos y las subimos antes de abrir WhatsApp. La tasación se confirma con una revisión en el showroom."
+                        ? "Al enviar se abre WhatsApp con los datos de tu auto y podés adjuntar las fotos en el chat. La tasación se confirma con una revisión en el showroom."
                         : "Al enviar preparamos el mensaje con los datos de tu auto. La tasación se confirma con una revisión en el showroom."}
                     </p>
                   </form>

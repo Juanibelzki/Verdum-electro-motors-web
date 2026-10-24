@@ -1,6 +1,6 @@
 import { clearSession, getAuthHeaders } from "../data/auth";
 import { FALLBACK_CAR_IMAGE, formatKm, formatPrice } from "../data/cars";
-import { canvasToBlob, uploadToStorage } from "../data/storage";
+import { canvasToBlob, deleteFromStorage, uploadToStorage } from "../data/storage";
 import { SUPABASE_URL } from "../data/supabase";
 
 export const MAX_VEHICLE_PHOTOS = 8;
@@ -424,6 +424,108 @@ export async function deleteVehiclePhoto(id: string): Promise<void> {
   await request<unknown>(`photos?id=eq.${encodeURIComponent(id)}`, {
     method: "DELETE",
   });
+}
+
+export const extractStoragePath = (
+  url: string,
+  bucket = "stock-photos"
+): string | null => {
+  if (!url) return null;
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const idx = url.indexOf(marker);
+  if (idx !== -1) {
+    return decodeURIComponent(url.slice(idx + marker.length));
+  }
+  const signMarker = `/storage/v1/object/sign/${bucket}/`;
+  const sIdx = url.indexOf(signMarker);
+  if (sIdx !== -1) {
+    const part = url.slice(sIdx + signMarker.length).split("?")[0];
+    return decodeURIComponent(part);
+  }
+  if (url.startsWith("vehicles/")) {
+    return url;
+  }
+  return null;
+};
+
+export async function deleteVehicleComplete(
+  vehicleId: string,
+  knownPhotos: AdminPhoto[] = []
+): Promise<void> {
+  let dbPhotos: AdminPhoto[] = [];
+  try {
+    const res = await request<AdminPhoto[]>(
+      `photos?select=id,url,vehicle_id&vehicle_id=eq.${encodeURIComponent(vehicleId)}`
+    );
+    if (Array.isArray(res)) dbPhotos = res;
+  } catch {
+    // Si falla la consulta previa, continuamos con knownPhotos
+  }
+
+  const allUrls = Array.from(
+    new Set(
+      [
+        ...knownPhotos.map((p) => p.url),
+        ...dbPhotos.map((p) => p.url),
+      ].filter(Boolean)
+    )
+  );
+
+  const paths = allUrls
+    .map((url) => extractStoragePath(url, "stock-photos"))
+    .filter((path): path is string => Boolean(path));
+
+  try {
+    const listRes = await fetch(
+      `${SUPABASE_URL}/storage/v1/object/list/stock-photos`,
+      {
+        method: "POST",
+        headers: await getAuthHeaders({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({ prefix: `vehicles/${vehicleId}` }),
+      }
+    );
+    if (listRes.ok) {
+      const items = (await listRes.json().catch(() => [])) as Array<{ name: string }>;
+      if (Array.isArray(items)) {
+        for (const item of items) {
+          if (item?.name) {
+            paths.push(`vehicles/${vehicleId}/${item.name}`);
+          }
+        }
+      }
+    }
+  } catch {
+    // Si falla el listado, continuamos con los paths extraídos de las URLs
+  }
+
+  const uniquePaths = Array.from(new Set(paths));
+
+  // 1. Eliminar archivos físicos del bucket stock-photos
+  if (uniquePaths.length > 0) {
+    try {
+      await deleteFromStorage("stock-photos", uniquePaths);
+    } catch (cause) {
+      console.warn("No se pudieron eliminar algunas fotos del storage:", cause);
+    }
+  }
+
+  // 2. Eliminar registros asociados en la tabla photos (vehicle_id=eq.<id>)
+  await request<unknown>(
+    `photos?vehicle_id=eq.${encodeURIComponent(vehicleId)}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  // 3. Eliminar el registro del vehículo en la tabla vehicles (id=eq.<id>)
+  await request<unknown>(
+    `vehicles?id=eq.${encodeURIComponent(vehicleId)}`,
+    {
+      method: "DELETE",
+    }
+  );
 }
 
 export const categoryFor = (
