@@ -335,6 +335,20 @@ create policy "stock_photos_admin_delete"
     and public.is_admin()
   );
 
+-- Formulario público de tasación: solo permite insertar WebP dentro de
+-- stock-photos/tasaciones/*. No habilita escritura en el resto del bucket.
+drop policy if exists "stock_photos_tasaciones_public_insert" on storage.objects;
+create policy "stock_photos_tasaciones_public_insert"
+  on storage.objects
+  for insert
+  to anon
+  with check (
+    bucket_id = 'stock-photos'
+    and name like 'tasaciones/%'
+    and lower(name) like '%.webp'
+    and (metadata->>'mimetype') = 'image/webp'
+  );
+
 -- ------------------------------------------------------------
 -- 10) GRANTS
 -- ------------------------------------------------------------

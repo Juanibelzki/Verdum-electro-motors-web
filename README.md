@@ -82,6 +82,18 @@ secciones:
 Los archivos se suben al bucket público `stock-photos` y la home los lee en
 vivo.
 
+### Tasaciones
+
+El formulario de la sección **04 — Entregar como parte de pago** optimiza las
+fotos a WebP y las sube a `stock-photos/tasaciones/<timestamp>-<random>/`
+usando la anon key. Después abre WhatsApp con los datos del auto y los links
+públicos de las fotos.
+
+La política está en `supabase-tasaciones-storage.sql` y ya está aplicada en el
+proyecto actual. Si se recrea el proyecto, ejecutarla en el **SQL Editor** de
+Supabase. Solo permite insertar WebP dentro de `tasaciones/*`; no habilita
+escritura en el resto del bucket.
+
 ### Seguridad y Auth
 
 1. En Supabase, ir a **Authentication → Users** y crear el usuario admin con

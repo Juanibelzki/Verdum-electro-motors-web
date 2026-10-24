@@ -13,6 +13,7 @@ import {
   TASACION_MAX_KM,
   TASACION_MIN_YEAR,
 } from "../data/tasacion";
+import { uploadTasacionPhotos } from "../data/tasacionUpload";
 import { ArrowUpRight, Camera, Check, Sparkles, Whatsapp, X } from "./Icons";
 import { Eyebrow, Reveal } from "./ui";
 
@@ -55,7 +56,11 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
   const [status, setStatus] = useState<Status | null>(null);
   const [sent, setSent] = useState(false);
   const [sentLink, setSentLink] = useState("");
-  const [sentMessage, setSentMessage] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({
+    done: 0,
+    total: 0,
+  });
   const photoInputRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<PhotoDraft[]>([]);
   const submittingRef = useRef(false);
@@ -153,40 +158,11 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
     setStatus(null);
     setSent(false);
     setSentLink("");
-    setSentMessage("");
+    setUploading(false);
+    setUploadProgress({ done: 0, total: 0 });
   };
 
-  const canSharePhotos = (() => {
-    if (!photos.length || typeof navigator === "undefined" || !navigator.canShare) {
-      return false;
-    }
-
-    try {
-      return navigator.canShare({ files: photos.map((photo) => photo.file) });
-    } catch {
-      return false;
-    }
-  })();
-
-  const sharePhotos = async (message: string) => {
-    if (!canSharePhotos) return;
-
-    try {
-      await navigator.share({
-        files: photos.map((photo) => photo.file),
-        text: message,
-        title: "Tasación Verdun Automotores",
-      });
-    } catch (cause) {
-      if (cause instanceof DOMException && cause.name === "AbortError") return;
-      setStatus({
-        tone: "error",
-        text: "No se pudo abrir el menú para compartir. Usá el botón de WhatsApp.",
-      });
-    }
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (submittingRef.current) return;
 
@@ -218,28 +194,53 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
     }
 
     submittingRef.current = true;
+    setUploading(true);
+    setUploadProgress({ done: 0, total: photos.length });
+    setStatus(
+      photos.length
+        ? {
+            tone: "info",
+            text: "Optimizando las fotos para subirlas...",
+          }
+        : null
+    );
 
-    const message = [
-      "Hola Verdun, quiero entregar mi auto como parte de pago.",
-      `Marca: ${brand}`,
-      `Modelo: ${model}`,
-      `Año: ${year}`,
-      `Kilómetros: ${kmNumber.toLocaleString("es-AR")}`,
-      photos.length ? "Adjunto fotos del vehículo." : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    try {
+      const photoUrls = await uploadTasacionPhotos(
+        photos.map((photo) => photo.file),
+        (done, total) => {
+          setUploadProgress({ done, total });
+          setStatus({
+            tone: "info",
+            text: `Subiendo fotos ${done}/${total}...`,
+          });
+        }
+      );
 
-    const url = whatsappLink(message);
-    setSentMessage(message);
-    setSentLink(url);
-    setStatus(null);
-    setSent(true);
+      const message = [
+        "Hola Verdun, quiero entregar mi auto como parte de pago.",
+        `Marca: ${brand}`,
+        `Modelo: ${model}`,
+        `Año: ${year}`,
+        `Kilómetros: ${kmNumber.toLocaleString("es-AR")}`,
+        photoUrls.length ? "Fotos del vehículo:" : "",
+        ...photoUrls,
+      ]
+        .filter(Boolean)
+        .join("\n");
 
-    if (canSharePhotos) {
-      void sharePhotos(message);
-    } else {
-      window.open(url, "_blank", "noopener,noreferrer");
+      setSentLink(whatsappLink(message));
+      setStatus(null);
+      setSent(true);
+    } catch (cause) {
+      console.error("No se pudieron subir las fotos de la tasación.", cause);
+      setStatus({
+        tone: "error",
+        text: "No pudimos subir las fotos. Revisá tu conexión e intentá nuevamente.",
+      });
+      submittingRef.current = false;
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -326,46 +327,19 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                     </p>
                     <p className="mx-auto mt-2 max-w-[300px] text-[10.5px] leading-relaxed text-muted">
                       {photos.length
-                        ? canSharePhotos
-                          ? "Compartí las fotos por WhatsApp. Elegí WhatsApp y el contacto de Verdun; si no se abrió, usá los botones de abajo."
-                          : "Abrimos el chat con los datos de tu auto. Adjuntá las fotos en el chat para que Verdun pueda verlas."
-                        : `Abrimos el chat con los datos de tu ${form.brand} ${form.model}. Si no se abrió, usá el botón de abajo.`}
+                        ? "Ya cargamos las fotos. Abrí el chat para enviarnos los datos y los links."
+                        : `Abrí el chat con los datos de tu ${form.brand} ${form.model}.`}
                     </p>
-                    {status && (
-                      <p
-                        role="status"
-                        className={`mx-auto mt-3 max-w-[300px] rounded-xl border px-3 py-2 text-[10px] font-medium leading-relaxed ${statusClasses(
-                          status.tone
-                        )}`}
-                      >
-                        {status.text}
-                      </p>
-                    )}
                     <div className="mt-5 flex flex-col gap-2">
-                      {canSharePhotos && (
-                        <button
-                          type="button"
-                          onClick={() => void sharePhotos(sentMessage)}
-                          className="flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
-                        >
-                          <Whatsapp className="h-4 w-4" />
-                          Compartir fotos por WhatsApp
-                        </button>
-                      )}
                       <a
                         href={sentLink}
                         target="_blank"
                         rel="noreferrer"
-                        className={
-                          canSharePhotos
-                            ? "flex items-center justify-center gap-2 rounded-full border border-ink/15 px-5 py-3.5 text-[12px] font-semibold text-ink transition hover:border-ink/30"
-                            : "flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
-                        }
+                        className="flex items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
                       >
                         <Whatsapp className="h-4 w-4" />
-                        {canSharePhotos
-                          ? "Abrir WhatsApp con los datos"
-                          : "Abrir WhatsApp"}
+                        Abrir WhatsApp con los datos
+                        {photos.length ? " y las fotos" : ""}
                       </a>
                       <button
                         type="button"
@@ -589,16 +563,21 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
 
                     <button
                       type="submit"
-                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft"
+                      disabled={uploading}
+                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-lime px-5 py-3.5 text-[12px] font-bold text-ink transition hover:bg-lime-soft disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Whatsapp className="h-4 w-4" />
-                      Enviar por WhatsApp
+                      {uploading
+                        ? uploadProgress.total
+                          ? `Subiendo fotos ${uploadProgress.done}/${uploadProgress.total}...`
+                          : "Preparando..."
+                        : "Enviar por WhatsApp"}
                       <ArrowUpRight className="h-4 w-4" />
                     </button>
                     <p className="mt-2.5 text-center text-[8.5px] leading-relaxed text-muted">
                       {photos.length
-                        ? "En celular se comparten las fotos por WhatsApp. En computadora se abre el chat con los datos y las adjuntás manualmente. La tasación se confirma con una revisión en el showroom."
-                        : "Al enviar se abre WhatsApp con los datos de tu auto. La tasación se confirma con una revisión en el showroom."}
+                        ? "Optimizamos las fotos y las subimos antes de abrir WhatsApp. La tasación se confirma con una revisión en el showroom."
+                        : "Al enviar preparamos el mensaje con los datos de tu auto. La tasación se confirma con una revisión en el showroom."}
                     </p>
                   </form>
                 )}
