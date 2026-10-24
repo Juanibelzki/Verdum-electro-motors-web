@@ -223,8 +223,8 @@ export default function OverviewPanel({
         <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
         <p>
           <strong>Panel protegido.</strong> Supabase Auth y RLS activos. El
-          acceso público solo muestra vehículos publicados. El cutover a
-          producción sigue pendiente de aprobación.{" "}
+          acceso público solo muestra vehículos publicados. El sitio público ya
+          está en producción.{" "}
           <button
             type="button"
             onClick={() => onNavigate("settings")}
@@ -269,8 +269,8 @@ export default function OverviewPanel({
         />
       </div>
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
-        <div className="space-y-5">
+      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
+        <div className="min-w-0 space-y-5">
           <SectionCard
             title="Stock por categoría"
             action={<LinkButton onClick={() => onNavigate("stock")}>Ver stock</LinkButton>}
@@ -343,7 +343,7 @@ export default function OverviewPanel({
           </SectionCard>
         </div>
 
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           <SectionCard
             title="Calidad de datos"
             action={<LinkButton onClick={() => onNavigate("settings")}>Ajustes</LinkButton>}

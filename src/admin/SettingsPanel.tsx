@@ -181,7 +181,7 @@ export default function SettingsPanel({
               <code className="rounded bg-cream px-1 py-0.5 text-[10.5px]">
                 publicado
               </code>
-              . El cutover a producción sigue pendiente de aprobación.
+              . El sitio público ya está en producción.
             </div>
           ) : (
             <div className="mt-5 rounded-xl border border-amber-300/80 bg-amber-50 px-4 py-3 text-[11.5px] leading-relaxed text-amber-900">
@@ -297,7 +297,7 @@ export default function SettingsPanel({
             <ChecklistItem done>Fotos con conversión a WebP y orden.</ChecklistItem>
             <ChecklistItem done>Publicar, despublicar y destacar.</ChecklistItem>
             <ChecklistItem done={securityReady}>Auth y RLS.</ChecklistItem>
-            <ChecklistItem done={false}>Cutover a producción.</ChecklistItem>
+            <ChecklistItem done>Cutover a producción.</ChecklistItem>
           </ul>
           {!specsReady && (
             <p className="mt-4 text-[11px] leading-relaxed text-muted">

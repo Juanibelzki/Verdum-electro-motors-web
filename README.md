@@ -125,6 +125,8 @@ descripción.
 - Fase 7: Supabase Auth, `public.admins`, RLS público/admin y Storage seguro.
   Código implementado y migración `supabase-auth-rls.sql` aplicada; usuario
   admin creado y login verificado.
-- Próxima: cutover a producción con aprobación explícita.
+- Fase 8: cutover a producción aprobado. `main` publica el rediseño en Vercel,
+  con `/admin` protegido por Supabase Auth y `noindex`.
 
-La web actual sigue viva en `main`.
+La web pública está en producción en
+<https://verdum-electro-motors-web.vercel.app>.
