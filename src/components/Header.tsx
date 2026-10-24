@@ -86,7 +86,7 @@ export default function Header({ onSchedule }: { onSchedule: () => void }) {
                 onClick={onSchedule}
                 className="hidden items-center gap-2 rounded-full bg-ink px-5 py-3 text-[12.5px] font-semibold text-cream transition duration-300 hover:bg-forest sm:inline-flex"
               >
-                Agendar test drive
+                Agendar visita
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </button>
               <button
@@ -130,7 +130,7 @@ export default function Header({ onSchedule }: { onSchedule: () => void }) {
               }}
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-ink px-5 py-4 text-sm font-semibold text-cream"
             >
-              Agendar test drive
+              Agendar visita
               <ArrowUpRight className="h-4 w-4" />
             </button>
             <div className="mt-4 flex items-center justify-between text-[11px] text-muted">

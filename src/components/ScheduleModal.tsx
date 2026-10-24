@@ -75,7 +75,7 @@ export default function ScheduleModal({
       : "Consulta general por stock";
 
     const message = [
-      "Hola Verdun, quiero agendar un test drive.",
+      "Hola Verdun, quiero agendar una visita al showroom.",
       `Nombre: ${name.trim()}`,
       `Teléfono: ${phone.trim()}`,
       `Email: ${email.trim()}`,
@@ -92,14 +92,14 @@ export default function ScheduleModal({
   };
 
   return (
-    <Modal open onClose={onClose} label="Agendar un test drive" className="sm:max-w-2xl">
+    <Modal open onClose={onClose} label="Agendar una visita al showroom" className="sm:max-w-2xl">
       {submitted ? (
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-12 text-center sm:px-12 sm:py-16">
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-lime text-ink">
             <Check className="h-7 w-7" strokeWidth={2.2} />
           </span>
           <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.24em] text-muted">
-            Consulta enviada
+            Visita solicitada
           </p>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
             Te esperamos, {name.trim().split(" ")[0]}.
@@ -111,7 +111,7 @@ export default function ScheduleModal({
 
           <div className="mx-auto mt-7 max-w-md rounded-2xl border border-line/80 bg-cream/70 p-5 text-left">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted">
-              Tu test drive
+              Tu visita
             </p>
             <p className="mt-2 text-lg font-extrabold tracking-tight">
               {selectedCar ? selectedCar.title : "Consulta general"}
@@ -158,7 +158,7 @@ export default function ScheduleModal({
               Sin costo · Sin compromiso
             </p>
             <h2 className="mt-4 text-[28px] font-extrabold leading-tight tracking-[-0.03em] sm:text-[34px]">
-              Agendá tu test drive.
+              Agendá tu visita.
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">
               Elegí el auto y el mejor momento. Nosotros nos ocupamos del resto.

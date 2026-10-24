@@ -461,7 +461,7 @@ export default function Hero({
                     <span className="grid h-9 w-9 place-items-center rounded-full bg-cream text-ink shadow-sm transition duration-300 group-hover:bg-lime">
                       <Calendar className="h-4 w-4" />
                     </span>
-                    Agendar test drive
+                    Agendar visita
                   </button>
                 </div>
               </div>

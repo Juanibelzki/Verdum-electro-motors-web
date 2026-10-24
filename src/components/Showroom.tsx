@@ -287,7 +287,7 @@ export default function Showroom({
               </h2>
               <p className="mt-4 max-w-md text-[13.5px] leading-relaxed text-muted">
                 Sin turnos obligatorios, sin vendedores que te persiguen. Un espacio para ver,
-                probar y preguntar todo lo que quieras.
+                conocer y preguntar todo lo que quieras.
               </p>
             </Reveal>
 
@@ -371,9 +371,9 @@ const faqs = [
       "Para iniciar la operación solo necesitás tu DNI y comprobantes de ingresos si vas a solicitar el crédito. El resto —verificación, transferencia, patentamiento y seguro— lo gestionamos nosotros con tu asesor de cuenta.",
   },
   {
-    question: "¿Puedo probar el auto antes de comprar?",
+    question: "¿Puedo ver el auto antes de comprar?",
     answer:
-      "Sí, y te lo recomendamos. Agendá un test drive online o pasá por el showroom en el horario que prefieras. No hay compromiso de compra: queremos que elijas seguro de lo que estás manejando.",
+      "Sí. Agendá una visita al showroom o pasá en el horario que prefieras. No hay compromiso de compra: queremos que conozcas el auto y decidas con tranquilidad.",
   },
 ];
 
@@ -425,7 +425,7 @@ export function Faq({ onSchedule }: { onSchedule: () => void }) {
                   onClick={onSchedule}
                   className="mt-2 w-full rounded-full px-4 py-2 text-[10.5px] font-semibold text-muted transition hover:text-ink"
                 >
-                  O agendar un test drive
+                  O agendar una visita
                 </button>
               </div>
             </Reveal>

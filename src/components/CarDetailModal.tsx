@@ -260,7 +260,7 @@ export default function CarDetailModal({
               onClick={onSchedule}
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 px-4 py-3.5 text-[12px] font-semibold text-ink transition hover:border-ink/30 hover:bg-paper"
             >
-              Agendar test drive
+              Agendar visita
               <ArrowUpRight className="h-4 w-4" />
             </button>
 

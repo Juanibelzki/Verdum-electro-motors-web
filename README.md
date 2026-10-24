@@ -49,7 +49,7 @@ Si no están definidas, la app usa los valores públicos del proyecto actual.
 - Categorías: solo se muestran las que tienen stock activo.
 - Destacado del hero: se elige automáticamente el 0KM más reciente (o el primer
   vehículo disponible), salvo que haya un vehículo marcado como `destacado`.
-- Formularios de test drive y tasación: abren WhatsApp con el mensaje prearmado.
+- Formularios de visita y tasación: abren WhatsApp con el mensaje prearmado.
 
 ## Estructura
 

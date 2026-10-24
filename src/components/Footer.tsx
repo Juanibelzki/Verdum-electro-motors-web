@@ -16,7 +16,7 @@ const exploreLinks = [
   { label: "Vehículos", href: "#vehiculos" },
   { label: "Financiamiento", href: "#financiacion" },
   { label: "Parte de pago", href: "#vender" },
-  { label: "Agendar test drive", href: "#showroom" },
+  { label: "Agendar visita", href: "#showroom" },
 ];
 
 const companyLinks = [
@@ -76,8 +76,8 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
                 </span>
               </h2>
               <p className="mt-4 max-w-md text-[13px] leading-relaxed text-cream/50">
-                Agendá una visita, probá el auto que te gusta y tomá la decisión sin apuro. Nosotros
-                nos ocupamos de todo lo demás.
+                Agendá una visita y conocé el auto que te gusta. Tomate tu tiempo para decidir;
+                nosotros nos ocupamos del resto.
               </p>
             </div>
             <div className="flex flex-col gap-2.5 sm:flex-row lg:flex-col lg:items-stretch">
@@ -86,7 +86,7 @@ export default function Footer({ onSchedule }: { onSchedule: () => void }) {
                 onClick={onSchedule}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-lime px-6 py-4 text-[12.5px] font-bold text-ink transition hover:bg-lime-soft"
               >
-                Agendar mi test drive
+                Agendar mi visita
                 <ArrowUpRight className="h-4 w-4" />
               </button>
               <a
