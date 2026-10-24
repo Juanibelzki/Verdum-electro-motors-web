@@ -734,8 +734,8 @@ export default function StockEditor({
         </div>
       )}
 
-      <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="space-y-5">
+      <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="min-w-0 space-y-5">
           <SectionCard
             icon={<Tag className="h-4 w-4" />}
             title="Publicación"
@@ -1270,7 +1270,7 @@ export default function StockEditor({
           </section>
         </div>
 
-        <aside className="xl:sticky xl:top-24 xl:self-start">
+        <aside className="min-w-0 xl:sticky xl:top-24 xl:self-start">
           <div className="rounded-2xl border border-line bg-paper p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
