@@ -2,7 +2,6 @@
    PANEL ADMINISTRATIVO - LÓGICA
    ============================================ */
 
-const ADMIN_PASSWORD = 'verdun2024';
 const IMAGES_STORAGE_KEY = 'verdun_images';
 const VEHICLES_STORAGE_KEY = 'verdun_vehicles';
 const CUSTOM_VEHICLES_KEY = 'verdun_custom_vehicles';
@@ -161,7 +160,7 @@ const SECTION_TITLES = {
 document.addEventListener('DOMContentLoaded', () => initAdmin());
 
 async function initAdmin() {
-    const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
+    const isAuthenticated = !!adminSessionToken;
 
     if (isAuthenticated && adminSessionToken) {
         // Verificar que el token sigue siendo válido
@@ -170,7 +169,7 @@ async function initAdmin() {
             if (!data) {
                 // Token expirado
                 setAdminToken(null);
-                localStorage.removeItem('adminAuthenticated');
+                localStorage.removeItem('verdun_admin_token');
                 showLoginScreen();
                 document.getElementById('loginForm').addEventListener('submit', handleLogin);
                 document.getElementById('logoutBtn').addEventListener('click', handleLogout);
@@ -320,45 +319,40 @@ async function handleLogin(e) {
     const password = document.getElementById('password').value;
     const errorDiv = document.getElementById('loginError');
 
-    if (password === ADMIN_PASSWORD) {
-        // Intentar obtener token de sesión de Supabase
-        try {
-            const { data, error } = await supabaseClient.rpc('admin_login', { password: password });
-            if (error) {
-                console.warn('Supabase login failed, using local auth:', error.message);
-                // Fallback: login local sin token Supabase
-                setAdminToken(null);
-            } else {
-                setAdminToken(data);
-            }
-        } catch (e) {
-            console.warn('Supabase login error, using local auth:', e);
-            setAdminToken(null);
-        }
-
-        localStorage.setItem('adminAuthenticated', 'true');
-        errorDiv.style.display = 'none';
-        try {
-            showAdminPanel();
-            await loadImagesSection();
-            await loadAllData();
-        } catch (err) {
-            console.error('loadAllData failed:', err);
-            showLoginScreen();
-            errorDiv.textContent = '❌ Error al cargar los datos: ' + err.message;
+    try {
+        const { data, error } = await supabaseClient.rpc('admin_login', { password: password });
+        if (error) {
+            errorDiv.textContent = '❌ ' + error.message;
             errorDiv.style.display = 'block';
-            localStorage.removeItem('adminAuthenticated');
+            document.getElementById('password').value = '';
+            return;
         }
-    } else {
-        errorDiv.textContent = '❌ Contraseña incorrecta';
+        setAdminToken(data);
+        errorDiv.style.display = 'none';
+    } catch (e) {
+        errorDiv.textContent = '❌ Error de conexión: ' + e.message;
         errorDiv.style.display = 'block';
         document.getElementById('password').value = '';
+        return;
+    }
+
+    try {
+        showAdminPanel();
+        await loadImagesSection();
+        await loadAllData();
+    } catch (err) {
+        console.error('loadAllData failed:', err);
+        showLoginScreen();
+        errorDiv.textContent = '❌ Error al cargar los datos: ' + err.message;
+        errorDiv.style.display = 'block';
+        localStorage.removeItem('verdun_admin_token');
+        setAdminToken(null);
     }
 }
 
 function handleLogout() {
     if (confirm('¿Deseas cerrar sesión?')) {
-        localStorage.removeItem('adminAuthenticated');
+        localStorage.removeItem('verdun_admin_token');
         setAdminToken(null);
         showLoginScreen();
         document.getElementById('loginForm').reset();
