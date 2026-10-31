@@ -21,7 +21,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: https://images.pexels.com https://ymiakfjhgndqhdtoubkr.supabase.co; media-src 'self' https://ymiakfjhgndqhdtoubkr.supabase.co; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://ymiakfjhgndqhdtoubkr.supabase.co https://*.supabase.co https://wa.me https://maps.google.com https://www.instagram.com; frame-src https://maps.google.com https://www.instagram.com; frame-ancestors 'none';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https: https://images.pexels.com https://ymiakfjhgndqhdtoubkr.supabase.co; media-src 'self' https://ymiakfjhgndqhdtoubkr.supabase.co; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://ymiakfjhgndqhdtoubkr.supabase.co https://*.supabase.co https://wa.me https://maps.google.com https://www.instagram.com; frame-src https://maps.google.com https://www.instagram.com; frame-ancestors 'none';"
         }
       ]
     }
