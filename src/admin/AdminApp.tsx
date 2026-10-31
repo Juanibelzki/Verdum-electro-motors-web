@@ -323,6 +323,40 @@ function AdminAccessDenied({
   );
 }
 
+function SunIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    </svg>
+  );
+}
+
+function MoonIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+    </svg>
+  );
+}
+
 function AdminWorkspace({
   session,
   securityReady,
@@ -334,7 +368,22 @@ function AdminWorkspace({
 }) {
   const [section, setSection] = useState<AdminSection>(() => readSection());
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const saved = localStorage.getItem("verdun_admin_theme");
+    if (saved === "light" || saved === "dark") return saved;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  });
   const stock = useAdminStock();
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("verdun_admin_theme", theme);
+    return () => {
+      document.documentElement.removeAttribute("data-theme");
+    };
+  }, [theme]);
 
   const activeCount = stock.vehicles.filter((vehicle) => vehicle.activo).length;
   const draftCount = stock.vehicles.length - activeCount;
@@ -402,6 +451,21 @@ function AdminWorkspace({
               <span className="hidden rounded-full border border-line bg-cream px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-muted sm:inline-flex">
                 Sesión activa
               </span>
+              <button
+                type="button"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                aria-label={
+                  theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
+                }
+                title={theme === "dark" ? "Modo claro" : "Modo oscuro"}
+                className="grid h-9 w-9 place-items-center rounded-full border border-line bg-cream text-muted transition hover:border-ink/25 hover:text-ink"
+              >
+                {theme === "dark" ? (
+                  <SunIcon className="h-4 w-4" />
+                ) : (
+                  <MoonIcon className="h-4 w-4" />
+                )}
+              </button>
               <button
                 type="button"
                 onClick={onSignOut}

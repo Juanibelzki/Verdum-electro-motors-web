@@ -20,6 +20,67 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ============================================
+   ADMIN · TEMA OSCURO
+   Se activa solo cuando el panel admin escribe
+   data-theme="dark" en <html>. El sitio público no se toca.
+   ============================================ */
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] body {
+  background-color: #0c1310;
+  color: #e9efea;
+}
+
+html[data-theme="dark"] [class*="bg-paper"] {
+  background-color: #141d18;
+}
+
+html[data-theme="dark"] [class*="bg-cream"] {
+  background-color: #1a2520;
+}
+
+html[data-theme="dark"] [class*="bg-sand"] {
+  background-color: #22302a;
+}
+
+html[data-theme="dark"] [class*="bg-line"] {
+  background-color: #2a3831;
+}
+
+html[data-theme="dark"] [class*="text-ink"] {
+  color: #e9efea;
+}
+
+html[data-theme="dark"] [class*="text-muted"] {
+  color: #93a59b;
+}
+
+html[data-theme="dark"] [class*="text-moss"] {
+  color: #a3c4b3;
+}
+
+html[data-theme="dark"] [class*="text-forest"] {
+  color: #9fd0b8;
+}
+
+html[data-theme="dark"] [class*="border-line"] {
+  border-color: #2a3831;
+}
+
+html[data-theme="dark"] [class*="border-ink"] {
+  border-color: rgba(233, 239, 234, 0.22);
+}
+
+/* Sobre el acento lima el texto tiene que seguir oscuro */
+html[data-theme="dark"] [class~="bg-lime"],
+html[data-theme="dark"] [class~="bg-lime/95"],
+html[data-theme="dark"] [class~="hover:bg-lime"]:hover {
+  color: #14241e;
+}
+
 body {
   background-color: var(--color-cream);
   color: var(--color-ink);
