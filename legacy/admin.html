@@ -99,6 +99,9 @@
             <!-- Top Bar -->
             <div class="admin-topbar">
                 <h1 id="sectionTitle">Stocks</h1>
+                <button class="btn-theme-toggle" id="themeToggle" title="Cambiar modo claro/oscuro" aria-label="Cambiar modo claro/oscuro">
+                    🌙
+                </button>
                 <button class="btn-back-to-site" onclick="window.location.href='index.html'">
                     ← Volver al sitio
                 </button>
@@ -608,5 +611,32 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="admin.js?v=25" defer></script>
+    <script>
+        // ============================================
+        // MODO OSCURO / CLARO
+        // ============================================
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+
+        // Detectar tema guardado en localStorage o preferencia del sistema
+        const savedTheme = localStorage.getItem('verdun_admin_theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+
+        function setTheme(theme) {
+            htmlElement.setAttribute('data-theme', theme);
+            localStorage.setItem('verdun_admin_theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const current = htmlElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            setTheme(next);
+        });
+
+        // Aplicar tema al cargar
+        setTheme(initialTheme);
+    </script>
 </body>
 </html>
