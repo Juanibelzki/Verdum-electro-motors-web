@@ -1,5 +1,5 @@
 import { loadAdminContent, saveAdminContent } from "./adminContent";
-import { heroPoster, heroVideos } from "./cars";
+import { heroPoster } from "./cars";
 
 export type HeroScene = {
   id: string;
@@ -12,17 +12,6 @@ export type HeroScene = {
 };
 
 export const HERO_SCENES_KEY = "hero_scenes";
-
-/** Local videos used when Supabase has no hero scenes yet. */
-export const fallbackHeroScenes: HeroScene[] = heroVideos.map((src, index) => ({
-  id: `fallback-${index + 1}`,
-  src,
-  srcMobile: src,
-  poster: heroPoster,
-  label: "",
-  type: "video",
-  position: "center",
-}));
 
 const normalizeScene = (raw: unknown, index: number): HeroScene | null => {
   if (!raw || typeof raw !== "object") return null;
@@ -74,9 +63,6 @@ const parseScenes = (data: unknown): HeroScene[] => {
 export async function loadHeroScenes(): Promise<HeroScene[]> {
   return parseScenes(await loadAdminContent(HERO_SCENES_KEY));
 }
-
-export const heroScenesWithFallback = (scenes: HeroScene[]): HeroScene[] =>
-  scenes.length ? scenes : fallbackHeroScenes;
 
 /** Saves the scenes in admin_content.hero_scenes (creates the row if needed). */
 export async function saveHeroScenes(scenes: HeroScene[]): Promise<void> {

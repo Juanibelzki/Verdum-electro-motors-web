@@ -151,7 +151,7 @@ export default function HeroVideosPanel() {
   const handleSave = async () => {
     if (!scenes.length) {
       const confirmed = window.confirm(
-        "No hay videos cargados. El hero va a volver a los videos de ejemplo. ¿Guardar igual?"
+        "No hay videos cargados. El hero va a mostrar solo la imagen de respaldo. ¿Guardar igual?"
       );
       if (!confirmed) return;
     }

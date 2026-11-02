@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatKm, formatPrice, heroPoster, type Car } from "../data/cars";
-import {
-  fallbackHeroScenes,
-  type HeroScene,
-} from "../data/heroScenes";
+import type { HeroScene } from "../data/heroScenes";
 import { ArrowUpRight, Calendar, MapPin } from "./Icons";
 
 const FADE_MS = 1000;
@@ -33,10 +30,7 @@ export default function Hero({
     : "";
 
   const failedSet = useMemo(() => new Set(failedIds), [failedIds]);
-  const usingFallback =
-    heroScenes.length > 0 &&
-    heroScenes.every((scene) => failedSet.has(scene.id));
-  const scenes = usingFallback ? fallbackHeroScenes : heroScenes;
+  const scenes = heroScenes;
   const availableScenes = useMemo(
     () => scenes.filter((scene) => !failedSet.has(scene.id)),
     [scenes, failedSet]
