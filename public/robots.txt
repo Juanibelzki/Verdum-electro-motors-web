@@ -3,3 +3,5 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /admin.html
+
+Sitemap: https://verdum-electro-motors-web.vercel.app/sitemap.xml

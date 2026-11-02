@@ -361,7 +361,7 @@ const faqs = [
       "Gestionamos financiamiento por crédito prendario con banco de hasta el 50% del valor del vehículo. La aprobación y las condiciones finales dependen del banco. Si querés avanzar, te contactamos con un asesor por WhatsApp.",
   },
   {
-    question: "¿Hacen entregas en todo el país?",
+    question: "¿Hacen entregas fuera de Corrientes?",
     answer:
       "Sí. Coordinamos entregas en Corrientes y alrededores, y enviamos al interior con transporte especializado. El auto viaja asegurado y con todos los papeles listos para patentar.",
   },

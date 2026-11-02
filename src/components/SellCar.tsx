@@ -373,8 +373,8 @@ export default function SellCar({ onSchedule }: { onSchedule: () => void }) {
                       </span>
                     </div>
                     <p className="mt-1.5 text-[11px] leading-relaxed text-muted">
-                      Completá los datos y sumá fotos. Te enviamos la tasación.
-                      Sin compromiso.
+                      Completá los datos y sumá fotos. Te respondemos con la
+                      tasación por WhatsApp. Sin compromiso.
                     </p>
 
                     <div className="mt-5 grid grid-cols-2 gap-3">

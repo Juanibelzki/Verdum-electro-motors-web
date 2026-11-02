@@ -365,12 +365,6 @@ export default function Catalog({
                 : error
                   ? "Stock no disponible"
                   : `${cars.length} unidades disponibles`}
-              {!loading && !error && (
-                <>
-                  <span className="text-muted/50">·</span>
-                  <span className="font-normal text-muted">Actualizado hoy</span>
-                </>
-              )}
             </div>
           </div>
         </Reveal>

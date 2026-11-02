@@ -440,7 +440,7 @@ export default function Hero({
                   </span>
                 </h1>
 
-                <p className="mt-6 max-w-[470px] text-[14.5px] leading-relaxed text-cream/80 [text-shadow:0_1px_10px_rgba(0,0,0,0.7)] sm:text-[15px]">
+                <p className="mt-6 max-w-[470px] text-[14.5px] leading-relaxed text-cream/90 [text-shadow:0_1px_10px_rgba(0,0,0,0.85)] sm:text-[15px]">
                   Autos 0KM y usados garantizados, con financiamiento por crédito prendario con banco y entrega inmediata
                   en Corrientes. Sin vueltas, sin letra chica.
                 </p>
@@ -528,11 +528,11 @@ export default function Hero({
             <div className="flex flex-wrap items-end justify-between gap-5 border-t border-cream/15 pt-5">
               <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex -space-x-2.5">
+                  <div className="flex -space-x-1.5">
                     {avatars.map((avatar) => (
                       <span
                         key={avatar.initials}
-                        className={`grid h-8 w-8 place-items-center rounded-full text-[9px] font-extrabold ring-2 ring-ink/50 ${avatar.tone}`}
+                        className={`grid h-9 w-9 place-items-center rounded-full text-[9px] font-extrabold ring-2 ring-ink/50 ${avatar.tone}`}
                       >
                         {avatar.initials}
                       </span>
