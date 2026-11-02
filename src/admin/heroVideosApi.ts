@@ -1,4 +1,3 @@
-import { heroPoster } from "../data/cars";
 import type { HeroScene } from "../data/heroScenes";
 import { canvasToBlob, uploadToStorage } from "../data/storage";
 import {
@@ -75,7 +74,7 @@ export async function uploadHeroVideo(file: File): Promise<HeroScene> {
     videoContentType(file, extension)
   );
 
-  let poster = heroPoster;
+  let poster: string | undefined;
   const posterBlob = await createPoster(file);
   if (posterBlob) {
     poster = await uploadToStorage(

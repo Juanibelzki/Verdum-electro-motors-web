@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { formatKm, formatPrice, heroPoster, type Car } from "../data/cars";
+import { formatKm, formatPrice, type Car } from "../data/cars";
 import type { HeroScene } from "../data/heroScenes";
 import { ArrowUpRight, Calendar, MapPin } from "./Icons";
 
@@ -44,7 +44,7 @@ export default function Hero({
     availableScenes.length > 1 && activeScene
       ? availableScenes[(normalizedActiveIndex + 1) % availableScenes.length]
       : null;
-  const posterSrc = activeScene?.poster || scenes[0]?.poster || heroPoster;
+  const posterSrc = activeScene?.poster || scenes[0]?.poster || null;
 
   const avatars = [
     { initials: "CM", tone: "bg-forest text-cream" },
@@ -333,11 +333,13 @@ export default function Hero({
         <div className="relative isolate flex min-h-[560px] flex-col overflow-hidden rounded-[1.75rem] border border-ink/10 bg-forest shadow-[0_45px_100px_-50px_rgba(20,36,30,0.75)] sm:min-h-[640px] sm:rounded-[2.25rem] lg:min-h-[760px] lg:rounded-[2.5rem]">
           {/* Media layer */}
           <div className="absolute inset-0" aria-hidden="true">
-            <img
-              src={posterSrc}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+            {posterSrc && (
+              <img
+                src={posterSrc}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            )}
             {!reduceMotion &&
               scenes.map((scene) => {
                 const isActive = scene.id === activeScene?.id;
@@ -362,19 +364,21 @@ export default function Hero({
                       />
                     ) : (
                       <>
-                        <img
-                          src={scene.poster || heroPoster}
-                          alt=""
-                          className="absolute inset-0 h-full w-full object-cover"
-                          style={{ objectPosition }}
-                        />
+                        {scene.poster && (
+                          <img
+                            src={scene.poster}
+                            alt=""
+                            className="absolute inset-0 h-full w-full object-cover"
+                            style={{ objectPosition }}
+                          />
+                        )}
                         <video
                           ref={(element) => {
                             if (element) videoRefs.current.set(scene.id, element);
                             else videoRefs.current.delete(scene.id);
                           }}
                           src={scene.src}
-                          poster={scene.poster || heroPoster}
+                          poster={scene.poster}
                           autoPlay={isActive && !failed}
                           muted
                           loop={availableScenes.length === 1}

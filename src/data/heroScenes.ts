@@ -1,5 +1,4 @@
 import { loadAdminContent, saveAdminContent } from "./adminContent";
-import { heroPoster } from "./cars";
 
 export type HeroScene = {
   id: string;
@@ -34,7 +33,7 @@ const normalizeScene = (raw: unknown, index: number): HeroScene | null => {
     poster:
       typeof item.poster === "string" && item.poster.trim()
         ? item.poster
-        : heroPoster,
+        : undefined,
     label: typeof item.label === "string" ? item.label : "",
     type,
     position:
