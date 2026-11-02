@@ -374,8 +374,13 @@ export default function Hero({
                         )}
                         <video
                           ref={(element) => {
-                            if (element) videoRefs.current.set(scene.id, element);
-                            else videoRefs.current.delete(scene.id);
+                            if (element) {
+                              // React sets `muted` as a property only; iOS needs the attribute to autoplay.
+                              element.defaultMuted = true;
+                              videoRefs.current.set(scene.id, element);
+                            } else {
+                              videoRefs.current.delete(scene.id);
+                            }
                           }}
                           src={scene.src}
                           poster={scene.poster}

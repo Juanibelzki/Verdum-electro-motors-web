@@ -135,6 +135,10 @@ export default function Showroom({
                       src={activeStory.src}
                       poster={activeStory.poster}
                       autoPlay
+                      ref={(element) => {
+                        // iOS needs the muted attribute, which React does not write.
+                        if (element) element.defaultMuted = true;
+                      }}
                       muted={muted}
                       playsInline
                       loop={count === 1}
