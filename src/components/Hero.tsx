@@ -385,6 +385,14 @@ export default function Hero({
                           onEnded={() => {
                             if (isActive) goNext();
                           }}
+                          onPause={(event) => {
+                            // The browser can pause inline video on its own (power saving,
+                            // tab switches). Keep the active scene playing.
+                            const video = event.currentTarget;
+                            if (isActive && !failed && !video.ended && !document.hidden) {
+                              void event.currentTarget.play().catch(() => undefined);
+                            }
+                          }}
                           style={{ objectPosition }}
                           className={`absolute inset-0 h-full w-full object-cover ${
                             failed ? "opacity-0" : ""
