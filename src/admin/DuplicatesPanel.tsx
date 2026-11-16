@@ -24,17 +24,70 @@ const normalize = (value: unknown) =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
-/** Two vehicles are "the same car" when type, brand, model and year match. */
-const duplicateKey = (vehicle: AdminVehicle) => {
-  const brand = normalize(vehicle.marca);
-  const model = normalize(vehicle.modelo);
-  if (!brand && !model) return null;
-  return [
-    normalize(vehicle.tipo) || "auto",
-    brand,
-    model,
-    normalize(vehicle.año),
-  ].join("|");
+const modelTokens = (vehicle: AdminVehicle) => {
+  const raw = normalize(vehicle.modelo) || normalize(vehicle.nombre);
+  return raw.split(" ").filter(Boolean);
+};
+
+const kmDigits = (vehicle: AdminVehicle) =>
+  String(vehicle.km ?? "").replace(/[^\d]/g, "");
+
+const similarity = (a: string[], b: string[]) => {
+  const setA = new Set(a);
+  const setB = new Set(b);
+  let shared = 0;
+  for (const token of setA) if (setB.has(token)) shared += 1;
+  const total = setA.size + setB.size - shared;
+  return total === 0 ? 0 : shared / total;
+};
+
+/**
+ * Two vehicles look like the same car when they have the same type and year,
+ * the same model family (first word of the model, ignoring the brand field,
+ * which is often mistyped) and either the same km or a very similar model name.
+ */
+const looksDuplicated = (a: AdminVehicle, b: AdminVehicle) => {
+  if ((normalize(a.tipo) || "auto") !== (normalize(b.tipo) || "auto")) {
+    return false;
+  }
+  const year = normalize(a.año);
+  if (!year || year !== normalize(b.año)) return false;
+
+  const tokensA = modelTokens(a);
+  const tokensB = modelTokens(b);
+  if (!tokensA.length || tokensA[0] !== tokensB[0]) return false;
+
+  const kmA = kmDigits(a);
+  if (kmA && kmA === kmDigits(b)) return true;
+  return similarity(tokensA, tokensB) >= 0.5;
+};
+
+const findGroups = (vehicles: AdminVehicle[]): AdminVehicle[][] => {
+  const parent = vehicles.map((_, index) => index);
+  const find = (i: number): number => {
+    while (parent[i] !== i) {
+      parent[i] = parent[parent[i]];
+      i = parent[i];
+    }
+    return i;
+  };
+
+  for (let i = 0; i < vehicles.length; i += 1) {
+    for (let j = i + 1; j < vehicles.length; j += 1) {
+      if (looksDuplicated(vehicles[i], vehicles[j])) {
+        parent[find(j)] = find(i);
+      }
+    }
+  }
+
+  const buckets = new Map<number, AdminVehicle[]>();
+  vehicles.forEach((vehicle, index) => {
+    const root = find(index);
+    const list = buckets.get(root) ?? [];
+    list.push(vehicle);
+    buckets.set(root, list);
+  });
+  return [...buckets.values()].filter((list) => list.length > 1);
 };
 
 const readKept = (): Set<string> => {
@@ -88,20 +141,9 @@ export default function DuplicatesPanel({
   );
 
   const groups = useMemo<Group[]>(() => {
-    const map = new Map<string, AdminVehicle[]>();
-    for (const vehicle of vehicles) {
-      const key = duplicateKey(vehicle);
-      if (!key) continue;
-      const list = map.get(key) ?? [];
-      list.push(vehicle);
-      map.set(key, list);
-    }
-    return [...map.entries()]
-      .filter(
-        ([, list]) =>
-          list.length > 1 && list.some((vehicle) => !kept.has(vehicle.id))
-      )
-      .map(([key, list]) => ({ key, vehicles: list }))
+    return findGroups(vehicles)
+      .filter((list) => list.some((vehicle) => !kept.has(vehicle.id)))
+      .map((list) => ({ key: list.map((v) => v.id).join("|"), vehicles: list }))
       .sort((a, b) => b.vehicles.length - a.vehicles.length);
   }, [vehicles, kept]);
 
@@ -154,7 +196,8 @@ export default function DuplicatesPanel({
             Autos repetidos
           </h2>
           <p className="mt-2 max-w-[680px] text-[13px] leading-relaxed text-muted">
-            Agrupamos los vehículos con la misma marca, modelo y año. Para cada
+            Agrupamos los vehículos del mismo año y modelo que tienen el mismo
+            kilometraje o un nombre muy parecido. Para cada
             uno elegí <strong>Eliminar</strong> (se borra de la base junto con
             sus fotos) o <strong>Dejar</strong> (lo marcás como válido y deja de
             aparecer como repetido).
