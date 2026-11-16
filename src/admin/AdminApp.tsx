@@ -1,6 +1,7 @@
 import { useEffect, useState, type ComponentType, type SVGProps } from "react";
 import { cn } from "../utils/cn";
 import {
+  AlertTriangle,
   ArrowUpRight,
   CarIcon,
   ChevronRight,
@@ -15,6 +16,7 @@ import {
 } from "../components/Icons";
 import type { AdminSession } from "../data/auth";
 import AdminLogin from "./AdminLogin";
+import DuplicatesPanel from "./DuplicatesPanel";
 import HeroVideosPanel from "./HeroVideosPanel";
 import ShowroomStoriesPanel from "./ShowroomStoriesPanel";
 import OverviewPanel from "./OverviewPanel";
@@ -23,12 +25,19 @@ import StockPanel from "./StockPanel";
 import { useAdminAuth } from "./useAdminAuth";
 import { useAdminStock } from "./useAdminStock";
 
-type AdminSection = "overview" | "stock" | "hero" | "stories" | "settings";
+type AdminSection =
+  | "overview"
+  | "stock"
+  | "duplicates"
+  | "hero"
+  | "stories"
+  | "settings";
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 const SECTION_IDS: AdminSection[] = [
   "overview",
   "stock",
+  "duplicates",
   "hero",
   "stories",
   "settings",
@@ -40,6 +49,7 @@ const SECTION_META: Record<
 > = {
   overview: { label: "Resumen", eyebrow: "Panel" },
   stock: { label: "Stock", eyebrow: "Vehículos" },
+  duplicates: { label: "Autos repetidos", eyebrow: "Vehículos" },
   hero: { label: "Hero", eyebrow: "Home" },
   stories: { label: "Historias", eyebrow: "Home" },
   settings: { label: "Ajustes", eyebrow: "Panel" },
@@ -174,6 +184,13 @@ function SidebarContent({
           active={activeSection === "stock"}
           onClick={() => onNavigate("stock")}
           badge={activeCount}
+        />
+        <NavItem
+          icon={AlertTriangle}
+          label="Autos repetidos"
+          sub
+          active={activeSection === "duplicates"}
+          onClick={() => onNavigate("duplicates")}
         />
 
         <p className="px-3 pb-1 pt-5 text-[8.5px] font-bold uppercase tracking-[0.22em] text-cream/30">
@@ -508,6 +525,16 @@ function AdminWorkspace({
               loading={stock.loading}
               error={stock.error}
               specsReady={stock.specsReady}
+              onReload={stock.reload}
+            />
+          )}
+
+          {section === "duplicates" && (
+            <DuplicatesPanel
+              vehicles={stock.vehicles}
+              categories={stock.categories}
+              loading={stock.loading}
+              error={stock.error}
               onReload={stock.reload}
             />
           )}
