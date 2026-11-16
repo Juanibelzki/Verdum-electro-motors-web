@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   Play,
+  RefreshCw,
   ShieldCheck,
   X,
 } from "../components/Icons";
@@ -19,6 +20,7 @@ import AdminLogin from "./AdminLogin";
 import DuplicatesPanel from "./DuplicatesPanel";
 import HeroVideosPanel from "./HeroVideosPanel";
 import ShowroomStoriesPanel from "./ShowroomStoriesPanel";
+import SheetSyncPanel from "./SheetSyncPanel";
 import OverviewPanel from "./OverviewPanel";
 import SettingsPanel from "./SettingsPanel";
 import StockPanel from "./StockPanel";
@@ -29,6 +31,7 @@ type AdminSection =
   | "overview"
   | "stock"
   | "duplicates"
+  | "sheet"
   | "hero"
   | "stories"
   | "settings";
@@ -38,6 +41,7 @@ const SECTION_IDS: AdminSection[] = [
   "overview",
   "stock",
   "duplicates",
+  "sheet",
   "hero",
   "stories",
   "settings",
@@ -50,6 +54,7 @@ const SECTION_META: Record<
   overview: { label: "Resumen", eyebrow: "Panel" },
   stock: { label: "Stock", eyebrow: "Vehículos" },
   duplicates: { label: "Autos repetidos", eyebrow: "Vehículos" },
+  sheet: { label: "Sincronizar con planilla", eyebrow: "Vehículos" },
   hero: { label: "Hero", eyebrow: "Home" },
   stories: { label: "Historias", eyebrow: "Home" },
   settings: { label: "Ajustes", eyebrow: "Panel" },
@@ -191,6 +196,13 @@ function SidebarContent({
           sub
           active={activeSection === "duplicates"}
           onClick={() => onNavigate("duplicates")}
+        />
+        <NavItem
+          icon={RefreshCw}
+          label="Sincronizar planilla"
+          sub
+          active={activeSection === "sheet"}
+          onClick={() => onNavigate("sheet")}
         />
 
         <p className="px-3 pb-1 pt-5 text-[8.5px] font-bold uppercase tracking-[0.22em] text-cream/30">
@@ -535,6 +547,16 @@ function AdminWorkspace({
               categories={stock.categories}
               loading={stock.loading}
               error={stock.error}
+              onReload={stock.reload}
+            />
+          )}
+
+          {section === "sheet" && (
+            <SheetSyncPanel
+              vehicles={stock.vehicles}
+              categories={stock.categories}
+              specsReady={stock.specsReady}
+              loading={stock.loading}
               onReload={stock.reload}
             />
           )}

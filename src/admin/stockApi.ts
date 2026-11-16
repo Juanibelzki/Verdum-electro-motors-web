@@ -327,6 +327,23 @@ export async function saveVehicle(
   };
 }
 
+/** Saca un vehículo del sitio sin borrarlo: queda como borrador. */
+export async function unpublishVehicle(id: string): Promise<void> {
+  await request<unknown>(`vehicles?id=eq.${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({
+      activo: false,
+      status: "borrador",
+      destacado: false,
+      updated_at: new Date().toISOString(),
+    }),
+  });
+}
+
 const loadImage = (src: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
